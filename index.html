@@ -1,0 +1,1456 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#EEF2EC">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="考察手記">
+<title>考察手記</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@700&display=swap">
+<style>
+:root{
+  --ground:#EEF2EC; --surface:#FFFFFF; --surface-2:#E2E8E1; --sunk:#F5F7F4;
+  --ink:#16231D; --ink-soft:#50605A; --ink-faint:#83918A; --rule:#D2DBD4;
+  --accent:#12705C; --accent-press:#0C5A4A; --on-accent:#FFFFFF; --accent-soft:#D8ECE5;
+  --marker:#F0B23B; --on-marker:#2A1C00;
+  --danger:#B3261E; --on-danger:#FFFFFF; --danger-soft:#F9E1DE;
+  --good:#1D7443; --good-soft:#DCF0E3; --mid:#855700; --mid-soft:#F7EBD0; --low:#B3261E; --low-soft:#F9E1DE;
+  --scrim:rgba(14,22,18,.46); --on-scrim:#FFFFFF;
+  --b0:#50605A; --b0s:#E2E8E1;
+  --b1:#1B6A86; --b1s:#DCECF2;
+  --b2:#874774; --b2s:#F3E3EE;
+  --b3:#86590C; --b3s:#F5EAD4;
+  --b4:#3B56A2; --b4s:#E1E6F5;
+  --shadow:0 1px 2px rgba(22,35,29,.06),0 6px 18px rgba(22,35,29,.08);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --ground:#0F1613; --surface:#18211C; --surface-2:#222C26; --sunk:#131A16;
+    --ink:#E4ECE7; --ink-soft:#A1AFA7; --ink-faint:#6F7D76; --rule:#2D3932;
+    --accent:#52BA9D; --accent-press:#66C9AD; --on-accent:#06231B; --accent-soft:#163A30;
+    --marker:#F3BF55; --on-marker:#2A1C00;
+    --danger:#F2A69F; --on-danger:#2A0B08; --danger-soft:#3A1D1A;
+    --good:#73D49C; --good-soft:#173826; --mid:#F0C261; --mid-soft:#3A2E12; --low:#F2A69F; --low-soft:#3A1D1A;
+    --scrim:rgba(0,0,0,.62); --on-scrim:#FFFFFF;
+    --b0:#A1AFA7; --b0s:#222C26;
+    --b1:#7CC3DA; --b1s:#15313B;
+    --b2:#DB9CC8; --b2s:#35202F;
+    --b3:#E2B460; --b3s:#352912;
+    --b4:#A0B3EA; --b4s:#1E2640;
+    --shadow:0 1px 2px rgba(0,0,0,.45);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --ground:#0F1613; --surface:#18211C; --surface-2:#222C26; --sunk:#131A16;
+  --ink:#E4ECE7; --ink-soft:#A1AFA7; --ink-faint:#6F7D76; --rule:#2D3932;
+  --accent:#52BA9D; --accent-press:#66C9AD; --on-accent:#06231B; --accent-soft:#163A30;
+  --marker:#F3BF55; --on-marker:#2A1C00;
+  --danger:#F2A69F; --on-danger:#2A0B08; --danger-soft:#3A1D1A;
+  --good:#73D49C; --good-soft:#173826; --mid:#F0C261; --mid-soft:#3A2E12; --low:#F2A69F; --low-soft:#3A1D1A;
+  --scrim:rgba(0,0,0,.62); --on-scrim:#FFFFFF;
+  --b0:#A1AFA7; --b0s:#222C26;
+  --b1:#7CC3DA; --b1s:#15313B;
+  --b2:#DB9CC8; --b2s:#35202F;
+  --b3:#E2B460; --b3s:#352912;
+  --b4:#A0B3EA; --b4s:#1E2640;
+  --shadow:0 1px 2px rgba(0,0,0,.45);
+}
+
+*{box-sizing:border-box}
+html,body{background:var(--ground)}
+body{margin:0;color:var(--ink);font-family:"Noto Sans TC","PingFang HK","Hiragino Sans TC","Microsoft JhengHei",system-ui,sans-serif;font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent;padding-inline:1rem;padding-top:env(safe-area-inset-top,0px)}
+html.locked,html.locked body{overflow:hidden}
+#app{max-width:28rem;margin-inline:auto}
+button,input,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+button:disabled{opacity:.6;cursor:default}
+:focus-visible{outline:3px solid var(--marker);outline-offset:2px}
+[hidden]{display:none!important}
+.vh{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+svg{flex:none}
+
+/* 頂欄 */
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:10;display:flex;align-items:center;gap:.35rem;min-height:3.5rem;background:var(--ground);border-bottom:1px solid var(--rule)}
+.bar h1{flex:1;margin:0;font-size:1.06rem;font-weight:700;letter-spacing:.02em;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar>.iconbtn:first-child{margin-left:-.65rem}
+.iconbtn{display:inline-grid;place-items:center;width:2.75rem;height:2.75rem;border:none;border-radius:.8rem;background:transparent;color:var(--ink)}
+.iconbtn:active{background:var(--surface-2)}
+.iconbtn.sm{width:2.25rem;height:2.25rem;color:var(--ink-soft)}
+.syncchip{display:inline-flex;align-items:center;gap:.3rem;border:1px solid var(--rule);border-radius:999px;padding:.3rem .75rem;background:var(--surface);color:var(--ink-soft);font-size:.78rem;font-weight:700;min-height:2.3rem;white-space:nowrap;max-width:9.5rem;overflow:hidden;text-overflow:ellipsis}
+.syncchip.pending{background:var(--mid-soft);border-color:transparent;color:var(--mid)}
+.syncchip.busy{background:var(--accent-soft);border-color:transparent;color:var(--accent)}
+.syncchip.bad{background:var(--danger-soft);border-color:transparent;color:var(--danger)}
+
+/* 版面 */
+.view{display:flex;flex-direction:column;gap:1.15rem;padding-block:1rem 7.5rem}
+.stack{display:flex;flex-direction:column;gap:1.15rem}
+.field{display:flex;flex-direction:column;gap:.4rem}
+.field.hide{display:none}
+label,.label{font-size:.88rem;font-weight:700;color:var(--ink-soft)}
+input:not([type=file]):not([type=checkbox]),textarea{width:100%;min-height:3rem;padding:.7rem .85rem;border:1px solid var(--rule);border-radius:.8rem;background:var(--surface);font-size:1rem;color:var(--ink)}
+textarea{resize:vertical;line-height:1.75}
+input::placeholder,textarea::placeholder{color:var(--ink-faint)}
+input:focus,textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.hint{margin:0;font-size:.8rem;color:var(--ink-faint);line-height:1.55}
+.fineprint{margin:0;font-size:.8rem;color:var(--ink-soft);line-height:1.65}
+.eyebrow{margin:0;font-size:.76rem;letter-spacing:.12em;color:var(--accent);font-weight:700}
+.eyebrow b{font-size:.95rem;letter-spacing:.18em;font-variant-numeric:tabular-nums}
+
+/* 按鈕 */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.45rem;min-height:3.25rem;padding:0 1.2rem;border:none;border-radius:.95rem;font-weight:700;font-size:1.02rem;letter-spacing:.02em}
+.btn.sm{min-height:2.6rem;padding:0 .95rem;font-size:.9rem;border-radius:.75rem}
+.btn-primary{background:var(--accent);color:var(--on-accent)}
+.btn-primary:active{background:var(--accent-press)}
+.btn-ghost{background:var(--surface);color:var(--ink);border:1px solid var(--rule)}
+.btn-dangerghost{background:transparent;color:var(--danger);border:1px dashed var(--danger)}
+.btn-danger{background:var(--danger);color:var(--on-danger)}
+.btn-block{width:100%}
+.btnrow{display:flex;gap:.5rem;flex-wrap:wrap}
+.linkbtn{display:inline-flex;align-items:center;gap:.25rem;border:none;background:none;color:var(--accent);font-weight:700;font-size:.9rem;padding:.4rem .2rem;min-height:2.6rem;text-align:left}
+.linkbtn.danger{color:var(--danger)}
+.dock{position:fixed;left:0;right:0;bottom:0;z-index:15;display:flex;justify-content:center;padding:1.4rem 1rem calc(.8rem + env(safe-area-inset-bottom,0px));background:linear-gradient(to top,var(--ground) 60%,transparent);pointer-events:none}
+.dock>*{pointer-events:auto;width:100%;max-width:28rem;box-shadow:var(--shadow)}
+
+/* 登入 */
+.login{display:flex;flex-direction:column;gap:1.7rem;padding-block:2.6rem 3rem}
+.brand{display:flex;flex-direction:column;gap:.35rem}
+.trailmark{display:flex;align-items:center;margin-bottom:.7rem}
+.trailmark i{position:relative;width:.95rem;height:.95rem;border-radius:.3rem;background:var(--marker)}
+.trailmark i+i{margin-left:1.7rem}
+.trailmark i+i::before{content:"";position:absolute;right:100%;top:50%;width:1.7rem;border-top:2px dashed var(--accent)}
+.appname{margin:0;font-family:"Noto Serif TC","Songti TC",serif;font-weight:700;font-size:2.5rem;line-height:1.2;letter-spacing:.08em}
+.appsub{margin:0;color:var(--ink-soft);font-size:.95rem;letter-spacing:.08em}
+.panel{background:var(--surface);border:1px solid var(--rule);border-radius:1.1rem;padding:1.25rem}
+.quick{display:flex;flex-direction:column;gap:.3rem;padding-top:.6rem;border-top:1px solid var(--rule)}
+
+/* 考察列表 */
+.hello{margin:0;font-size:.9rem;color:var(--ink-soft)}
+.triplist{display:flex;flex-direction:column;gap:.75rem}
+.tripcard{position:relative;display:flex;gap:.9rem;align-items:stretch;width:100%;padding:.75rem;border:1px solid var(--rule);border-radius:1.05rem;background:var(--surface);text-align:left}
+.tripcard:active{background:var(--sunk)}
+.tc-cover{flex:none;display:grid;place-items:center;width:5.25rem;height:5.25rem;border-radius:.75rem;overflow:hidden;background:var(--surface-2);color:var(--ink-faint)}
+.tc-cover img{width:100%;height:100%;object-fit:cover}
+.tc-body{display:flex;flex-direction:column;gap:.12rem;min-width:0;justify-content:center}
+.tc-date{font-size:.78rem;color:var(--ink-soft);font-variant-numeric:tabular-nums}
+.tc-place{font-family:"Noto Serif TC","Songti TC",serif;font-weight:700;font-size:1.12rem;line-height:1.35}
+.tc-meta{font-size:.78rem;color:var(--ink-faint);font-variant-numeric:tabular-nums}
+.empty{padding:1.4rem;border:1px dashed var(--rule);border-radius:1rem;color:var(--ink-soft);font-size:.92rem;display:flex;flex-direction:column;gap:.5rem;align-items:flex-start}
+.empty p{margin:0}
+
+/* 新增考察 */
+.suggest{display:flex;gap:.45rem;overflow-x:auto;margin-inline:-1rem;padding:0 1rem .35rem;scrollbar-width:none}
+.suggest::-webkit-scrollbar{display:none}
+.sugg{flex:none;border:1px solid var(--rule);background:var(--surface);border-radius:999px;padding:.5rem .85rem;font-size:.86rem;white-space:nowrap}
+.sugg:active{background:var(--accent-soft)}
+
+/* 封面 */
+.cover{position:relative;display:block;width:100%;max-width:100%;aspect-ratio:16/8;border-radius:1rem;overflow:hidden;background:var(--surface-2)}
+.cover img{width:100%;height:100%;object-fit:cover}
+.cover .phbtn{height:100%}
+.cover-blank{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.3rem;width:100%;max-width:100%;aspect-ratio:16/6;border:2px dashed var(--rule);border-radius:1rem;background:var(--sunk);color:var(--ink-soft);cursor:pointer;text-align:center;padding:1rem}
+.ce-title{font-weight:700;color:var(--accent);font-size:.98rem}
+.ce-sub{font-size:.8rem;font-weight:500;color:var(--ink-faint)}
+.cover-btn{position:absolute;right:.6rem;bottom:.6rem;display:inline-flex;align-items:center;gap:.35rem;padding:.45rem .8rem;border-radius:999px;background:var(--scrim);color:var(--on-scrim);font-size:.8rem;font-weight:700;cursor:pointer}
+
+/* 考察頁 */
+.triphead{display:flex;flex-direction:column;gap:.55rem}
+.th-date{margin:0;display:flex;align-items:center;gap:.4rem;font-size:.85rem;color:var(--ink-soft);font-variant-numeric:tabular-nums;flex-wrap:wrap}
+.th-place{margin:0;font-family:"Noto Serif TC","Songti TC",serif;font-weight:700;font-size:1.75rem;line-height:1.3;text-wrap:balance}
+.th-purpose{margin:0;font-size:.92rem;color:var(--ink-soft)}
+.th-sum{margin:0;font-size:.88rem;color:var(--ink-soft);font-variant-numeric:tabular-nums}
+.th-sum b{color:var(--ink);font-size:1.02rem}
+.covered{display:flex;flex-direction:column;gap:.35rem}
+.covered .label{margin:0}
+.menu{display:flex;flex-direction:column;gap:.5rem}
+
+/* 分類色 */
+.b0{--c:var(--b0);--cs:var(--b0s)}
+.b1{--c:var(--b1);--cs:var(--b1s)}
+.b2{--c:var(--b2);--cs:var(--b2s)}
+.b3{--c:var(--b3);--cs:var(--b3s)}
+.b4{--c:var(--b4);--cs:var(--b4s)}
+.chips{display:flex;flex-wrap:wrap;gap:.35rem}
+.dot{width:.5rem;height:.5rem;border-radius:50%;flex:none;background:var(--c)}
+.tchip{display:inline-flex;align-items:center;gap:.35rem;padding:.2rem .6rem;border-radius:.45rem;font-size:.8rem;font-weight:500;line-height:1.5;background:var(--cs);color:var(--c)}
+.cchip{display:inline-flex;align-items:center;gap:.2rem;padding:.12rem .55rem;border-radius:999px;font-size:.78rem;line-height:1.5;border:1px solid var(--c);color:var(--c)}
+
+/* 路線（紀錄點時間軸） */
+.route{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:1rem}
+.stop{position:relative;display:grid;grid-template-columns:2.6rem minmax(0,1fr);gap:.7rem;align-items:start}
+.stop::before{content:"";position:absolute;left:1.3rem;top:2.6rem;bottom:-1rem;border-left:2px dashed var(--accent);transform:translateX(-1px)}
+.stop:last-child::before{display:none}
+.wp{display:grid;place-items:center;width:2.6rem;height:2.6rem;border-radius:.7rem;background:var(--marker);color:var(--on-marker);font-weight:700;font-size:.95rem;font-variant-numeric:tabular-nums;letter-spacing:.02em}
+.wp.sm{display:inline-grid;width:1.9rem;height:1.9rem;font-size:.78rem;border-radius:.5rem}
+.stopcard{display:flex;flex-direction:column;gap:.55rem;width:100%;padding:.8rem;border:1px solid var(--rule);border-radius:1rem;background:var(--surface);text-align:left}
+button.stopcard:active{background:var(--sunk)}
+.st-time{font-size:.82rem;font-weight:700;color:var(--ink-soft);font-variant-numeric:tabular-nums}
+.st-photos{display:grid;gap:.35rem;grid-template-columns:repeat(3,minmax(0,1fr))}
+.st-photos.n1{grid-template-columns:minmax(0,1fr)}
+.st-photos.n2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.st-photos img{display:block;width:100%;max-width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:.55rem;background:var(--surface-2)}
+.st-photos.n1 img{aspect-ratio:16/9}
+.phbtn{display:block;width:100%;padding:0;border:none;background:none;border-radius:.55rem;overflow:hidden;cursor:zoom-in}
+.st-note{font-size:.92rem;line-height:1.7;color:var(--ink);display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+div.stopcard .st-note{display:block;white-space:pre-wrap}
+
+/* 紀錄點編輯 */
+.pe-meta{margin:0;display:flex;align-items:center;gap:.5rem;font-size:.88rem;color:var(--ink-soft);flex-wrap:wrap;font-variant-numeric:tabular-nums}
+.block{display:flex;flex-direction:column;gap:.6rem}
+.block-head{display:flex;align-items:center;justify-content:space-between;gap:.5rem;min-height:2.5rem}
+.block-head h3{margin:0;font-size:1rem;font-weight:700}
+.block-head h3 label{font-size:inherit;color:inherit}
+.count{font-size:.82rem;color:var(--ink-soft);font-variant-numeric:tabular-nums}
+.slots{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.5rem}
+.slot{position:relative;aspect-ratio:1;max-width:100%;border-radius:.85rem;overflow:hidden;background:var(--surface-2)}
+.slot .phbtn{height:100%;border-radius:0}
+.slot img{display:block;width:100%;height:100%;object-fit:cover}
+.slot.add{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.3rem;border:2px dashed var(--accent);background:var(--accent-soft);color:var(--accent);font-size:.78rem;font-weight:700;text-align:center;padding:.4rem;cursor:pointer;line-height:1.35}
+.slot-x{position:absolute;top:.3rem;right:.3rem;display:grid;place-items:center;width:2rem;height:2rem;border-radius:50%;border:none;background:var(--scrim);color:var(--on-scrim)}
+.seltopics{display:flex;flex-direction:column;gap:.6rem}
+.seltopic{border:1px solid var(--rule);border-radius:1rem;background:var(--surface);padding:.6rem .7rem .75rem;display:flex;flex-direction:column;gap:.55rem}
+.stp-head{display:flex;align-items:center;gap:.55rem}
+.stp-label{flex:1;display:flex;flex-direction:column;min-width:0}
+.stp-num{font-size:.72rem;color:var(--c);font-weight:700;letter-spacing:.04em}
+.stp-title{font-size:.98rem;font-weight:700;line-height:1.4}
+.conchips{display:flex;flex-wrap:wrap;gap:.4rem}
+.concept{border:1px solid var(--rule);background:var(--surface);color:var(--ink);border-radius:999px;padding:.35rem .78rem;font-size:.86rem;line-height:1.4;min-height:2.3rem}
+.concept[aria-pressed="true"]{background:var(--c);border-color:var(--c);color:var(--surface)}
+.pickcta{display:flex;align-items:center;gap:.6rem;width:100%;min-height:3.5rem;padding:.8rem 1rem;border:2px dashed var(--accent);border-radius:1rem;background:var(--accent-soft);color:var(--accent);font-weight:700;text-align:left}
+.addrow{display:flex;gap:.5rem}
+.addrow input{flex:1;min-width:0}
+.cchip.rm{padding-right:.15rem;font-size:.84rem}
+.cchip.rm button{display:grid;place-items:center;width:1.75rem;height:1.75rem;border:none;background:none;color:inherit;border-radius:50%}
+.flash{margin:0;padding:.7rem .85rem;border-radius:.8rem;background:var(--danger-soft);color:var(--danger);font-size:.88rem;font-weight:500}
+.okbox{margin:0;padding:.7rem .85rem;border-radius:.8rem;background:var(--accent-soft);color:var(--accent);font-size:.88rem;font-weight:500}
+.danger-zone{padding-top:.8rem;border-top:1px solid var(--rule);display:flex;flex-direction:column;gap:.6rem}
+
+/* 考察題目 */
+.qcards{display:flex;flex-direction:column;gap:.5rem}
+.qcard{display:flex;align-items:center;gap:.8rem;width:100%;padding:.7rem .85rem;border:1px solid var(--rule);border-radius:.95rem;background:var(--surface);text-align:left;min-height:3.6rem}
+.qcard:active{background:var(--sunk)}
+.qc-code{font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:.12em;color:var(--accent);font-size:1.05rem}
+.qc-main{flex:1;display:flex;flex-direction:column;min-width:0}
+.qc-title{font-weight:700;font-size:.95rem;line-height:1.4}
+.qc-sub{font-size:.78rem;color:var(--ink-soft)}
+.pill-todo{flex:none;font-size:.75rem;font-weight:700;padding:.2rem .6rem;border-radius:999px;background:var(--mid-soft);color:var(--mid);white-space:nowrap}
+.score{flex:none;display:inline-flex;align-items:baseline;gap:.2rem;padding:.2rem .65rem;border-radius:999px;font-size:.8rem;font-variant-numeric:tabular-nums;white-space:nowrap}
+.score b{font-size:1rem}
+.score.good{background:var(--good-soft);color:var(--good)}
+.score.mid{background:var(--mid-soft);color:var(--mid)}
+.score.low{background:var(--low-soft);color:var(--low)}
+.score.big{font-size:1rem;padding:.35rem .95rem}
+.score.big b{font-size:1.55rem}
+.codebox{display:flex;flex-direction:column;gap:.45rem}
+#inCode{font-size:1.35rem;letter-spacing:.3em;font-variant-numeric:tabular-nums;text-align:center;font-weight:700}
+.qhead{display:flex;flex-direction:column;gap:.45rem}
+.scorebig{display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;font-size:.84rem;color:var(--ink-soft)}
+.qa{display:flex;flex-direction:column;gap:.6rem;padding:.9rem;border:1px solid var(--rule);border-radius:1rem;background:var(--surface)}
+.qa-head{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:.6rem;align-items:start}
+.qa-no{display:grid;place-items:center;width:1.8rem;height:1.8rem;border-radius:50%;background:var(--ink);color:var(--surface);font-size:.85rem;font-weight:700}
+.qa-text{margin:0;font-weight:500;line-height:1.65}
+.qa-marks{font-size:.78rem;color:var(--ink-soft);white-space:nowrap;padding-top:.15rem}
+.qa-ans{margin:0;padding:.65rem .8rem;border-radius:.75rem;background:var(--sunk);line-height:1.75;white-space:pre-wrap}
+.qa-ans.none{color:var(--ink-faint)}
+.qa-res{display:flex;flex-direction:column;gap:.4rem}
+.qa-score{margin:0;font-size:.85rem;color:var(--ink-soft)}
+.qa-score b{color:var(--ink);font-size:1rem}
+.pts{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:.3rem}
+.pts li{display:flex;align-items:flex-start;gap:.45rem;font-size:.86rem;line-height:1.55}
+.pt-mark{display:grid;place-items:center;width:1.35rem;height:1.35rem;border-radius:50%;flex:none;margin-top:.1rem}
+.pts li.hit .pt-mark{background:var(--good-soft);color:var(--good)}
+.pts li.miss .pt-mark{background:var(--low-soft);color:var(--low)}
+.pts li.miss{color:var(--ink-soft)}
+.pts li.key .pt-mark{background:var(--accent-soft);color:var(--accent)}
+
+/* 老師後台 */
+.adminhead{display:flex;flex-direction:column;gap:.35rem}
+.regbox{display:flex;flex-direction:column;gap:.55rem;padding:.9rem;border-radius:1rem;border:1px solid var(--rule);background:var(--surface)}
+.regbox.open{border-color:var(--accent);background:var(--accent-soft)}
+.reg-status{margin:0;font-weight:700}
+.regbox.open .reg-status{color:var(--accent)}
+.reg-sub{margin:0;font-size:.82rem;color:var(--ink-soft);line-height:1.6}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:.25rem;padding:.25rem;border-radius:.9rem;background:var(--surface-2)}
+.seg button{border:none;background:transparent;border-radius:.7rem;min-height:2.6rem;font-weight:700;font-size:.92rem;color:var(--ink-soft)}
+.seg button[aria-selected="true"]{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
+.slist{display:flex;flex-direction:column;gap:.6rem}
+.grp{margin:.4rem 0 0;font-size:.8rem;letter-spacing:.06em}
+.srow{display:flex;align-items:center;gap:.8rem;width:100%;padding:.75rem .85rem;border:1px solid var(--rule);border-radius:1rem;background:var(--surface);text-align:left;min-height:3.8rem}
+.srow:active{background:var(--sunk)}
+.avatar{display:grid;place-items:center;width:2.6rem;height:2.6rem;border-radius:50%;background:var(--accent-soft);color:var(--accent);font-weight:700;flex:none}
+.sr-main{flex:1;display:flex;flex-direction:column;min-width:0}
+.sr-name{font-weight:700}
+.sr-sub{font-size:.8rem;color:var(--ink-soft);font-variant-numeric:tabular-nums}
+.qsrow{display:grid;grid-template-columns:auto minmax(0,1fr);gap:.1rem .95rem;align-items:center;width:100%;padding:.85rem .95rem;border:1px solid var(--rule);border-radius:1rem;background:var(--surface);text-align:left}
+.qsrow:active{background:var(--sunk)}
+.qs-code{grid-row:span 2;font-size:1.55rem;font-weight:700;letter-spacing:.12em;font-variant-numeric:tabular-nums;color:var(--accent)}
+.qs-title{font-weight:700;line-height:1.4}
+.qs-sub{font-size:.8rem;color:var(--ink-soft);font-variant-numeric:tabular-nums}
+.bigcode{display:flex;flex-direction:column;align-items:center;gap:.45rem;padding:1.2rem 1rem;border-radius:1.1rem;background:var(--surface);border:2px solid var(--marker);text-align:center}
+.bigcode .digits{margin:0;font-size:3rem;font-weight:700;letter-spacing:.25em;padding-left:.25em;font-variant-numeric:tabular-nums;line-height:1.1;user-select:all;-webkit-user-select:all}
+.bigcode .digits.sm{font-size:2.2rem}
+.qlist{display:flex;flex-direction:column;gap:.6rem}
+fieldset.qedit{border:1px solid var(--rule);border-radius:1rem;background:var(--surface);padding:.9rem;margin:0;display:flex;flex-direction:column;gap:.8rem;min-width:0}
+fieldset.qedit legend{font-weight:700;padding:0 .3rem;font-size:.95rem}
+.check{display:flex;align-items:center;gap:.6rem;font-size:.95rem;color:var(--ink);font-weight:500;min-height:2.75rem;cursor:pointer}
+.check input{width:1.3rem;height:1.3rem;accent-color:var(--accent);flex:none}
+
+/* 底部抽屜 */
+@keyframes sheetup{from{transform:translateY(28px);opacity:.5}to{transform:none;opacity:1}}
+.scrim{position:fixed;inset:0;z-index:30;background:var(--scrim)}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:31;margin-inline:auto;width:100%;max-width:30rem;max-height:86vh;max-height:86dvh;display:flex;flex-direction:column;background:var(--surface);border-radius:1.2rem 1.2rem 0 0;padding-bottom:env(safe-area-inset-bottom,0px);box-shadow:0 -8px 30px rgba(0,0,0,.18)}
+@media (prefers-reduced-motion:no-preference){.sheet{animation:sheetup .22s ease-out}}
+.sheet-head{display:flex;align-items:center;justify-content:space-between;gap:.6rem;padding:1rem 1rem .6rem}
+.sheet-head h3{margin:0;font-size:1.08rem}
+.searchbox{display:flex;align-items:center;gap:.5rem;margin:0 1rem;padding:0 .8rem;border:1px solid var(--rule);border-radius:.85rem;background:var(--sunk);color:var(--ink-soft)}
+.searchbox input{border:none;background:transparent;padding:.7rem 0;min-height:2.9rem}
+.searchbox input:focus{box-shadow:none}
+.searchbox:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.booktabs{display:flex;gap:.4rem;overflow-x:auto;padding:.7rem 1rem;scrollbar-width:none}
+.booktabs::-webkit-scrollbar{display:none}
+.btab{flex:none;border:1px solid var(--rule);background:var(--surface);border-radius:999px;padding:.4rem .85rem;font-size:.84rem;white-space:nowrap;min-height:2.4rem}
+.btab[aria-pressed="true"]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.pk-list{overflow-y:auto;flex:1;padding-bottom:1rem;overscroll-behavior:contain}
+.pk-bookhead{position:sticky;top:0;z-index:1;display:flex;align-items:center;gap:.45rem;padding:.45rem 1rem;background:var(--surface-2);font-size:.8rem;font-weight:700;color:var(--c)}
+.pk-row{display:flex;align-items:center;gap:.75rem;width:100%;padding:.7rem 1rem;border:none;border-bottom:1px solid var(--rule);background:var(--surface);text-align:left;min-height:3.6rem}
+.pk-row:active{background:var(--sunk)}
+.pk-row[aria-pressed="true"]{background:var(--accent-soft)}
+.pk-num{flex:none;display:grid;place-items:center;width:2.1rem;height:2.1rem;border-radius:.5rem;background:var(--cs);color:var(--c);font-size:.82rem;font-weight:700;font-variant-numeric:tabular-nums}
+.pk-main{flex:1;display:flex;flex-direction:column;min-width:0}
+.pk-title{font-weight:700;font-size:.96rem;line-height:1.4}
+.pk-sub{font-size:.76rem;color:var(--ink-faint);line-height:1.5}
+.pk-check{flex:none;display:grid;place-items:center;width:1.8rem;height:1.8rem;border-radius:50%;border:2px solid var(--rule);color:transparent}
+.pk-row[aria-pressed="true"] .pk-check{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.pk-row.custom .pk-num{background:var(--accent-soft);color:var(--accent)}
+.pk-none{padding:1.5rem 1rem;color:var(--ink-soft);font-size:.9rem;margin:0}
+.sheet-body{padding:0 1rem 1.25rem;overflow-y:auto;display:flex;flex-direction:column;gap:1rem}
+.acct{display:grid;grid-template-columns:auto minmax(0,1fr);gap:.35rem 1rem;margin:0}
+.acct dt{font-size:.85rem;color:var(--ink-soft);font-weight:700}
+.acct dd{margin:0;font-weight:500}
+.syncline{margin:0;padding:.7rem .85rem;border-radius:.8rem;background:var(--sunk);font-size:.88rem;line-height:1.6}
+
+/* 相片檢視 */
+.viewer{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;background:rgba(8,12,10,.94);padding:calc(env(safe-area-inset-top,0px) + 3.5rem) 0 calc(env(safe-area-inset-bottom,0px) + 1rem)}
+.viewer img{max-width:100%;max-height:100%;object-fit:contain}
+.viewer .iconbtn{position:absolute;top:calc(env(safe-area-inset-top,0px) + .5rem);right:.5rem;color:#FFFFFF;background:rgba(255,255,255,.14)}
+
+.toast{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + .8rem);transform:translateX(-50%);z-index:60;padding:.6rem 1rem;border-radius:.8rem;background:var(--ink);color:var(--surface);font-size:.9rem;font-weight:500;box-shadow:var(--shadow);max-width:calc(100% - 2rem);text-align:center}
+.loading{padding:2rem 0;color:var(--ink-soft);margin:0}
+</style>
+</head>
+<body>
+<div id="app"><p class="loading">載入中……</p></div>
+<div id="sheet"></div>
+<div id="viewer"></div>
+<div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+<script src="config.js"></script>
+
+<script>
+const DATA = {"books":[{"n":1,"t":"旅遊導論"},{"n":2,"t":"款待導論"},{"n":3,"t":"地理名勝‧主題公園及景點要素"},{"n":4,"t":"客務關係及服務‧行業趨勢議題"}],"topics":[{"b":1,"n":1,"t":"旅遊業整合模式","c":["旅客","旅遊推廣者","旅遊服務供應商","經濟因素","政治因素","社會因素","文化因素","環境因素","科技因素"]},{"b":1,"n":2,"t":"旅行、旅遊與旅客","c":["有時間性","離開原居地","自願","往返","性質","短程旅遊（不過夜）","本地旅客","國際旅客"]},{"b":1,"n":3,"t":"旅遊的形式","c":["公幹/商務旅遊","文化旅遊","環保旅遊","學習旅遊","宗教朝聖","保健旅遊","探訪親友","運動旅遊"]},{"b":1,"n":4,"t":"高恆分類法","c":["旅行團群體旅客","個別的群體旅客","探險式旅客","漫遊式旅客","環境泡泡","制度化旅遊","非制度化旅遊"]},{"b":1,"n":5,"t":"蒲樂分類法","c":["保守型","接近保守型","中庸型","接近探奇型","探奇型"]},{"b":1,"n":6,"t":"旅客行為守則及旅遊時的關注事項（風險）","c":["尊重人權","協助保護自然環境","尊重文化資源","遵守公平貿易原則","了解當地習俗","罪行的可能性","人身安全","財務風險","健康","有特殊需要的旅客"]},{"b":1,"n":7,"t":"旅遊的動機","c":["好奇心","快樂","健康","運動","專業及公商務","自我/尊重的需求","親友交往","尋根","宗教信仰及精神審美"]},{"b":1,"n":8,"t":"旅客流量概念下的行程模式","c":["雙向往返模式","中轉圓形往返模式","圓形往返模式","幅射往返模式"]},{"b":1,"n":9,"t":"馬斯勞需求定論","c":["生理需要","安全需要","社交需要","尊重需要","自我實現需要"]},{"b":1,"n":10,"t":"丹恩的推拉因素","c":["推動因素","拉動因素"]},{"b":1,"n":11,"t":"旅遊產品的特性","c":["無形性","生產與消費不可分割性","差異性","不可保存性","互補性及替代性","不可擁有及不可轉移","需求與價格不固定","帶有風險"]},{"b":1,"n":12,"t":"旅遊產品的生命週期","c":["開發階段","引入階段","成長階段","成熟階段","衰退階段"]},{"b":1,"n":13,"t":"巴特勒旅遊目的地的生命週期","c":["發掘","投入","發展","鞏固","停滯","重生","衰落"]},{"b":1,"n":14,"t":"承載力","c":["空間承載力","環境承載力","心理承載力","經濟承載力","社會文化承載力"]},{"b":1,"n":15,"t":"郵輪","c":["母港","停靠港","自給自足的目的地","小型郵輪","大型郵輪","超級大型郵輪","登船卡"]},{"b":1,"n":16,"t":"旅遊產品的分銷途徑","c":["單向模式","雙向模式","多向模式","旅行代理商","旅行團經營商","旅遊批發商","旅遊零售商"]},{"b":1,"n":17,"t":"政府在旅遊業的角色","c":["政策制定者","宣傳推廣者","監管者","直接經營者"]},{"b":1,"n":18,"t":"資金流動三重效應","c":["第一重效應","第二重效應","第三重效應","流失","旅遊業乘數效應"]},{"b":1,"n":19,"t":"多克西的旅客情緒指標","c":["興奮愉快階段","理所當然階段","煩厭不快階段","敵對感覺階段","得不償失階段"]},{"b":1,"n":20,"t":"旅遊業統計數據範疇","c":["地理環境","人口特性","消費心態","社會經濟影響"]},{"b":1,"n":21,"t":"公營及私營機構在本地旅遊業中擔當的角色","c":["香港旅遊發展局","旅遊事務署","香港旅遊業議會","香港貿易發展局","香港酒店業協會","機場管理局","優質旅遊服務計劃","旅遊業賠償基金"]},{"b":1,"n":22,"t":"國際主要旅遊機構","c":["聯合國世界旅遊組織（UNWTO）","亞太旅遊協會（PATA）"]},{"b":1,"n":23,"t":"香港的旅遊資源","c":["尖沙咀海濱","太平山頂","香港迪士尼樂園","香港海洋公園","昂坪360","女人街／男人街","蘭桂坊／蘇豪區","香港會議展覽中心","大館","中環街市","南豐紗廠","戲曲中心","M+","香港故宮文化博物館","香港地質公園","米埔自然保護區","麥理浩徑","大潭郊野公園"]},{"b":1,"n":24,"t":"旅遊業的影響","c":["社會文化正面影響","示範效應","文化商業化","擠塞","直接職位","間接職位","無形出口","流失","過分依賴","非生物環境影響","生物環境影響"]},{"b":1,"n":25,"t":"會議、獎勵、商務及展覽旅遊（MICE）","c":["會議","獎勵旅遊","商務","展覽","消費展覽會","商貿展覽會"]},{"b":1,"n":26,"t":"衡量目標的五個原則（SMART）","c":["明確性","衡量性","一致性","實際","有時限性"]},{"b":2,"n":1,"t":"酒店類型","c":["地理位置","功能設施","服務水平","規模","房價","評級","產權"]},{"b":2,"n":2,"t":"計算酒店的級別","c":["酒店設施","酒店地點","職員與客房數目比例","酒店實際平均房租","商務組合","甲級高價酒店","乙級高價酒店","中價酒店","旅客賓館"]},{"b":2,"n":3,"t":"客房五大分類","c":["標準級客房","特級客房","豪華級客房","行政套房","總統套房"]},{"b":2,"n":4,"t":"影響酒店房價的因素","c":["旅遊季節節慶及活動","房間的級別","房間計價方法","租住時間長短","顧客類別"]},{"b":2,"n":5,"t":"計算酒店銷售收入的方法","c":["入住率","每日平均房價（ADR）","每間可銷售房收入（RevPAR）","超額預訂"]},{"b":2,"n":6,"t":"酒店三類管理模式","c":["獨立擁有及經營","管理合約","特許經營"]},{"b":2,"n":7,"t":"酒店的組織架構","c":["前線部門","後勤部門","客務部","餐飲部","營業及市場推廣部","財務部","人力資源部","工程部","保安部"]},{"b":2,"n":8,"t":"顧客流程與酒店運作","c":["抵埗前","抵埗","入住","離開"]},{"b":2,"n":9,"t":"前堂部","c":["前堂經理","大堂副經理","款接部","禮賓部","訂房部","電話通訊部"]},{"b":2,"n":10,"t":"管家部","c":["管家部辦公室","客房樓層","公共地方","制服及布草房","洗衣房","其他職能"]},{"b":2,"n":11,"t":"本港餐飲服務的市場分類","c":["酒店市場","閒暇市場","商業及工業市場","交通市場","學生市場","零售市場","醫護市場","其他公營部門市場"]},{"b":2,"n":12,"t":"規劃餐單時應考慮的因素","c":["市場方面","顧客方面","營運方面","與食物有關的因素","食材成本與餐單價格"]},{"b":2,"n":13,"t":"餐廳的設計佈局","c":["用餐區","水吧","款接部","收銀部","經理室及行政部","員工儲物室和更衣室","電子銷售終端機（POS）"]},{"b":2,"n":14,"t":"感官五個方面","c":["視覺","觸覺","聽覺","嗅覺","溫度"]},{"b":2,"n":15,"t":"防火安全","c":["可燃物","溫度","氧氣","連鎖反應","二氧化碳式滅火筒","乾粉式滅火筒","水式滅火筒","泡沫式滅火筒","滅火氈"]},{"b":2,"n":16,"t":"食物污染","c":["細菌性","化學性","物理性","沙門氏菌","金黃葡萄球菌","副溶血性弧菌","李斯特菌"]},{"b":2,"n":17,"t":"食物安全五要點","c":["精明選擇","保持清潔","生熟分開","煮熟食物","安全溫度"]},{"b":3,"n":1,"t":"基本世界地理概念","c":["亞洲","歐洲","非洲","北美洲","南美洲","大洋洲","南極洲"]},{"b":3,"n":2,"t":"氣候的分類及其特徵","c":["熱帶氣候","乾旱氣候","溫帶氣候","大陸性氣候","極地氣候"]},{"b":3,"n":3,"t":"成功的景點的特性","c":["高品質","真實性","獨特性","吸客能力","活動選擇","可達度高"]},{"b":3,"n":4,"t":"Kotler產品的三個層次","c":["核心產品","實際產品","延伸產品"]},{"b":3,"n":5,"t":"亞洲","c":["中國","馬來西亞","泰國","沙特阿拉伯","迪拜（阿聯酋）"]},{"b":3,"n":6,"t":"非洲","c":["摩洛哥","南非","突尼斯","埃及"]},{"b":3,"n":7,"t":"歐洲","c":["法國","意大利","西班牙"]},{"b":3,"n":8,"t":"北美洲","c":["美國","墨西哥","加拿大"]},{"b":3,"n":9,"t":"南美洲","c":["巴西","阿根廷","智利"]},{"b":4,"n":1,"t":"顧客服務五個重要指標(RATER)","c":["可靠性","可信性","有形性","關懷性","反應性"]},{"b":4,"n":2,"t":"忠誠度計劃","c":["簡單積分計劃","級別積分計劃","夥伴計劃"]},{"b":4,"n":3,"t":"服務金三角","c":["企業","員工","顧客","對外行銷","互動行銷","內部行銷"]},{"b":4,"n":4,"t":"「關鍵時刻」的定義及其重要性","c":["關鍵時刻","接觸點"]},{"b":4,"n":5,"t":"服務品質差距","c":["差距一：認識差距","差距二：服務設計及標準差距","差距三：服務表現差距","差距四：溝通差距","差距五：顧客差距"]},{"b":4,"n":6,"t":"招待不易取悅的客人","c":["憤怒的客人","不滿意的客人","猶豫不決的客人","苛刻或專橫的客人","粗魯或不顧及他人的客人","喋喋不休的客人"]},{"b":4,"n":7,"t":"可持續發展旅遊業的十二個目標","c":["自然的完整性","生物多樣性","資源效益","環境純淨度","社會公平性","旅遊體驗","地區管理","地區福祉","文化獨特性","經濟可行性","地區性繁榮","僱員質素"]},{"b":4,"n":8,"t":"旅遊業的同質化與標準化","c":["同質化","標準化"]},{"b":4,"n":9,"t":"本土文化商品化與矮化","c":["文化商品化","矮化"]},{"b":4,"n":10,"t":"公平貿易","c":["公平夥伴合作關係","公平利益分配","旅客與本地居民的公平貿易","合理使用自然資源","合理薪酬與工作環境"]},{"b":4,"n":11,"t":"五個世代的特點","c":["老一輩","嬰兒潮","X世代","Y世代","Z世代"]},{"b":4,"n":12,"t":"過度旅遊","c":["市面秩序混亂","公共交通受阻","資源被佔用","物價樓價上漲","生活受阻及小販攤檔滋擾"]},{"b":4,"n":13,"t":"GDS系統","c":["全球分銷系統（GDS）","旅客紀錄（PNR）","Abacus","Amadeus","Sabre"]},{"b":4,"n":14,"t":"網上旅遊代理商","c":["提供一站式搜尋","採用元搜索技術","價格便宜","溝通與討論平台"]},{"b":4,"n":15,"t":"低成本航空公司","c":["只提供有限服務","營運成本較低","使用次級機場","使用非繁忙時間"]},{"b":4,"n":16,"t":"酒店資產管理系統（PMS）","c":["協調各部門運作","提高服務水平","運作標準化","品牌建立","節省營運成本"]},{"b":4,"n":17,"t":"銷售點系統","c":["樓面點餐","廚房出菜","櫃檯結帳","現場座位管理"]}]};
+const BOOK_SHORT = {1:"旅遊導論",2:"款待導論",3:"地理名勝",4:"客務及趨勢"};
+const TOPIC = new Map(DATA.topics.map(t => [t.b + "-" + t.n, t]));
+const TEACHER = "YHP";
+const API = String(window.API_URL || "").trim();   // 伺服器網址喺 config.js 設定
+
+const $ = (s, r = document) => r.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const pad = n => String(n).padStart(2, "0");
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+const WD = ["日","一","二","三","四","五","六"];
+function todayStr(){ const d = new Date(); return d.getFullYear() + "-" + pad(d.getMonth()+1) + "-" + pad(d.getDate()); }
+function fmtDate(s){ const d = new Date(s + "T00:00:00"); if (isNaN(d)) return esc(s); return d.getFullYear() + "年" + (d.getMonth()+1) + "月" + d.getDate() + "日（" + WD[d.getDay()] + "）"; }
+function fmtTime(iso){ const d = new Date(iso); return pad(d.getHours()) + ":" + pad(d.getMinutes()); }
+function fmtStamp(iso){ const d = new Date(iso); if (isNaN(d)) return ""; return (d.getMonth()+1) + "月" + d.getDate() + "日 " + pad(d.getHours()) + ":" + pad(d.getMinutes()); }
+function fmtWhen(ms){ const d = new Date(ms), now = new Date(); const same = d.toDateString() === now.toDateString(); return (same ? "今日 " : (d.getMonth()+1) + "月" + d.getDate() + "日 ") + pad(d.getHours()) + ":" + pad(d.getMinutes()); }
+
+const svg = (p, s = 22) => '<svg width="' + s + '" height="' + s + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + p + '</svg>';
+const ICON = {
+  back:    svg('<path d="M15 18l-6-6 6-6"/>'),
+  plus:    svg('<path d="M12 5v14M5 12h14"/>', 20),
+  cam:     svg('<path d="M3 8.5h3.5l2-3h7l2 3H21V19H3z"/><circle cx="12" cy="13.2" r="3.6"/>', 28),
+  check:   svg('<path d="M5 12.5l4.5 4.5L19 7.5"/>', 18),
+  x:       svg('<path d="M6 6l12 12M18 6L6 18"/>', 16),
+  search:  svg('<circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/>', 20),
+  more:    svg('<circle cx="5" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="19" cy="12" r="1.3"/>'),
+  logout:  svg('<path d="M14 4h5v16h-5M10 8l-4 4 4 4M6 12h9"/>'),
+  refresh: svg('<path d="M20 11.5a8 8 0 1 1-2.35-5.65M20 4.5v5h-5"/>'),
+  user:    svg('<circle cx="12" cy="8.5" r="3.6"/><path d="M4.8 20c1.3-3.4 4-5.2 7.2-5.2s5.9 1.8 7.2 5.2"/>', 16),
+  cal:     svg('<rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 10h17M8.5 3v4M15.5 3v4"/>', 18),
+  img:     svg('<rect x="3.5" y="4.5" width="17" height="15" rx="2"/><circle cx="9" cy="10" r="1.8"/><path d="M20.5 16l-5-5L6 19.5"/>', 26),
+  imgsm:   svg('<rect x="3.5" y="4.5" width="17" height="15" rx="2"/><circle cx="9" cy="10" r="1.8"/><path d="M20.5 16l-5-5L6 19.5"/>', 16),
+  copy:    svg('<rect x="8.5" y="8.5" width="11" height="11" rx="2"/><path d="M15.5 8.5V6a1.5 1.5 0 0 0-1.5-1.5H6A1.5 1.5 0 0 0 4.5 6v8A1.5 1.5 0 0 0 6 15.5h2.5"/>', 18)
+};
+
+/* ── 本機儲存（IndexedDB）：未上載的紀錄先存在手機 ── */
+const STORES = ["trips","points","photos","responses","meta","outbox"];
+const mem = {}; STORES.forEach(s => { mem[s] = new Map(); });
+let idb = null;
+function openDB(){
+  return new Promise(res => {
+    try {
+      const r = indexedDB.open("kaocha-shouji-formal", 1);
+      r.onupgradeneeded = () => { const d = r.result; STORES.forEach(s => { if (!d.objectStoreNames.contains(s)) d.createObjectStore(s, {keyPath:"id"}); }); };
+      r.onsuccess = () => { idb = r.result; res(true); };
+      r.onerror = () => res(false);
+      r.onblocked = () => res(false);
+    } catch (e) { res(false); }
+  });
+}
+function req(store, mode, fn){
+  return new Promise(res => {
+    try {
+      const t = idb.transaction(store, mode); const q = fn(t.objectStore(store));
+      t.oncomplete = () => res(q && q.result); t.onerror = t.onabort = () => res(undefined);
+    } catch (e) { res(undefined); }
+  });
+}
+async function put(store, obj){ mem[store].set(obj.id, obj); if (idb) await req(store, "readwrite", s => s.put(obj)); }
+async function del(store, id){ mem[store].delete(id); if (idb) await req(store, "readwrite", s => s.delete(id)); }
+async function getOne(store, id){ if (mem[store].has(id)) return mem[store].get(id); if (!idb) return undefined; const v = await req(store, "readonly", s => s.get(id)); if (v) mem[store].set(id, v); return v; }
+async function getAll(store){ if (!idb) return [...mem[store].values()]; const v = await req(store, "readonly", s => s.getAll()); (v || []).forEach(o => mem[store].set(o.id, o)); return v || []; }
+async function clearStore(store){ mem[store].clear(); if (idb) await req(store, "readwrite", s => s.clear()); }
+
+/* ── 伺服器 ── */
+async function api(action, params = {}){
+  const body = JSON.stringify(Object.assign({action, token: S.session ? S.session.token : ""}, params));
+  const ctl = typeof AbortController === "function" ? new AbortController() : null;
+  const timer = ctl ? setTimeout(() => ctl.abort(), 90000) : null;
+  let data;
+  try {
+    const res = await fetch(API, {method:"POST", headers:{"Content-Type":"text/plain;charset=utf-8"}, body, signal: ctl ? ctl.signal : undefined});
+    data = await res.json();
+  } catch (e) {
+    const err = new Error("未能連接伺服器，請檢查網絡後再試。"); err.net = true; throw err;
+  } finally { if (timer) clearTimeout(timer); }
+  if (!data || !data.ok) {
+    const err = new Error((data && data.message) || "伺服器發生錯誤，請稍後再試。");
+    err.code = (data && data.code) || "error";
+    if (err.code === "auth" && S.session) authLost();
+    throw err;
+  }
+  return data;
+}
+
+/* ── 相片：本機優先，缺少才向伺服器取 ── */
+const urlCache = new Map(), want = new Map(), missing = new Set();
+let wantT = null, pumping = false;
+function setURL(key, blob){ const old = urlCache.get(key); if (old) { try { URL.revokeObjectURL(old); } catch (e) {} } const u = URL.createObjectURL(blob); urlCache.set(key, u); return u; }
+function resetPhotoCache(){ for (const u of urlCache.values()) { try { URL.revokeObjectURL(u); } catch (e) {} } urlCache.clear(); want.clear(); missing.clear(); }
+function dropURLs(id){ ["s","l"].forEach(z => { const k = id + "|" + z, u = urlCache.get(k); if (u) { try { URL.revokeObjectURL(u); } catch (e) {} urlCache.delete(k); } }); }
+async function localURL(id, size){
+  const key = id + "|" + size;
+  if (urlCache.has(key)) return urlCache.get(key);
+  if (!isStudent()) return null;
+  const p = await getOne("photos", id);
+  const blob = p && (size === "l" ? p.full : (p.thumb || p.full));
+  return blob ? setURL(key, blob) : null;
+}
+function hydrate(root){
+  root.querySelectorAll("img[data-photo]").forEach(async img => {
+    const id = img.dataset.photo, size = img.dataset.size || "s";
+    const u = await localURL(id, size);
+    if (u) { img.src = u; return; }
+    if (size === "l") { const s = await localURL(id, "s"); if (s && !img.getAttribute("src")) img.src = s; }
+    wantPhoto(id, size);
+  });
+}
+function wantPhoto(id, size){
+  const key = id + "|" + size;
+  if (!S.session || want.has(key) || missing.has(key)) return;
+  want.set(key, {id, size});
+  clearTimeout(wantT); wantT = setTimeout(pumpPhotos, 50);
+}
+async function pumpPhotos(){
+  if (pumping) return; pumping = true;
+  try {
+    while (want.size && S.session) {
+      const size = want.values().next().value.size;
+      const batch = [...want.values()].filter(w => w.size === size).slice(0, size === "l" ? 3 : 12);
+      let res;
+      try { res = await api("getPhotos", {ids: batch.map(w => w.id), size}); }
+      catch (e) { want.clear(); break; }
+      for (const w of batch) {
+        const key = w.id + "|" + w.size; want.delete(key);
+        const ph = res.photos && res.photos[w.id];
+        if (!ph) { missing.add(key); continue; }
+        const blob = b64ToBlob(ph.data, "image/jpeg");
+        if (isStudent()) {
+          const p = (await getOne("photos", w.id)) || {id: w.id, w: ph.w, h: ph.h, remote: true, thumb: null, full: null};
+          if (w.size === "l") p.full = blob; else p.thumb = blob;
+          await put("photos", p);
+        }
+        const u = setURL(key, blob);
+        document.querySelectorAll('img[data-photo="' + w.id + '"]').forEach(img => { if ((img.dataset.size || "s") === w.size || !img.getAttribute("src")) img.src = u; });
+      }
+    }
+  } finally { pumping = false; }
+}
+async function dropPhoto(id){ if (!id) return; await del("photos", id); dropURLs(id); }
+
+function loadImg(url){ return new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = url; }); }
+async function drawJPEG(img, max, q){
+  const w0 = img.naturalWidth, h0 = img.naturalHeight, s = Math.min(1, max / Math.max(w0, h0));
+  const w = Math.max(1, Math.round(w0 * s)), h = Math.max(1, Math.round(h0 * s));
+  const c = document.createElement("canvas"); c.width = w; c.height = h;
+  c.getContext("2d").drawImage(img, 0, 0, w, h);
+  const blob = await new Promise(r => c.toBlob(r, "image/jpeg", q));
+  if (!blob) throw new Error("toBlob");
+  return {blob, w, h};
+}
+async function makePhoto(file){
+  const url = URL.createObjectURL(file);
+  try {
+    const img = await loadImg(url);
+    const full = await drawJPEG(img, 1280, 0.8), thumb = await drawJPEG(img, 480, 0.72);
+    return {id: uid(), full: full.blob, thumb: thumb.blob, w: full.w, h: full.h, remote: false};
+  } finally { URL.revokeObjectURL(url); }
+}
+function blobToB64(blob){ return new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(String(r.result).split(",")[1] || ""); r.onerror = rej; r.readAsDataURL(blob); }); }
+function b64ToBlob(b64, type){ const bin = atob(b64), u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); return new Blob([u], {type}); }
+
+/* ── 狀態 ── */
+const S = {
+  session: null, authLost: false, route: {name: "boot"}, trips: [], points: [], responses: [],
+  draft: null, qdraft: null, sheet: null, pkBook: 0, confirm: null, flash: null, menu: false, codeOpen: false,
+  viewer: null, volatile: false, t: {},
+  sync: {pending: 0, busy: false, offline: false, error: null, note: null, last: 0, lastPull: 0, pulled: false, timer: null}
+};
+const isStudent = () => !!(S.session && S.session.role === "student");
+const isTeacher = () => !!(S.session && S.session.role === "teacher");
+
+function go(name, params = {}){ S.route = Object.assign({}, params, {name}); S.confirm = null; S.flash = null; S.menu = false; S.codeOpen = false; render(); try { window.scrollTo(0, 0); } catch (e) {} }
+function render(){
+  const r = S.route; let html;
+  switch (r.name) {
+    case "setup": html = vSetup(); break;
+    case "login": html = vLogin(); break;
+    case "register": html = vRegister(); break;
+    case "setpw": html = vSetPw(); break;
+    case "trips": html = vTrips(); break;
+    case "newtrip": html = vNewTrip(); break;
+    case "trip": html = vTrip(r.id); break;
+    case "point": html = vPoint(); break;
+    case "answer": html = vAnswer(r.rid); break;
+    case "admin": html = vAdmin(); break;
+    case "astudent": html = vAStudent(r.sid); break;
+    case "atrip": html = vATrip(r.sid, r.id); break;
+    case "aresp": html = vAResp(r.rid); break;
+    case "qset": html = vQset(r.id); break;
+    case "qedit": html = vQEdit(); break;
+    default: html = '<p class="loading">載入中……</p>';
+  }
+  const app = $("#app"); app.innerHTML = html; hydrate(app);
+  if (r.name === "login") syncLoginMode();
+}
+function refresh(){ const y = window.scrollY; render(); try { window.scrollTo(0, y); } catch (e) {} if (S.sheet === "account") renderSheet(); }
+let toastT; function toast(msg){ const el = $("#toast"); el.textContent = msg; el.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => { el.hidden = true; }, 2600); }
+function flashIn(msg){ const el = $("[data-flash]"); if (el) { el.textContent = msg || ""; el.hidden = !msg; } }
+function setBusy(id, on, label){ const b = document.getElementById(id); if (b) { b.disabled = on; if (label) b.textContent = label; } }
+
+/* ── 共用組件 ── */
+function bar(title, o = {}){
+  return '<header class="bar">' +
+    (o.back ? '<button type="button" class="iconbtn" data-act="' + o.back + '" aria-label="返回">' + ICON.back + '</button>' : '') +
+    '<h1>' + esc(title) + '</h1>' +
+    (o.sync ? syncChip() : '') +
+    (o.more ? '<button type="button" class="iconbtn" data-act="menu" aria-label="更多選項" aria-expanded="' + S.menu + '">' + ICON.more + '</button>' : '') +
+    (o.refresh ? '<button type="button" class="iconbtn" data-act="trefresh" aria-label="重新載入">' + ICON.refresh + '</button>' : '') +
+    (o.logout ? '<button type="button" class="iconbtn" data-act="tlogout" aria-label="登出">' + ICON.logout + '</button>' : '') +
+    '</header>';
+}
+function syncChip(){
+  const s = S.sync, n = s.pending;
+  let cls = "", label;
+  if (n && s.busy) { cls = "busy"; label = "上載中…"; }
+  else if (n) { cls = "pending"; label = "未上載 " + n; }
+  else if (s.busy && !s.pulled) { cls = "busy"; label = "同步中…"; }
+  else label = ICON.user + esc(S.session ? S.session.name : "帳戶");
+  return '<button type="button" class="syncchip ' + cls + '" data-act="account" data-sync aria-label="帳戶及同步狀態">' + label + '</button>';
+}
+function paintSync(){
+  document.querySelectorAll("[data-sync]").forEach(el => { el.outerHTML = syncChip(); });
+  if (S.sheet === "account") renderSheet();
+}
+function confirmBtn(key, label, sure){ const armed = S.confirm === key; return '<button type="button" class="btn ' + (armed ? 'btn-danger' : 'btn-dangerghost') + ' btn-block" data-act="confirm" data-key="' + esc(key) + '">' + (armed ? sure : label) + '</button>'; }
+function stateHTML(c, key){
+  if (c.err) return '<div class="empty"><p>' + esc(c.err) + '</p><button type="button" class="btn btn-ghost sm" data-act="tretry" data-key="' + esc(key) + '">再試一次</button></div>';
+  return '<p class="loading">載入中……</p>';
+}
+function brandHTML(){ return '<div class="brand"><div class="trailmark" aria-hidden="true"><i></i><i></i><i></i></div><h1 class="appname">考察手記</h1><p class="appsub">旅遊與款待科　實地考察紀錄</p></div>'; }
+function topicInfo(k){ return k.startsWith("c:") ? null : TOPIC.get(k); }
+function topicChip(tp){ const b = tp.b || 0; return '<span class="tchip b' + b + '"><span class="dot"></span>' + esc(tp.t) + '</span>'; }
+function conceptChip(c){ const i = c.k === "custom" ? null : topicInfo(c.k); return '<span class="cchip b' + (i ? i.b : 0) + '">' + esc(c.c) + '</span>'; }
+function tripPoints(tid, points = S.points){ return points.filter(p => p.tripId === tid).sort((a, b) => a.seq - b.seq); }
+function nextSeq(tid){ return tripPoints(tid).reduce((m, p) => Math.max(m, p.seq), 0) + 1; }
+function tripStats(tid, points = S.points){ const pts = tripPoints(tid, points); const topics = new Map(); let photos = 0; pts.forEach(p => { p.topics.forEach(t => { if (!topics.has(t.k)) topics.set(t.k, t); }); photos += p.photos.length; }); return {pts, topics, photos}; }
+function tripCover(t, points = S.points){ if (t.cover) return t.cover; for (const p of tripPoints(t.id, points)) if (p.photos.length) return p.photos[0]; return null; }
+function scoreClass(s, t){ const r = t ? s / t : 0; return r >= .8 ? "good" : r >= .5 ? "mid" : "low"; }
+function scorePill(s, t, big){ return '<span class="score ' + scoreClass(s, t) + (big ? " big" : "") + '"><b>' + s + '</b> / ' + t + '</span>'; }
+function qTotal(q){ return q.questions.reduce((s, x) => s + (x.marks ?? x.points.length), 0); }
+function sortTrips(list){ return [...list].sort((a, b) => (b.date || "").localeCompare(a.date || "") || (b.createdAt || "").localeCompare(a.createdAt || "")); }
+
+function tripCard(t, act, points, sid){
+  const st = tripStats(t.id, points), cover = tripCover(t, points);
+  return '<button type="button" class="tripcard" data-act="' + act + '" data-id="' + t.id + '"' + (sid ? ' data-sid="' + sid + '"' : '') + '>' +
+    '<span class="tc-cover">' + (cover ? '<img data-photo="' + cover + '" alt="">' : ICON.img) + '</span>' +
+    '<span class="tc-body"><span class="tc-date">' + fmtDate(t.date) + '</span>' +
+    '<span class="tc-place">' + esc(t.place) + '</span>' +
+    '<span class="tc-meta">' + st.pts.length + ' 個紀錄點 · ' + st.topics.size + ' 個課題 · ' + st.photos + ' 張相片</span></span></button>';
+}
+function photoTag(id, size, zoom){
+  const img = '<img data-photo="' + id + '"' + (size === "l" ? ' data-size="l"' : '') + ' alt="">';
+  return zoom ? '<button type="button" class="phbtn" data-act="viewphoto" data-id="' + id + '" aria-label="放大相片">' + img + '</button>' : img;
+}
+function stopHTML(p, readonly){
+  const n = p.photos.length;
+  const photos = n ? '<span class="st-photos n' + n + '">' + p.photos.map(id => photoTag(id, "s", readonly)).join("") + '</span>' : '';
+  const chips = p.topics.map(topicChip).join("") + p.concepts.map(conceptChip).join("");
+  const inner = '<span class="st-time">' + fmtTime(p.time) + '</span>' + photos +
+    (chips ? '<span class="chips">' + chips + '</span>' : '') + (p.note ? '<span class="st-note">' + esc(p.note) + '</span>' : '');
+  return '<li class="stop"><span class="wp" aria-hidden="true">' + pad(p.seq) + '</span>' +
+    (readonly ? '<div class="stopcard">' + inner + '</div>'
+      : '<button type="button" class="stopcard" data-act="openpoint" data-id="' + p.id + '" aria-label="紀錄點 ' + pad(p.seq) + '，' + fmtTime(p.time) + '，按此檢視或修改">' + inner + '</button>') + '</li>';
+}
+function tripHeadHTML(t, st){
+  const covered = [...st.topics.values()].map(topicChip).join("");
+  return '<section class="triphead">' +
+    '<p class="th-date">' + ICON.cal + fmtDate(t.date) + '</p>' +
+    '<h2 class="th-place">' + esc(t.place) + '</h2>' +
+    (t.purpose ? '<p class="th-purpose">' + esc(t.purpose) + '</p>' : '') +
+    '<p class="th-sum"><b>' + st.pts.length + '</b> 個紀錄點　<b>' + st.topics.size + '</b> 個課題　<b>' + st.photos + '</b> 張相片</p>' +
+    (covered ? '<div class="covered"><p class="label">已連結課題</p><div class="chips">' + covered + '</div></div>' : '') +
+    '</section>';
+}
+function respCards(rs, act){
+  return rs.map(r => {
+    const q = r.qset; if (!q) return "";
+    const done = r.status === "submitted", answered = r.answers.filter(a => (a.text || "").trim()).length;
+    return '<button type="button" class="qcard" data-act="' + act + '" data-id="' + r.id + '"><span class="qc-code">' + esc(q.code) + '</span>' +
+      '<span class="qc-main"><span class="qc-title">' + esc(q.title) + '</span><span class="qc-sub">' + (done ? "已於 " + fmtStamp(r.submittedAt) + " 提交" : "已作答 " + answered + " / " + q.questions.length + " 題") + '</span></span>' +
+      (done ? scorePill(r.score, r.total) : '<span class="pill-todo">未提交</span>') + '</button>';
+  }).join("");
+}
+function resultHTML(q, res){
+  return '<div class="qa-res"><p class="qa-score">得分 <b>' + res.score + '</b> / ' + res.total + '</p><ul class="pts">' +
+    res.got.map((g, j) => '<li class="' + (g ? 'hit' : 'miss') + '"><span class="pt-mark" aria-hidden="true">' + (g ? ICON.check : ICON.x) + '</span>' +
+      '<span>' + (q.points ? esc(q.points[j]) : "得分點 " + (j + 1)) + '<span class="vh">' + (g ? "（已取得）" : "（未取得）") + '</span></span></li>').join("") + '</ul></div>';
+}
+function answerBody(r, o){
+  const q = r.qset, done = r.status === "submitted";
+  const head = '<section class="qhead"><p class="eyebrow">題目編號 <b>' + esc(q.code) + '</b></p>' +
+    '<h2 class="th-place">' + esc(q.title) + '</h2>' +
+    '<p class="th-sum">' + (o.who ? esc(o.who) + "　·　" : "") + q.questions.length + ' 題　共 ' + qTotal(q) + ' 分' + (o.place ? "　·　" + esc(o.place) : "") + '</p>' +
+    (done ? '<div class="scorebig">' + scorePill(r.score, r.total, true) + '<span>於 ' + fmtStamp(r.submittedAt) + ' 提交，系統已按參考答案自動評分</span></div>' : '') + '</section>';
+  const body = q.questions.map((x, i) => {
+    const a = r.answers[i] || {text:""}, txt = (a.text || "").trim();
+    let main;
+    if (done) main = '<p class="qa-ans' + (txt ? '' : ' none') + '">' + (txt ? esc(a.text) : "（未有作答）") + '</p>' + resultHTML(x, r.results[i]);
+    else if (o.teacher) main = '<p class="qa-ans none">' + (txt ? esc(a.text) + "\n（作答中，尚未提交）" : "（尚未作答）") + '</p>' +
+      (x.points ? '<ul class="pts">' + x.points.map(pt => '<li class="key"><span class="pt-mark" aria-hidden="true">' + ICON.check + '</span><span>' + esc(pt) + '</span></li>').join("") + '</ul>' : '');
+    else main = '<label class="vh" for="ans' + i + '">第 ' + (i + 1) + ' 題答案</label><textarea id="ans' + i + '" data-ans="' + i + '" rows="4" maxlength="800" placeholder="在此輸入答案">' + esc(a.text) + '</textarea>';
+    return '<section class="qa"><div class="qa-head"><span class="qa-no">' + (i + 1) + '</span><p class="qa-text">' + esc(x.text) + '</p><span class="qa-marks">' + x.marks + ' 分</span></div>' + main + '</section>';
+  }).join("");
+  return head + '<div class="qlist">' + body + '</div>';
+}
+
+/* ── 登入畫面 ── */
+function vSetup(){
+  return '<main class="login">' + brandHTML() + '<div class="panel stack"><p class="label">尚未完成設定</p>' +
+    '<p class="fineprint">請老師按「設定步驟」第 6 步，在 config.js 填上 Apps Script 網址。</p></div></main>';
+}
+function vLogin(){
+  const r = S.route;
+  return '<main class="login">' + brandHTML() +
+    '<form id="loginForm" class="panel stack" novalidate>' +
+      (r.msg ? '<p class="flash">' + esc(r.msg) + '</p>' : '') +
+      '<div class="field"><label for="inCls">班別</label><input id="inCls" maxlength="8" autocapitalize="characters" autocomplete="off" spellcheck="false" placeholder="例如：5A" value="' + esc(r.cls || "") + '"></div>' +
+      '<div class="field" id="fNo"><label for="inNo">學號</label><input id="inNo" inputmode="numeric" maxlength="2" autocomplete="off" placeholder="例如：12" value="' + esc(r.no || "") + '"></div>' +
+      '<div class="field"><label for="inPw" id="lPw">密碼</label><input id="inPw" type="password" maxlength="64" autocomplete="current-password"></div>' +
+      '<p class="flash" data-flash role="alert" hidden></p>' +
+      '<button class="btn btn-primary btn-block" type="submit" id="loginBtn">登入</button>' +
+      '<div class="quick"><button type="button" class="linkbtn" data-act="toregister">第一次使用？按此登記帳戶</button>' +
+      '<p class="fineprint">忘記密碼請找老師重設。</p></div>' +
+    '</form>' +
+    (S.volatile ? '<p class="flash">這個瀏覽器未能保存資料，未上載的紀錄在關閉頁面後會消失。請改用 Safari 或 Chrome 開啟。</p>' : '') +
+    '</main>';
+}
+function syncLoginMode(){
+  const c = $("#inCls"); if (!c) return;
+  const teach = c.value.trim().toUpperCase() === TEACHER;
+  const f = $("#fNo"); if (f) f.classList.toggle("hide", teach);
+  const l = $("#lPw"); if (l) l.textContent = teach ? "老師密碼" : "密碼";
+}
+function vRegister(){
+  return bar("登記帳戶", {back:"tologin"}) +
+    '<main class="view"><form id="regForm" class="stack" autocomplete="off" novalidate>' +
+      '<p class="hint">老師開放登記期間才可以登記，每位同學只需登記一次。密碼由你自己設定，老師也看不到。</p>' +
+      '<div class="field"><label for="rCls">班別</label><input id="rCls" maxlength="8" autocapitalize="characters" spellcheck="false" placeholder="例如：5A"></div>' +
+      '<div class="field"><label for="rNo">學號</label><input id="rNo" inputmode="numeric" maxlength="2" placeholder="例如：12"></div>' +
+      '<div class="field"><label for="rName">姓名</label><input id="rName" maxlength="20" placeholder="例如：陳小明"></div>' +
+      '<div class="field"><label for="rPw">設定密碼</label><input id="rPw" type="password" maxlength="64" autocomplete="new-password"><p class="hint">最少 6 個字元。請不要使用其他帳戶的密碼。</p></div>' +
+      '<div class="field"><label for="rPw2">再輸入一次密碼</label><input id="rPw2" type="password" maxlength="64" autocomplete="new-password"></div>' +
+      '<p class="flash" data-flash role="alert" hidden></p>' +
+    '</form></main>' +
+    '<div class="dock"><button type="submit" form="regForm" class="btn btn-primary" id="regBtn">登記並登入</button></div>';
+}
+function vSetPw(){
+  const must = S.route.must;
+  return bar(must ? "設定新密碼" : "更改密碼", must ? {} : {back:"back"}) +
+    '<main class="view"><form id="pwForm" class="stack" novalidate>' +
+      '<p class="hint">' + (must ? "你正在使用老師提供的臨時密碼，請設定你自己的密碼。" : "請輸入新的密碼。") + '</p>' +
+      '<div class="field"><label for="nPw">新密碼</label><input id="nPw" type="password" maxlength="64" autocomplete="new-password"><p class="hint">最少 6 個字元。請不要使用其他帳戶的密碼。</p></div>' +
+      '<div class="field"><label for="nPw2">再輸入一次</label><input id="nPw2" type="password" maxlength="64" autocomplete="new-password"></div>' +
+      '<p class="flash" data-flash role="alert" hidden></p>' +
+    '</form></main>' +
+    '<div class="dock"><button type="submit" form="pwForm" class="btn btn-primary" id="pwBtn">儲存密碼</button></div>';
+}
+
+/* ── 學生畫面 ── */
+function vTrips(){
+  const list = sortTrips(S.trips), s = S.session;
+  const empty = !S.sync.pulled && S.sync.busy ? '<p class="loading">正在取回雲端紀錄……</p>'
+    : '<div class="empty"><p>還未有考察紀錄。</p><p>出發考察當日，按下方「新增考察」建立紀錄。</p></div>';
+  return bar("我的考察", {sync:true}) +
+    '<main class="view"><p class="hello">' + esc(s.name) + '　' + esc(s.cls) + ' 班 ' + s.no + ' 號</p>' +
+    (S.volatile ? '<p class="flash">這個瀏覽器未能保存資料，請盡快連接網絡，讓紀錄上載到雲端。</p>' : '') +
+    '<section class="triplist" aria-label="考察列表">' + (list.length ? list.map(t => tripCard(t, "opentrip", S.points)).join("") : empty) + '</section></main>' +
+    '<div class="dock"><button type="button" class="btn btn-primary" data-act="newtrip">' + ICON.plus + '新增考察</button></div>';
+}
+function vNewTrip(){
+  const places = TOPIC.get("1-23").c;
+  return bar("新增考察", {back:"totrips"}) +
+    '<main class="view"><form id="tripForm" class="stack" autocomplete="off">' +
+      '<div class="field"><label for="inPlace">考察地點</label><input id="inPlace" required maxlength="40" placeholder="例如：香港海洋公園">' +
+        '<p class="hint">課題 23「香港的旅遊資源」提及的地點，按一下即可填入：</p>' +
+        '<div class="suggest">' + places.map(p => '<button type="button" class="sugg" data-act="pickplace" data-v="' + esc(p) + '">' + esc(p) + '</button>').join("") + '</div></div>' +
+      '<div class="field"><label for="inDate">考察日期</label><input id="inDate" type="date" required value="' + todayStr() + '">' +
+        '<p class="hint">已按手機日期自動填上；補記舊考察時可以修改。</p></div>' +
+      '<div class="field"><label for="inPurpose">考察目的（選填）</label><textarea id="inPurpose" rows="3" maxlength="200" placeholder="例如：觀察主題公園如何管理人流"></textarea></div>' +
+    '</form></main>' +
+    '<div class="dock"><button type="submit" form="tripForm" class="btn btn-primary">建立並開始紀錄</button></div>';
+}
+function coverHTML(t){
+  if (t.cover) return '<div class="cover"><img data-photo="' + t.cover + '" data-size="l" alt="考察封面">' +
+    '<label class="cover-btn" for="inCover" tabindex="0" role="button">' + ICON.imgsm + '更換封面</label></div>';
+  return '<label class="cover-blank" for="inCover" tabindex="0" role="button">' + ICON.img +
+    '<span class="ce-title">上載封面圖片</span><span class="ce-sub">用自己的相片或圖畫，裝飾這次考察</span></label>';
+}
+function hasSubmitted(tid){ return S.responses.some(r => r.tripId === tid && r.status === "submitted"); }
+function qSectionHTML(t){
+  const cards = respCards(S.responses.filter(r => r.tripId === t.id), "openresp");
+  const entry = S.codeOpen
+    ? '<form id="codeForm" class="codebox" autocomplete="off" novalidate><label for="inCode">題目編號</label>' +
+      '<div class="addrow"><input id="inCode" inputmode="numeric" maxlength="4" placeholder="四位數字"><button class="btn btn-primary sm" type="submit" id="codeBtn">載入題目</button></div>' +
+      (S.flash ? '<p class="flash" role="alert">' + esc(S.flash) + '</p>' : '') + '</form>'
+    : '';
+  return '<section class="block" aria-labelledby="hQ"><div class="block-head"><h3 id="hQ">考察題目</h3>' +
+    (S.codeOpen ? '' : '<button type="button" class="linkbtn" data-act="opencode">' + ICON.plus + '輸入題目編號</button>') + '</div>' +
+    (cards ? '<div class="qcards">' + cards + '</div>' : (S.codeOpen ? '' : '<p class="hint">老師出題後會提供四位數字的題目編號，輸入後即可看到題目及作答。</p>')) +
+    entry + '</section>';
+}
+function vTrip(id){
+  const t = S.trips.find(x => x.id === id);
+  if (!t) return bar("考察紀錄", {back:"totrips"}) + '<main class="view"><div class="empty"><p>找不到這次考察，可能已被刪除。</p></div></main>';
+  const st = tripStats(id);
+  const route = st.pts.length ? '<ol class="route" aria-label="紀錄點">' + st.pts.map(p => stopHTML(p, false)).join("") + '</ol>'
+    : '<div class="empty"><p>還未有紀錄點。</p><p>到達第一個觀察位置後，按下方「新增紀錄點」。</p></div>';
+  const menu = S.menu ? '<div class="menu">' + (hasSubmitted(id) ? '<p class="hint">這次考察已提交答案，不能刪除。</p>'
+    : confirmBtn("deltrip:" + id, "刪除這次考察", "再按一次確認刪除（相片及未提交的答案一併刪除）")) + '</div>' : '';
+  return bar("考察紀錄", {back:"totrips", sync:true, more:true}) +
+    '<main class="view">' + menu + coverHTML(t) + '<input id="inCover" class="vh" type="file" accept="image/*" tabindex="-1">' +
+    tripHeadHTML(t, st) + qSectionHTML(t) + route + '</main>' +
+    '<div class="dock"><button type="button" class="btn btn-primary" data-act="newpoint" data-id="' + id + '">' + ICON.plus + '新增紀錄點 ' + pad(nextSeq(id)) + '</button></div>';
+}
+function selTopicHTML(tp){
+  const info = topicInfo(tp.k), b = info ? info.b : 0;
+  const label = info
+    ? '<span class="stp-num">' + BOOK_SHORT[b] + '・課題 ' + info.n + '</span><span class="stp-title">' + esc(info.t) + '</span>'
+    : '<span class="stp-num">自訂課題</span><span class="stp-title">' + esc(tp.t) + '</span>';
+  const conc = info ? '<div class="conchips" role="group" aria-label="' + esc(info.t) + '的概念">' + info.c.map(c => {
+    const on = S.draft.concepts.some(x => x.k === tp.k && x.c === c);
+    return '<button type="button" class="concept" data-act="togglec" data-k="' + tp.k + '" data-v="' + esc(c) + '" aria-pressed="' + on + '">' + esc(c) + '</button>';
+  }).join("") + '</div>' : '';
+  return '<div class="seltopic b' + b + '"><div class="stp-head"><span class="dot"></span><span class="stp-label">' + label + '</span>' +
+    '<button type="button" class="iconbtn sm" data-act="rmtopic" data-k="' + esc(tp.k) + '" aria-label="移除這個課題">' + ICON.x + '</button></div>' + conc + '</div>';
+}
+function vPoint(){
+  const d = S.draft, t = S.trips.find(x => x.id === d.tripId);
+  const slots = d.photos.map(id => '<div class="slot">' + photoTag(id, "s", true) + '<button type="button" class="slot-x" data-act="rmphoto" data-id="' + id + '" aria-label="移除這張相片">' + ICON.x + '</button></div>').join("") +
+    (d.photos.length < 3 ? '<label class="slot add" for="inPhoto" tabindex="0" role="button">' + ICON.cam + '<span>' + (d.photos.length ? "再加一張" : "拍攝或選擇相片") + '</span></label>' : '');
+  const topics = d.topics.length ? d.topics.map(selTopicHTML).join("")
+    : '<button type="button" class="pickcta" data-act="openpicker">' + ICON.search + '<span>選擇與這個觀察相關的課題</span></button>';
+  const customs = d.concepts.filter(c => c.k === "custom");
+  return bar("紀錄點 " + pad(d.seq), {back:"leavepoint"}) +
+    '<main class="view">' +
+    '<p class="pe-meta"><span class="wp sm" aria-hidden="true">' + pad(d.seq) + '</span><span>' + esc(t ? t.place : "") + '</span><span aria-hidden="true">·</span><span>' + fmtTime(d.time) + '</span></p>' +
+    '<section class="block" aria-labelledby="hPhotos"><div class="block-head"><h3 id="hPhotos">相片</h3><span class="count">' + d.photos.length + ' / 3</span></div>' +
+      '<div class="slots">' + slots + '</div><input id="inPhoto" class="vh" type="file" accept="image/*" multiple tabindex="-1">' +
+      '<p class="hint">每個紀錄點最多三張。相片會自動壓縮，有網絡時自動上載。</p></section>' +
+    '<section class="block" aria-labelledby="hTopics"><div class="block-head"><h3 id="hTopics">相關課題及概念</h3>' +
+      (d.topics.length ? '<button type="button" class="linkbtn" data-act="openpicker">' + ICON.plus + '選擇課題</button>' : '') + '</div>' +
+      '<div class="seltopics">' + topics + '</div>' +
+      (d.topics.some(tp => !tp.k.startsWith("c:")) ? '<p class="hint">按一下概念即可選取，可選多於一個。</p>' : '') + '</section>' +
+    '<section class="block" aria-labelledby="hMore"><div class="block-head"><h3 id="hMore">其他概念或重點</h3></div>' +
+      '<div class="addrow"><input id="inConcept" maxlength="30" placeholder="自行輸入，例如：輪候時間" enterkeyhint="done"><button type="button" class="btn btn-ghost sm" data-act="addconcept">加入</button></div>' +
+      (customs.length ? '<div class="chips">' + customs.map(c => '<span class="cchip b0 rm">' + esc(c.c) + '<button type="button" data-act="rmconcept" data-v="' + esc(c.c) + '" aria-label="移除「' + esc(c.c) + '」">' + ICON.x + '</button></span>').join("") + '</div>' : '') + '</section>' +
+    '<section class="block"><div class="block-head"><h3><label for="inNote">所見所聞</label></h3></div>' +
+      '<textarea id="inNote" rows="6" maxlength="1000" placeholder="記下你看到、聽到的情況，並說明與課題的關係。">' + esc(d.note) + '</textarea></section>' +
+    (S.flash ? '<p class="flash" role="alert">' + esc(S.flash) + '</p>' : '') +
+    (d.isNew ? '' : '<div class="danger-zone">' + confirmBtn("delpoint:" + d.id, "刪除這個紀錄點", "再按一次確認刪除") + '</div>') +
+    '</main>' +
+    '<div class="dock"><button type="button" class="btn btn-primary" data-act="savepoint">' + ICON.check + '儲存紀錄點</button></div>';
+}
+function vAnswer(rid){
+  const r = S.responses.find(x => x.id === rid);
+  if (!r || !r.qset) return bar("考察題目", {back:"back"}) + '<main class="view"><div class="empty"><p>找不到這組題目。</p></div></main>';
+  const done = r.status === "submitted", trip = S.trips.find(t => t.id === r.tripId);
+  return bar("考察題目", {back:"back", sync:true}) + '<main class="view">' + answerBody(r, {place: trip ? trip.place : ""}) +
+    (done ? '' : '<p class="hint">答案會自動暫存。提交後不能修改，系統會按老師提供的參考答案自動評分。</p>') +
+    (S.flash ? '<p class="flash" role="alert">' + esc(S.flash) + '</p>' : '') + '</main>' +
+    (done ? '' : '<div class="dock"><button type="button" class="btn btn-primary" id="submitBtn" data-act="confirm" data-key="submit:' + r.id + '">' + ICON.check + (S.confirm === "submit:" + r.id ? "再按一次確認提交" : "提交答案") + '</button></div>');
+}
+
+/* ── 老師後台 ── */
+function need(key, action, params){
+  let c = S.t[key];
+  if (!c) {
+    c = S.t[key] = {loading:true};
+    const box = S.t;
+    api(action, params).then(d => { box[key] = {data:d}; }, e => { box[key] = {err:e.message}; }).then(() => { if (isTeacher() && S.t === box) refresh(); });
+  }
+  return c;
+}
+function vAdmin(){
+  const tab = S.route.tab || "students";
+  const top = bar("YHP 後台", {refresh:true, logout:true});
+  const c = need("overview", "tOverview", {});
+  if (!c.data) return top + '<main class="view">' + stateHTML(c, "overview") + '</main>';
+  const d = c.data, regLocal = d.regUntil ? Date.now() + (d.regUntil - d.now) : 0, open = regLocal > Date.now();
+  const nTrips = d.students.reduce((s, x) => s + x.trips, 0), nSub = d.students.reduce((s, x) => s + x.submitted, 0);
+  const reg = '<section class="regbox' + (open ? ' open' : '') + '" aria-labelledby="hReg">' +
+    '<p class="reg-status" id="hReg">' + (open ? '學生登記開放中' : '學生登記已關閉') + '</p>' +
+    '<p class="reg-sub">' + (open ? '開放至 ' + fmtWhen(regLocal) + '。學生在登入畫面按「第一次使用？按此登記帳戶」。'
+      : '開放後學生才可以自行登記帳戶及設定密碼，建議在課堂上全班一起登記。') + '</p>' +
+    '<div class="btnrow">' + (open ? '<button type="button" class="btn btn-ghost sm" data-act="setreg" data-m="0">關閉登記</button>'
+      : '<button type="button" class="btn btn-primary sm" data-act="setreg" data-m="30">開放 30 分鐘</button><button type="button" class="btn btn-ghost sm" data-act="setreg" data-m="1440">開放 1 日</button>') + '</div></section>';
+  const head = '<section class="adminhead"><p class="eyebrow">老師後台</p><h2 class="th-place">YHP</h2>' +
+    '<p class="th-sum"><b>' + d.students.length + '</b> 位學生　<b>' + nTrips + '</b> 次考察　<b>' + d.qsets.length + '</b> 組題目　<b>' + nSub + '</b> 份已提交答案</p></section>';
+  const seg = '<div class="seg" role="tablist" aria-label="後台分頁">' + [["students","學生紀錄"],["qsets","考察題目"]].map(([k, l]) =>
+    '<button type="button" role="tab" data-act="admintab" data-tab="' + k + '" aria-selected="' + (tab === k) + '">' + l + '</button>').join("") + '</div>';
+  let body;
+  if (tab === "students") {
+    let last = null;
+    body = d.students.length ? '<div class="slist">' + d.students.map(s => {
+      let h = "";
+      if (s.cls !== last) { last = s.cls; h = '<p class="label grp">' + esc(s.cls) + ' 班　' + d.students.filter(x => x.cls === s.cls).length + ' 人</p>'; }
+      return h + '<button type="button" class="srow" data-act="openstudent" data-sid="' + s.sid + '"><span class="avatar" aria-hidden="true">' + esc(s.name.slice(0, 1)) + '</span>' +
+        '<span class="sr-main"><span class="sr-name">' + pad(s.no) + '　' + esc(s.name) + '</span>' +
+        '<span class="sr-sub">' + s.trips + ' 次考察 · ' + s.submitted + ' 份答案' + (s.lastLogin ? ' · ' + fmtStamp(s.lastLogin) + ' 登入' : '') + '</span></span>' +
+        (s.temp ? '<span class="pill-todo">臨時密碼</span>' : '') + '</button>';
+    }).join("") + '</div>' : '<div class="empty"><p>還未有學生登記。</p><p>按上方「開放 30 分鐘」，再請學生在登入畫面登記帳戶。</p></div>';
+  } else {
+    body = d.qsets.length ? '<div class="slist">' + d.qsets.map(q =>
+      '<button type="button" class="qsrow" data-act="openqset" data-id="' + q.id + '"><span class="qs-code">' + esc(q.code) + '</span>' +
+      '<span class="qs-title">' + esc(q.title) + '</span>' +
+      '<span class="qs-sub">' + q.questions + ' 題 · 共 ' + q.total + ' 分 · ' + q.submitted + ' 份已提交' + (q.drafts ? ' · ' + q.drafts + ' 份作答中' : '') + (q.avg !== null ? ' · 平均 ' + q.avg + ' 分' : '') + '</span></button>').join("") + '</div>'
+      : '<div class="empty"><p>還未有題目。按下方「新增題目」為考察出題。</p></div>';
+  }
+  return top + '<main class="view">' + head + reg + seg + body + '</main>' +
+    (tab === "qsets" ? '<div class="dock"><button type="button" class="btn btn-primary" data-act="newqset">' + ICON.plus + '新增題目</button></div>' : '');
+}
+function vAStudent(sid){
+  const c = need("stu:" + sid, "tStudent", {sid});
+  if (!c.data) return bar("學生紀錄", {back:"back"}) + '<main class="view">' + stateHTML(c, "stu:" + sid) + '</main>';
+  const d = c.data, s = d.student, trips = sortTrips(d.trips);
+  const temp = S.t["temp:" + sid] || s.temp;
+  return bar(s.name, {back:"back"}) + '<main class="view"><section class="adminhead"><p class="eyebrow">學生紀錄</p><h2 class="th-place">' + esc(s.name) + '</h2>' +
+    '<p class="th-sum">' + esc(s.cls) + ' 班 ' + s.no + ' 號　·　<b>' + trips.length + '</b> 次考察　<b>' + d.responses.filter(r => r.status === "submitted").length + '</b> 份已提交答案</p>' +
+    (s.lastLogin ? '<p class="hint">最近登入：' + fmtStamp(s.lastLogin) + '</p>' : '') + '</section>' +
+    '<section class="triplist" aria-label="考察列表">' + (trips.length ? trips.map(t => tripCard(t, "atrip", d.points, sid)).join("") : '<div class="empty"><p>這位學生還未有考察紀錄。</p></div>') + '</section>' +
+    '<div class="danger-zone">' +
+      (temp ? '<div class="bigcode"><p class="eyebrow">臨時密碼</p><p class="digits sm">' + esc(temp) + '</p><p class="hint">請把臨時密碼告訴' + esc(s.name) + '。學生用它登入後，需要立即設定自己的密碼。</p></div>' : '') +
+      '<p class="hint">學生忘記密碼時，按下面按鈕產生臨時密碼。原本的密碼會即時失效。</p>' +
+      confirmBtn("resetpw:" + sid, "重設密碼", "再按一次確認重設") + '</div></main>';
+}
+function vATrip(sid, id){
+  const c = need("stu:" + sid, "tStudent", {sid});
+  if (!c.data) return bar("考察紀錄", {back:"back"}) + '<main class="view">' + stateHTML(c, "stu:" + sid) + '</main>';
+  const d = c.data, t = d.trips.find(x => x.id === id);
+  if (!t) return bar("考察紀錄", {back:"back"}) + '<main class="view"><div class="empty"><p>找不到這次考察。</p></div></main>';
+  const st = tripStats(id, d.points), cards = respCards(d.responses.filter(r => r.tripId === id), "aopenresp");
+  return bar(d.student.name, {back:"back"}) + '<main class="view">' +
+    (t.cover ? '<div class="cover">' + photoTag(t.cover, "l", true) + '</div>' : '') + tripHeadHTML(t, st) +
+    '<section class="block" aria-labelledby="hAQ"><div class="block-head"><h3 id="hAQ">考察題目</h3></div>' +
+      (cards ? '<div class="qcards">' + cards + '</div>' : '<p class="hint">這位學生未有在這次考察輸入題目編號。</p>') + '</section>' +
+    (st.pts.length ? '<ol class="route" aria-label="紀錄點">' + st.pts.map(p => stopHTML(p, true)).join("") + '</ol>' : '<div class="empty"><p>未有紀錄點。</p></div>') +
+    '</main>';
+}
+function vAResp(rid){
+  const c = need("resp:" + rid, "tResponse", {rid});
+  if (!c.data) return bar("學生答案", {back:"back"}) + '<main class="view">' + stateHTML(c, "resp:" + rid) + '</main>';
+  const d = c.data, s = d.student;
+  return bar("學生答案", {back:"back"}) + '<main class="view">' +
+    answerBody(d.response, {teacher:true, who: s ? s.name + "（" + s.cls + " 班 " + s.no + " 號）" : "", place: d.place}) + '</main>';
+}
+function vQset(id){
+  const c = need("qs:" + id, "tQset", {id});
+  if (!c.data) return bar("題目", {back:"back"}) + '<main class="view">' + stateHTML(c, "qs:" + id) + '</main>';
+  const q = c.data.qset, rs = c.data.responses, sub = rs.filter(r => r.status === "submitted"), drafts = rs.length - sub.length;
+  const total = q.questions.reduce((s, x) => s + x.points.length, 0);
+  const avg = sub.length ? (sub.reduce((s, r) => s + r.score, 0) / sub.length).toFixed(1) : null;
+  return bar("題目 " + q.code, {back:"back"}) + '<main class="view">' +
+    '<div class="bigcode"><p class="eyebrow">題目編號</p><p class="digits" id="bigDigits">' + esc(q.code) + '</p>' +
+      '<p class="hint">' + (S.route.fresh ? "已產生新的題目編號，請告訴學生。" : "學生在考察紀錄內輸入這個編號即可作答。") + '</p>' +
+      '<button type="button" class="btn btn-ghost sm" data-act="copycode" data-v="' + esc(q.code) + '">' + ICON.copy + '複製編號</button></div>' +
+    '<section class="qhead"><h2 class="th-place">' + esc(q.title) + '</h2><p class="th-sum">' + q.questions.length + ' 題　共 ' + total + ' 分　·　' + (q.showAnswer ? "學生提交後可看到參考答案" : "學生提交後只看到得分") + '</p></section>' +
+    '<div class="qlist">' + q.questions.map((x, i) => '<section class="qa"><div class="qa-head"><span class="qa-no">' + (i + 1) + '</span><p class="qa-text">' + esc(x.text) + '</p><span class="qa-marks">' + x.points.length + ' 分</span></div>' +
+      '<ul class="pts">' + x.points.map(p => '<li class="key"><span class="pt-mark" aria-hidden="true">' + ICON.check + '</span><span>' + esc(p.text) + '</span></li>').join("") + '</ul></section>').join("") + '</div>' +
+    '<section class="block" aria-labelledby="hResp"><div class="block-head"><h3 id="hResp">學生答案</h3><span class="count">' + sub.length + ' 份已提交' + (drafts ? '・' + drafts + ' 份作答中' : '') + (avg ? '・平均 ' + avg + ' 分' : '') + '</span></div>' +
+      (rs.length ? '<div class="slist">' + rs.map(r =>
+        '<button type="button" class="srow" data-act="aopenresp" data-id="' + r.id + '"><span class="avatar" aria-hidden="true">' + esc(r.name.slice(0, 1)) + '</span>' +
+        '<span class="sr-main"><span class="sr-name">' + esc(r.name) + '</span><span class="sr-sub">' + esc(r.cls) + ' 班 ' + r.no + ' 號' + (r.status === "submitted" ? ' · ' + fmtStamp(r.submittedAt) + ' 提交' : '') + '</span></span>' +
+        (r.status === "submitted" ? scorePill(r.score, r.total) : '<span class="pill-todo">作答中</span>') + '</button>').join("") + '</div>'
+        : '<p class="hint">還未有學生輸入這個題目編號。</p>') + '</section>' +
+    '<div class="danger-zone">' + confirmBtn("delqs:" + id, "刪除這組題目", "再按一次確認刪除（學生將看不到這組題目及答案）") + '</div>' +
+    '</main>';
+}
+function vQEdit(){
+  const d = S.qdraft;
+  return bar("新增題目", {back:"back"}) + '<main class="view"><form id="qForm" class="stack" autocomplete="off" novalidate>' +
+    '<div class="field"><label for="qTitle">考察主題</label><input id="qTitle" maxlength="40" placeholder="例如：香港海洋公園考察" value="' + esc(d.title) + '"></div>' +
+    d.qs.map((q, i) => '<fieldset class="qedit"><legend>第 ' + (i + 1) + ' 題</legend>' +
+      '<div class="field"><label for="qt' + i + '">題目</label><textarea id="qt' + i + '" rows="3" maxlength="400" placeholder="例如：指出海洋公園出現了哪一類承載力問題，並以一項例證加以說明。">' + esc(q.text) + '</textarea></div>' +
+      '<div class="field"><label for="qp' + i + '">參考答案（得分點）</label><textarea id="qp' + i + '" rows="3" maxlength="1500" placeholder="心理承載力／空間承載力&#10;輪候／排隊／擠迫">' + esc(q.pts) + '</textarea>' +
+        '<p class="hint">每行一個得分點，每點 1 分。同一得分點可接受的不同寫法，以「／」分隔。系統會檢查學生答案有沒有包含這些字眼。</p></div>' +
+      (d.qs.length > 1 ? '<button type="button" class="linkbtn danger" data-act="rmq" data-i="' + i + '">' + ICON.x + '刪除這一題</button>' : '') + '</fieldset>').join("") +
+    (d.qs.length < 10 ? '<button type="button" class="btn btn-ghost btn-block" data-act="addq">' + ICON.plus + '加一題</button>' : '') +
+    '<label class="check" for="qShow"><input id="qShow" type="checkbox"' + (d.show ? ' checked' : '') + '><span>學生提交後可看到參考答案</span></label>' +
+    (S.flash ? '<p class="flash" role="alert">' + esc(S.flash) + '</p>' : '') +
+    '</form></main>' +
+    '<div class="dock"><button type="submit" form="qForm" class="btn btn-primary" id="qBtn">' + ICON.check + '儲存並產生題目編號</button></div>';
+}
+
+/* ── 底部抽屜：課題選單、帳戶 ── */
+function openSheet(kind){ S.sheet = kind; document.documentElement.classList.add("locked"); renderSheet(); }
+function syncText(){
+  const s = S.sync;
+  if (s.busy && s.pending) return "正在上載紀錄……";
+  if (s.pending) return "有 " + s.pending + " 項紀錄等待上載。" + (s.offline ? "現在未能連接伺服器，恢復網絡後會自動上載。" : (s.error ? "上次上載失敗：" + s.error : ""));
+  return "所有紀錄已上載到雲端" + (s.last ? "（" + fmtWhen(s.last) + "）" : "") + "。" + (s.note ? "另外，有一項紀錄未能上載：" + s.note : "");
+}
+function renderSheet(){
+  const root = $("#sheet");
+  if (!S.sheet) { root.innerHTML = ""; return; }
+  if (S.sheet === "picker") {
+    const q = $("#pkSearch") ? $("#pkSearch").value : "";
+    root.innerHTML = '<div class="scrim" data-act="closesheet"></div>' +
+      '<div class="sheet" role="dialog" aria-modal="true" aria-labelledby="pkTitle">' +
+      '<div class="sheet-head"><h3 id="pkTitle">選擇相關課題</h3><button type="button" id="pkDone" class="btn btn-primary sm" data-act="closesheet">完成</button></div>' +
+      '<div class="searchbox">' + ICON.search + '<input id="pkSearch" type="search" placeholder="搜尋課題或概念，例如：承載力" value="' + esc(q) + '" enterkeyhint="search" aria-label="搜尋課題或概念"></div>' +
+      '<div class="booktabs" role="group" aria-label="按課本分冊篩選">' + [0,1,2,3,4].map(b => '<button type="button" class="btab" data-act="pkbook" data-b="' + b + '" aria-pressed="' + (S.pkBook === b) + '">' + (b ? "第" + b + "冊 " + BOOK_SHORT[b] : "全部") + '</button>').join("") + '</div>' +
+      '<div class="pk-list" id="pkList"></div></div>';
+    renderPkList(); updatePkCount();
+  } else if (S.sheet === "account" && S.session) {
+    const s = S.session, n = S.sync.pending;
+    root.innerHTML = '<div class="scrim" data-act="closesheet"></div>' +
+      '<div class="sheet" role="dialog" aria-modal="true" aria-labelledby="acTitle">' +
+      '<div class="sheet-head"><h3 id="acTitle">帳戶</h3><button type="button" class="iconbtn" data-act="closesheet" aria-label="關閉">' + ICON.x + '</button></div>' +
+      '<div class="sheet-body"><dl class="acct"><dt>姓名</dt><dd>' + esc(s.name) + '</dd><dt>班別</dt><dd>' + esc(s.cls) + ' 班 ' + s.no + ' 號</dd></dl>' +
+        '<p class="syncline" role="status">' + esc(syncText()) + '</p>' +
+        '<div class="btnrow"><button type="button" class="btn btn-ghost sm" data-act="syncnow"' + (S.sync.busy ? ' disabled' : '') + '>' + ICON.refresh + '立即同步</button>' +
+        '<button type="button" class="btn btn-ghost sm" data-act="tochangepw">更改密碼</button></div>' +
+        confirmBtn("logout", "登出", n ? "尚有 " + n + " 項未上載，登出會遺失。再按一次確認登出" : "再按一次確認登出") +
+        '<p class="fineprint">登出後，這部手機上的紀錄會被清除；再次登入即可從雲端取回已上載的紀錄。</p>' +
+      '</div></div>';
+  }
+}
+function renderPkList(){
+  const list = $("#pkList"); if (!list || !S.draft) return;
+  const raw = ($("#pkSearch").value || "").trim(), q = raw.toLowerCase();
+  const sel = new Set(S.draft.topics.map(t => t.k));
+  let html = "";
+  for (const b of DATA.books) {
+    if (S.pkBook && S.pkBook !== b.n) continue;
+    const rows = DATA.topics.filter(t => t.b === b.n && (!q || t.t.toLowerCase().includes(q) || t.c.some(c => c.toLowerCase().includes(q))));
+    if (!rows.length) continue;
+    html += '<div class="pk-group"><div class="pk-bookhead b' + b.n + '"><span class="dot"></span>第' + b.n + '冊　' + esc(b.t) + '</div>' + rows.map(t => {
+      const k = t.b + "-" + t.n;
+      const hit = q && !t.t.toLowerCase().includes(q) ? t.c.filter(c => c.toLowerCase().includes(q)) : null;
+      const sub = hit && hit.length ? "包含概念：" + hit.join("、") : t.c.slice(0, 4).join("、") + (t.c.length > 4 ? "……" : "");
+      return '<button type="button" class="pk-row b' + t.b + '" data-act="picktopic" data-k="' + k + '" aria-pressed="' + sel.has(k) + '">' +
+        '<span class="pk-num">' + t.n + '</span><span class="pk-main"><span class="pk-title">' + esc(t.t) + '</span><span class="pk-sub">' + esc(sub) + '</span></span>' +
+        '<span class="pk-check" aria-hidden="true">' + ICON.check + '</span></button>';
+    }).join("") + '</div>';
+  }
+  if (raw && !DATA.topics.some(t => t.t === raw)) {
+    html += '<button type="button" class="pk-row custom" data-act="customtopic" data-v="' + esc(raw) + '"><span class="pk-num">＋</span><span class="pk-main"><span class="pk-title">以「' + esc(raw) + '」作為自訂課題</span><span class="pk-sub">課程重點以外的觀察，也可以記錄</span></span></button>';
+  }
+  list.innerHTML = html || '<p class="pk-none">找不到相關課題。</p>';
+}
+function updatePkCount(){ const b = $("#pkDone"); if (b && S.draft) b.textContent = S.draft.topics.length ? "完成（已選 " + S.draft.topics.length + " 個）" : "完成"; }
+function renderViewer(){
+  const root = $("#viewer");
+  if (!S.viewer) { root.innerHTML = ""; return; }
+  root.innerHTML = '<div class="viewer" role="dialog" aria-modal="true" aria-label="相片" data-act="closeviewer">' + photoTag(S.viewer, "l", false) +
+    '<button type="button" class="iconbtn" data-act="closeviewer" aria-label="關閉">' + ICON.x + '</button></div>';
+  hydrate(root);
+}
+
+/* ── 同步：本機先存，有網絡就逐項上載 ── */
+let opSeq = 0, flushing = null, syncing = null;
+async function enqueue(op, ref, delay = 800){
+  const ops = await getAll("outbox");
+  if (!ops.some(o => o.op === op && o.ref === ref)) {
+    await put("outbox", {id: Date.now() * 1000 + (opSeq++ % 1000), op, ref});
+    S.sync.pending = ops.length + 1; paintSync();
+  }
+  clearTimeout(S.sync.timer); S.sync.timer = setTimeout(() => { flush(); }, delay);
+}
+function flush(){ if (!flushing) flushing = doFlush().finally(() => { flushing = null; }); return flushing; }
+async function doFlush(){
+  if (!isStudent() || S.authLost) return;
+  S.sync.busy = true; paintSync();
+  try {
+    for (;;) {
+      if (!isStudent() || S.authLost) break;
+      const ops = (await getAll("outbox")).sort((a, b) => a.id - b.id);
+      S.sync.pending = ops.length;
+      if (!ops.length) { S.sync.error = null; S.sync.offline = false; S.sync.last = Date.now(); break; }
+      paintSync();
+      const op = ops[0];
+      try { await runOp(op); S.sync.offline = false; }
+      catch (e) {
+        if (e.net || e.code === "busy" || e.code === "error" || e.code === "auth") { S.sync.offline = !!e.net; S.sync.error = e.net ? null : e.message; break; }
+        S.sync.note = e.message;   // 例如考察已在其他手機刪除：這一項不再重試
+      }
+      await del("outbox", op.id);
+    }
+  } finally {
+    S.sync.busy = false;
+    S.sync.pending = (await getAll("outbox")).length;
+    paintSync();
+  }
+}
+async function runOp(op){
+  if (op.op === "trip") { const t = await getOne("trips", op.ref); if (t) await api("saveTrip", {trip: t}); }
+  else if (op.op === "tripdel") await api("deleteTrip", {id: op.ref});
+  else if (op.op === "point") { const p = await getOne("points", op.ref); if (p) await api("savePoint", {point: p}); }
+  else if (op.op === "pointdel") await api("deletePoint", {id: op.ref});
+  else if (op.op === "photo") {
+    const ph = await getOne("photos", op.ref);
+    if (ph && !ph.remote && ph.full) {
+      await api("uploadPhoto", {id: ph.id, full: await blobToB64(ph.full), thumb: ph.thumb ? await blobToB64(ph.thumb) : "", w: ph.w, h: ph.h});
+      ph.remote = true; await put("photos", ph);
+    }
+  }
+  else if (op.op === "answers") {
+    const r = await getOne("responses", op.ref);
+    if (r && r.status !== "submitted") await api("saveAnswers", {rid: r.id, answers: r.answers.map(a => a.text || "")});
+  }
+}
+async function pull(){
+  const d = await api("pull");
+  if (!isStudent()) return;
+  const pend = new Set((await getAll("outbox")).map(o => o.ref));
+  Object.assign(S.session, {name: d.me.name, cls: d.me.cls, no: d.me.no}); await put("meta", S.session);
+  const sTrips = new Set(d.trips.map(t => t.id)), sPoints = new Set(d.points.map(p => p.id)), sResp = new Set(d.responses.map(r => r.id));
+  for (const t of await getAll("trips")) if (!sTrips.has(t.id) && !pend.has(t.id)) await del("trips", t.id);
+  for (const t of d.trips) if (!pend.has(t.id)) await put("trips", t);
+  for (const p of await getAll("points")) if (!sPoints.has(p.id) && !pend.has(p.id)) await del("points", p.id);
+  for (const p of d.points) if (!pend.has(p.id)) await put("points", p);
+  const local = new Map((await getAll("photos")).map(p => [p.id, p]));
+  for (const m of d.photos) {
+    const p = local.get(m.id);
+    if (!p) await put("photos", {id: m.id, w: m.w, h: m.h, remote: true, thumb: null, full: null});
+    else if (!p.remote) { p.remote = true; await put("photos", p); }
+  }
+  for (const r of await getAll("responses")) if (!sResp.has(r.id) && !pend.has(r.id)) await del("responses", r.id);
+  for (const r of d.responses) {
+    if (pend.has(r.id) && r.status !== "submitted") { const loc = await getOne("responses", r.id); if (loc) r.answers = loc.answers; }
+    await put("responses", r);
+  }
+  await gcPhotos();
+  await loadLocal();
+}
+async function gcPhotos(){
+  const keep = new Set();
+  (await getAll("trips")).forEach(t => { if (t.cover) keep.add(t.cover); });
+  (await getAll("points")).forEach(p => p.photos.forEach(id => keep.add(id)));
+  (await getAll("outbox")).forEach(o => { if (o.op === "photo") keep.add(o.ref); });
+  if (S.draft) S.draft.photos.forEach(id => keep.add(id));
+  for (const p of await getAll("photos")) if (!keep.has(p.id)) await dropPhoto(p.id);
+}
+function syncNow(){
+  if (!syncing) syncing = (async () => {
+    try {
+      await flush();
+      if (!isStudent() || S.authLost) return;
+      S.sync.busy = true; paintSync();
+      await pull();
+      S.sync.pulled = true; S.sync.lastPull = Date.now(); S.sync.offline = false;
+    } catch (e) { if (e.net) S.sync.offline = true; else S.sync.error = e.message; }
+    finally {
+      S.sync.busy = false; syncing = null; paintSync();
+      if (isStudent() && (S.route.name === "trips" || (S.route.name === "trip" && !S.codeOpen && !S.menu))) refresh();
+    }
+  })();
+  return syncing;
+}
+async function loadLocal(){
+  S.trips = await getAll("trips"); S.points = await getAll("points"); S.responses = await getAll("responses");
+  S.sync.pending = (await getAll("outbox")).length;
+}
+async function wipeLocal(){
+  for (const s of ["trips","points","photos","responses","outbox"]) await clearStore(s);
+  resetPhotoCache();
+  S.trips = []; S.points = []; S.responses = []; S.draft = null;
+  Object.assign(S.sync, {pending: 0, error: null, note: null, offline: false, last: 0, lastPull: 0, pulled: false});
+}
+async function startSession(d){
+  const me = d.me;
+  resetPhotoCache();
+  if (me.role === "student") {
+    const owner = await getOne("meta", "owner");
+    if (owner && owner.sid !== me.sid) await wipeLocal();
+    await put("meta", {id: "owner", sid: me.sid, name: me.name});
+  }
+  S.session = {id: "session", token: d.token, role: me.role, sid: me.sid || "", cls: me.cls || "", no: me.no || "", name: me.name || "", mustChange: !!d.mustChange};
+  S.authLost = false; S.t = {};
+  await put("meta", S.session);
+  if (me.role === "teacher") return go("admin", {tab: "students"});
+  await loadLocal();
+  if (d.mustChange) go("setpw", {must: true}); else go("trips");
+  syncNow();
+}
+async function authLost(){
+  if (!S.session || S.authLost) return;
+  S.authLost = true;
+  const teacher = isTeacher(), name = S.session.name;
+  S.session = null; S.t = {}; resetPhotoCache(); await del("meta", "session"); S.sheet = null; renderSheet(); document.documentElement.classList.remove("locked");
+  const n = teacher ? 0 : (await getAll("outbox")).length;
+  go("login", {msg: "登入已失效，請重新登入。" + (n ? "這部手機仍有 " + n + " 項屬於" + name + "的紀錄未上載，請以同一帳戶登入，紀錄便會自動上載。" : "")});
+}
+
+/* ── 動作 ── */
+function isDirty(d){ return JSON.stringify([d.photos, d.topics, d.concepts, (d.note || "").trim()]) !== d._orig; }
+async function purgeLocalTrip(tid){
+  const t = S.trips.find(x => x.id === tid);
+  for (const p of tripPoints(tid)) { for (const id of p.photos) await dropPhoto(id); await del("points", p.id); }
+  for (const r of S.responses.filter(x => x.tripId === tid)) await del("responses", r.id);
+  if (t && t.cover) await dropPhoto(t.cover);
+  await del("trips", tid);
+  S.points = S.points.filter(p => p.tripId !== tid); S.responses = S.responses.filter(r => r.tripId !== tid); S.trips = S.trips.filter(x => x.id !== tid);
+}
+function readQDraft(){
+  const d = S.qdraft; if (!d) return;
+  const ti = $("#qTitle"); if (ti) d.title = ti.value;
+  d.qs.forEach((q, i) => { const a = $("#qt" + i), b = $("#qp" + i); if (a) q.text = a.value; if (b) q.pts = b.value; });
+  const sh = $("#qShow"); if (sh) d.show = sh.checked;
+}
+const countPoints = txt => String(txt || "").split(/\n+/).map(l => l.trim()).filter(Boolean).length;
+
+const A = {
+  /* 帳戶 */
+  async login(){
+    const cls = $("#inCls").value.trim(), no = $("#inNo").value.trim(), pw = $("#inPw").value;
+    const teacher = cls.toUpperCase() === TEACHER;
+    if (!cls) return flashIn("請輸入班別。");
+    if (!teacher && !/^\d{1,2}$/.test(no)) return flashIn("請輸入學號。");
+    if (!pw) return flashIn(teacher ? "請輸入老師密碼。" : "請輸入密碼。");
+    flashIn(""); setBusy("loginBtn", true, "登入中……");
+    try { await startSession(await api("login", {cls, no, password: pw})); }
+    catch (e) { setBusy("loginBtn", false, "登入"); flashIn(e.message); }
+  },
+  toregister(){ go("register"); },
+  tologin(){ go("login"); },
+  async register(){
+    const cls = $("#rCls").value.trim(), no = $("#rNo").value.trim(), name = $("#rName").value.trim(), pw = $("#rPw").value, pw2 = $("#rPw2").value;
+    if (!cls || cls.toUpperCase() === TEACHER) return flashIn("請輸入正確的班別，例如 5A。");
+    if (!/^\d{1,2}$/.test(no)) return flashIn("請輸入學號。");
+    if (!name) return flashIn("請輸入姓名。");
+    if (pw.length < 6) return flashIn("密碼最少要有 6 個字元。");
+    if (pw !== pw2) return flashIn("兩次輸入的密碼不一樣，請再輸入一次。");
+    flashIn(""); setBusy("regBtn", true, "登記中……");
+    try { await startSession(await api("register", {cls, no, name, password: pw})); toast("登記成功，歡迎使用考察手記"); }
+    catch (e) { setBusy("regBtn", false, "登記並登入"); flashIn(e.message); }
+  },
+  async savepw(){
+    const a = $("#nPw").value, b = $("#nPw2").value;
+    if (a.length < 6) return flashIn("密碼最少要有 6 個字元。");
+    if (a !== b) return flashIn("兩次輸入的密碼不一樣，請再輸入一次。");
+    flashIn(""); setBusy("pwBtn", true, "儲存中……");
+    try {
+      await api("changePassword", {password: a});
+      S.session.mustChange = false; await put("meta", S.session);
+      const back = S.route.back; back ? go(back.name, back) : go("trips"); toast("已更新密碼");
+    } catch (e) { setBusy("pwBtn", false, "儲存密碼"); flashIn(e.message); }
+  },
+  account(){ openSheet("account"); },
+  syncnow(){ syncNow(); },
+  tochangepw(){ const back = Object.assign({}, S.route); A.closesheet(); go("setpw", {must: false, back}); },
+  async tlogout(){ api("logout").catch(() => {}); S.session = null; S.t = {}; resetPhotoCache(); await del("meta", "session"); go("login"); },
+  info(){ openSheet("account"); },
+  back(){ const b = S.route.back; if (b) go(b.name, b); else go(isTeacher() ? "admin" : "trips"); },
+
+  /* 學生：考察 */
+  newtrip(){ go("newtrip"); },
+  totrips(){ go("trips"); },
+  opentrip(el){ go("trip", {id: el.dataset.id}); },
+  pickplace(el){ const i = $("#inPlace"); if (i) i.value = el.dataset.v; },
+  async createTrip(){
+    const place = $("#inPlace").value.trim(); if (!place) return;
+    const now = new Date().toISOString();
+    const t = {id: uid(), place, date: $("#inDate").value || todayStr(), purpose: $("#inPurpose").value.trim(), cover: null, createdAt: now, updatedAt: now};
+    await put("trips", t); S.trips.push(t); go("trip", {id: t.id}); await enqueue("trip", t.id);
+  },
+  menu(){ S.menu = !S.menu; S.confirm = null; refresh(); },
+  async addcover(input){
+    const f = (input.files || [])[0]; input.value = ""; if (!f) return;
+    const t = S.trips.find(x => x.id === S.route.id); if (!t) return;
+    try {
+      const ph = await makePhoto(f); await put("photos", ph);
+      const old = t.cover; t.cover = ph.id; t.updatedAt = new Date().toISOString(); await put("trips", t);
+      if (old) await dropPhoto(old);
+      refresh(); toast("已更新封面");
+      await enqueue("photo", ph.id); await enqueue("trip", t.id);
+    } catch (e) { toast("未能讀取這張圖片，請再選擇一次。"); }
+  },
+  opencode(){ S.codeOpen = true; S.flash = null; refresh(); const i = $("#inCode"); if (i) i.focus(); },
+  async loadcode(){
+    const code = ($("#inCode").value || "").trim(), tid = S.route.id;
+    const fail = msg => { S.flash = msg; refresh(); const i = $("#inCode"); if (i) i.value = code; };
+    if (!/^\d{4}$/.test(code)) return fail("題目編號是四位數字，請再輸入一次。");
+    setBusy("codeBtn", true, "載入中……");
+    try {
+      await flush();
+      if ((await getAll("outbox")).some(o => o.op === "trip" && o.ref === tid)) throw Object.assign(new Error(""), {net: true});
+      const d = await api("openCode", {code, tripId: tid});
+      await put("responses", d.response);
+      S.responses = S.responses.filter(r => r.id !== d.response.id).concat(d.response);
+      go("answer", {rid: d.response.id, back: {name: "trip", id: tid}});
+    } catch (e) { fail(e.net ? "需要網絡才可以載入題目，請連接網絡後再試。" : e.message); }
+  },
+  openresp(el){ const r = S.responses.find(x => x.id === el.dataset.id); if (r) go("answer", {rid: r.id, back: {name: "trip", id: r.tripId}}); },
+
+  /* 學生：紀錄點 */
+  newpoint(el){
+    const tid = el.dataset.id;
+    S.draft = {id: uid(), tripId: tid, seq: nextSeq(tid), time: new Date().toISOString(), photos: [], topics: [], concepts: [], note: "", isNew: true, _added: [], _removed: []};
+    S.draft._orig = JSON.stringify([[], [], [], ""]); go("point");
+  },
+  openpoint(el){
+    const p = S.points.find(x => x.id === el.dataset.id); if (!p) return;
+    const d = JSON.parse(JSON.stringify(p)); d.isNew = false; d._added = []; d._removed = [];
+    d._orig = JSON.stringify([d.photos, d.topics, d.concepts, (d.note || "").trim()]); S.draft = d; go("point");
+  },
+  async leavepoint(){
+    const d = S.draft;
+    if (d && isDirty(d) && S.confirm !== "leave") { S.confirm = "leave"; S.flash = "這個紀錄點尚未儲存。再按一次左上角的返回，即會放棄剛才的修改。"; return refresh(); }
+    if (d) { for (const id of d._added) await dropPhoto(id); }
+    const tid = d ? d.tripId : null; S.draft = null; tid ? go("trip", {id: tid}) : go("trips");
+  },
+  async addphoto(input){
+    const files = [...(input.files || [])]; input.value = "";
+    const d = S.draft; if (!d || !files.length) return; S.flash = null;
+    for (const f of files) {
+      if (d.photos.length >= 3) { S.flash = "每個紀錄點最多三張相片，其餘相片未有加入。"; break; }
+      try { const ph = await makePhoto(f); await put("photos", ph); d.photos.push(ph.id); d._added.push(ph.id); }
+      catch (e) { S.flash = "未能讀取其中一張相片，請再選擇一次。"; }
+    }
+    refresh();
+  },
+  async rmphoto(el){
+    const d = S.draft, id = el.dataset.id; d.photos = d.photos.filter(x => x !== id);
+    if (d._added.includes(id)) { d._added = d._added.filter(x => x !== id); await dropPhoto(id); } else d._removed.push(id);
+    refresh();
+  },
+  viewphoto(el){ S.viewer = el.dataset.id; renderViewer(); },
+  closeviewer(){ S.viewer = null; renderViewer(); },
+  openpicker(){ openSheet("picker"); },
+  closesheet(){ S.sheet = null; $("#sheet").innerHTML = ""; document.documentElement.classList.remove("locked"); S.confirm = null; if (S.route.name === "point") refresh(); },
+  pkbook(el){ S.pkBook = +el.dataset.b; renderSheet(); },
+  picktopic(el){
+    const d = S.draft, k = el.dataset.k, i = d.topics.findIndex(t => t.k === k);
+    if (i >= 0) { d.topics.splice(i, 1); d.concepts = d.concepts.filter(c => c.k !== k); el.setAttribute("aria-pressed", "false"); }
+    else { const info = TOPIC.get(k); d.topics.push({k, t: info.t, b: info.b}); el.setAttribute("aria-pressed", "true"); }
+    updatePkCount();
+  },
+  customtopic(el){
+    const v = (el.dataset.v || "").trim(); if (!v) return; const k = "c:" + v;
+    if (!S.draft.topics.some(t => t.k === k)) S.draft.topics.push({k, t: v, b: 0});
+    $("#pkSearch").value = ""; renderPkList(); updatePkCount();
+  },
+  rmtopic(el){ const d = S.draft, k = el.dataset.k; d.topics = d.topics.filter(t => t.k !== k); d.concepts = d.concepts.filter(c => c.k !== k); refresh(); },
+  togglec(el){
+    const d = S.draft, k = el.dataset.k, v = el.dataset.v, i = d.concepts.findIndex(c => c.k === k && c.c === v);
+    if (i >= 0) { d.concepts.splice(i, 1); el.setAttribute("aria-pressed", "false"); } else { d.concepts.push({k, c: v}); el.setAttribute("aria-pressed", "true"); }
+  },
+  addconcept(){
+    const i = $("#inConcept"), v = (i && i.value || "").trim(); if (!v) return;
+    if (!S.draft.concepts.some(c => c.k === "custom" && c.c === v)) S.draft.concepts.push({k: "custom", c: v});
+    refresh(); const again = $("#inConcept"); if (again) again.focus();
+  },
+  rmconcept(el){ const v = el.dataset.v; S.draft.concepts = S.draft.concepts.filter(c => !(c.k === "custom" && c.c === v)); refresh(); },
+  async savepoint(){
+    const d = S.draft; d.note = ($("#inNote") ? $("#inNote").value : d.note) || "";
+    if (!d.photos.length && !d.topics.length && !d.concepts.length && !d.note.trim()) { S.flash = "這個紀錄點還未有任何內容：請加入相片、選擇課題或輸入文字。"; return refresh(); }
+    const now = new Date().toISOString();
+    const pt = {id: d.id, tripId: d.tripId, seq: d.seq, time: d.time, photos: d.photos, topics: d.topics, concepts: d.concepts, note: d.note.trim(), createdAt: d.createdAt || now, updatedAt: now};
+    await put("points", pt);
+    for (const id of d._removed) await dropPhoto(id);
+    const i = S.points.findIndex(p => p.id === pt.id); if (i >= 0) S.points[i] = pt; else S.points.push(pt);
+    S.draft = null; go("trip", {id: pt.tripId}); toast("已儲存紀錄點 " + pad(pt.seq));
+    for (const id of pt.photos) { const ph = await getOne("photos", id); if (ph && !ph.remote) await enqueue("photo", id); }
+    await enqueue("point", pt.id);
+  },
+
+  /* 老師 */
+  trefresh(){ S.t = {}; refresh(); },
+  tretry(el){ delete S.t[el.dataset.key]; refresh(); },
+  async setreg(el){
+    const m = +el.dataset.m; el.disabled = true;
+    try {
+      const d = await api("tSetReg", {minutes: m});
+      const o = S.t.overview; if (o && o.data) Object.assign(o.data, {regUntil: d.regUntil, now: d.now});
+      refresh(); toast(m ? "已開放登記" : "已關閉登記");
+    } catch (e) { el.disabled = false; toast(e.message); }
+  },
+  admintab(el){ go("admin", {tab: el.dataset.tab}); },
+  openstudent(el){ go("astudent", {sid: el.dataset.sid, back: {name: "admin", tab: "students"}}); },
+  atrip(el){ go("atrip", {sid: el.dataset.sid, id: el.dataset.id, back: Object.assign({}, S.route)}); },
+  aopenresp(el){ const b = Object.assign({}, S.route); delete b.fresh; go("aresp", {rid: el.dataset.id, back: b}); },
+  openqset(el){ go("qset", {id: el.dataset.id, back: {name: "admin", tab: "qsets"}}); },
+  newqset(){ S.qdraft = {title: "", qs: [{text: "", pts: ""}], show: true}; go("qedit", {back: {name: "admin", tab: "qsets"}}); },
+  addq(){ readQDraft(); S.qdraft.qs.push({text: "", pts: ""}); refresh(); },
+  rmq(el){ readQDraft(); S.qdraft.qs.splice(+el.dataset.i, 1); refresh(); },
+  async saveqset(){
+    readQDraft(); const d = S.qdraft;
+    const qs = d.qs.map(q => ({text: q.text.trim(), points: q.pts})).filter(q => q.text || countPoints(q.points));
+    const fail = msg => { S.flash = msg; refresh(); };
+    if (!d.title.trim()) return fail("請輸入考察主題。");
+    if (!qs.length) return fail("請最少出一題。");
+    const bad = qs.findIndex(q => !q.text || !countPoints(q.points));
+    if (bad >= 0) return fail("第 " + (bad + 1) + " 題" + (qs[bad].text ? "未有參考答案（得分點）" : "未有題目") + "。");
+    setBusy("qBtn", true, "儲存中……");
+    try {
+      const res = await api("tCreateQset", {title: d.title.trim(), showAnswer: !!d.show, questions: qs});
+      S.qdraft = null; S.t = {}; S.t["qs:" + res.qset.id] = {data: {qset: res.qset, responses: []}};
+      go("qset", {id: res.qset.id, fresh: true, back: {name: "admin", tab: "qsets"}}); toast("已產生題目編號 " + res.qset.code);
+    } catch (e) { setBusy("qBtn", false); fail(e.message); }
+  },
+  copycode(el){
+    const v = el.dataset.v;
+    const fallback = () => { const n = $("#bigDigits"); if (n) { const r = document.createRange(); r.selectNodeContents(n); const s = window.getSelection(); s.removeAllRanges(); s.addRange(r); } toast("已選取編號，請長按複製"); };
+    try { navigator.clipboard.writeText(v).then(() => toast("已複製題目編號 " + v), fallback); } catch (e) { fallback(); }
+  },
+
+  /* 需要按兩次確認的動作 */
+  async confirm(el){
+    const key = el.dataset.key;
+    if (S.confirm !== key) { S.confirm = key; return refresh(); }
+    S.confirm = null;
+    const cut = key.indexOf(":"), kind = cut < 0 ? key : key.slice(0, cut), id = cut < 0 ? "" : key.slice(cut + 1);
+    if (kind === "deltrip") {
+      if (hasSubmitted(id)) return toast("這次考察已提交答案，不能刪除。");
+      await purgeLocalTrip(id); go("trips"); toast("已刪除這次考察"); await enqueue("tripdel", id);
+    } else if (kind === "delpoint") {
+      const d = S.draft, p = S.points.find(x => x.id === id);
+      const ids = new Set([...(p ? p.photos : []), ...(d ? d.photos : []), ...(d ? d._removed : [])]);
+      for (const pid of ids) await dropPhoto(pid);
+      await del("points", id); S.points = S.points.filter(x => x.id !== id);
+      const tid = d ? d.tripId : (p ? p.tripId : null); S.draft = null; tid ? go("trip", {id: tid}) : go("trips"); toast("已刪除紀錄點");
+      await enqueue("pointdel", id);
+    } else if (kind === "submit") {
+      const r = S.responses.find(x => x.id === id); if (!r) return;
+      clearTimeout(ansT);
+      document.querySelectorAll("textarea[data-ans]").forEach(t => { r.answers[+t.dataset.ans].text = t.value; });
+      await put("responses", r);
+      setBusy("submitBtn", true, "提交中……");
+      try {
+        const d = await api("submitAnswers", {rid: r.id, answers: r.answers.map(a => a.text || "")});
+        await put("responses", d.response);
+        S.responses = S.responses.map(x => x.id === r.id ? d.response : x);
+        S.flash = null; refresh(); try { window.scrollTo(0, 0); } catch (e) {}
+        toast("已提交，得分 " + d.response.score + " / " + d.response.total);
+      } catch (e) {
+        S.flash = e.net ? "需要網絡才可以提交。答案已暫存在這部手機，連接網絡後再按提交。" : e.message; refresh();
+      }
+    } else if (kind === "logout") {
+      api("logout").catch(() => {});
+      await wipeLocal(); await del("meta", "session"); await del("meta", "owner");
+      S.session = null; A.closesheet(); go("login"); toast("已登出");
+    } else if (kind === "delqs") {
+      try { await api("tDeleteQset", {id}); S.t = {}; go("admin", {tab: "qsets"}); toast("已刪除題目"); }
+      catch (e) { toast(e.message); refresh(); }
+    } else if (kind === "resetpw") {
+      try {
+        const d = await api("tResetPassword", {sid: id});
+        S.t["temp:" + id] = d.temp; delete S.t.overview;
+        refresh(); toast("已產生臨時密碼");
+      } catch (e) { toast(e.message); refresh(); }
+    }
+  }
+};
+
+/* ── 事件 ── */
+document.addEventListener("click", e => { const el = e.target.closest("[data-act]"); if (!el || el.disabled) return; const f = A[el.dataset.act]; if (f) f(el, e); });
+document.addEventListener("change", e => {
+  const t = e.target; if (!t) return;
+  if (t.id === "inPhoto") A.addphoto(t); else if (t.id === "inCover") A.addcover(t);
+});
+let ansT;
+document.addEventListener("input", e => {
+  const t = e.target;
+  if (t.id === "inNote" && S.draft) { S.draft.note = t.value; if (S.confirm === "leave") S.confirm = null; }
+  else if (t.id === "pkSearch") renderPkList();
+  else if (t.id === "inCls") syncLoginMode();
+  else if (t.dataset && t.dataset.ans !== undefined && S.route.name === "answer") {
+    const r = S.responses.find(x => x.id === S.route.rid);
+    if (r && r.status !== "submitted") {
+      r.answers[+t.dataset.ans].text = t.value;
+      clearTimeout(ansT); ansT = setTimeout(async () => {
+        const cur = S.responses.find(x => x.id === r.id);
+        if (!cur || cur.status === "submitted") return;
+        await put("responses", cur); await enqueue("answers", cur.id, 5000);
+      }, 600);
+    }
+  }
+});
+document.addEventListener("keydown", e => {
+  const t = e.target;
+  if (e.key === "Enter" && t.id === "inConcept") { e.preventDefault(); A.addconcept(); }
+  if (e.key === "Escape") { if (S.viewer) A.closeviewer(); else if (S.sheet) A.closesheet(); }
+  if ((e.key === "Enter" || e.key === " ") && t.tagName === "LABEL" && t.htmlFor && t.getAttribute("role") === "button") { e.preventDefault(); const f = document.getElementById(t.htmlFor); if (f) f.click(); }
+});
+document.addEventListener("submit", e => {
+  e.preventDefault(); const id = e.target.id;
+  if (id === "loginForm") A.login(); else if (id === "regForm") A.register(); else if (id === "pwForm") A.savepw();
+  else if (id === "tripForm") A.createTrip(); else if (id === "codeForm") A.loadcode(); else if (id === "qForm") A.saveqset();
+});
+window.addEventListener("online", () => { if (isStudent()) syncNow(); });
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible" && isStudent() && Date.now() - S.sync.lastPull > 120000) syncNow(); });
+setInterval(() => { if (isStudent() && S.sync.pending && !S.sync.busy) flush(); }, 60000);
+
+(async function boot(){
+  if (!API) return go("setup");
+  const ok = await openDB(); S.volatile = !ok;
+  try {
+    const sess = await getOne("meta", "session");
+    if (sess && sess.token) {
+      S.session = sess;
+      if (sess.role === "teacher") return go("admin", {tab: "students"});
+      await loadLocal();
+      if (sess.mustChange) go("setpw", {must: true}); else go("trips");
+      syncNow();
+      return;
+    }
+  } catch (e) {}
+  go("login");
+})();
+</script>
+</body>
+</html>
