@@ -273,6 +273,11 @@ div.stopcard .st-note{display:block;white-space:pre-wrap}
 .reg-status{margin:0;font-weight:700}
 .regbox.open .reg-status{color:var(--accent)}
 .reg-sub{margin:0;font-size:.82rem;color:var(--ink-soft);line-height:1.6}
+.pwrow{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap}
+.pwval{font-size:1.4rem;font-weight:700;letter-spacing:.08em;font-variant-numeric:tabular-nums;user-select:all;-webkit-user-select:all;word-break:break-all}
+.pill-off{flex:none;font-size:.75rem;font-weight:700;padding:.2rem .6rem;border-radius:999px;background:var(--surface-2);color:var(--ink-soft);white-space:nowrap}
+.srow.off .avatar{background:var(--surface-2);color:var(--ink-faint)}
+.srow.off .sr-name{color:var(--ink-soft)}
 .seg{display:grid;grid-template-columns:1fr 1fr;gap:.25rem;padding:.25rem;border-radius:.9rem;background:var(--surface-2)}
 .seg button{border:none;background:transparent;border-radius:.7rem;min-height:2.6rem;font-weight:700;font-size:.92rem;color:var(--ink-soft)}
 .seg button[aria-selected="true"]{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
@@ -354,6 +359,11 @@ const DATA = {"books":[{"n":1,"t":"旅遊導論"},{"n":2,"t":"款待導論"},{"n
 const BOOK_SHORT = {1:"旅遊導論",2:"款待導論",3:"地理名勝",4:"客務及趨勢"};
 const TOPIC = new Map(DATA.topics.map(t => [t.b + "-" + t.n, t]));
 const TEACHER = "YHP";
+const codeOf = (cls, no) => String(cls || "") + pad(no || 0);          // 例如 4A01
+function parseCode(v){
+  const m = String(v || "").normalize("NFKC").replace(/[\s\-]/g, "").toUpperCase().match(/^(\d[A-Z])(\d{1,2})$/);
+  return m ? {cls: m[1], no: parseInt(m[2], 10)} : null;
+}
 const API = String(window.API_URL || "").trim();   // 伺服器網址喺 config.js 設定
 
 const $ = (s, r = document) => r.querySelector(s);
@@ -753,32 +763,28 @@ function vLogin(){
   return '<main class="login">' + brandHTML() +
     '<form id="loginForm" class="panel stack" novalidate>' +
       (r.msg ? '<p class="flash">' + esc(r.msg) + '</p>' : '') +
-      '<div class="field"><label for="inCls">班別</label><input id="inCls" maxlength="8" autocapitalize="characters" autocomplete="off" spellcheck="false" placeholder="例如：5A" value="' + esc(r.cls || "") + '"></div>' +
-      '<div class="field" id="fNo"><label for="inNo">學號</label><input id="inNo" inputmode="numeric" maxlength="2" autocomplete="off" placeholder="例如：12" value="' + esc(r.no || "") + '"></div>' +
+      '<div class="field"><label for="inSid">班別學號</label><input id="inSid" maxlength="8" autocapitalize="characters" autocomplete="username" spellcheck="false" placeholder="例如：4A01" value="' + esc(r.code || "") + '"></div>' +
       '<div class="field"><label for="inPw" id="lPw">密碼</label><input id="inPw" type="password" maxlength="64" autocomplete="current-password"></div>' +
       '<p class="flash" data-flash role="alert" hidden></p>' +
       '<button class="btn btn-primary btn-block" type="submit" id="loginBtn">登入</button>' +
       '<div class="quick"><button type="button" class="linkbtn" data-act="toregister">第一次使用？按此登記帳戶</button>' +
-      '<p class="fineprint">忘記密碼請找老師重設。</p></div>' +
+      '<p class="fineprint">忘記密碼可以請老師查閱。</p></div>' +
     '</form>' +
     (S.volatile ? '<p class="flash">這個瀏覽器未能保存資料，未上載的紀錄在關閉頁面後會消失。請改用 Safari 或 Chrome 開啟。</p>' : '') +
     (INAPP ? '<p class="flash">你正在其他 app 內置的瀏覽器開啟考察手記，紀錄有機會遺失。請按右上角選單，改用 Safari 或 Chrome 開啟。</p>' : '') +
     '</main>';
 }
 function syncLoginMode(){
-  const c = $("#inCls"); if (!c) return;
-  const teach = c.value.trim().toUpperCase() === TEACHER;
-  const f = $("#fNo"); if (f) f.classList.toggle("hide", teach);
-  const l = $("#lPw"); if (l) l.textContent = teach ? "老師密碼" : "密碼";
+  const c = $("#inSid"); if (!c) return;
+  const l = $("#lPw"); if (l) l.textContent = c.value.trim().toUpperCase() === TEACHER ? "老師密碼" : "密碼";
 }
 function vRegister(){
   return bar("登記帳戶", {back:"tologin"}) +
     '<main class="view"><form id="regForm" class="stack" autocomplete="off" novalidate>' +
-      '<p class="hint">老師開放登記期間才可以登記，每位同學只需登記一次。密碼由你自己設定，老師也看不到。</p>' +
-      '<div class="field"><label for="rCls">班別</label><input id="rCls" maxlength="8" autocapitalize="characters" spellcheck="false" placeholder="例如：5A"></div>' +
-      '<div class="field"><label for="rNo">學號</label><input id="rNo" inputmode="numeric" maxlength="2" placeholder="例如：12"></div>' +
+      '<p class="hint">每位同學只需登記一次，之後用班別學號及自己設定的密碼登入。</p>' +
+      '<div class="field"><label for="rSid">班別學號</label><input id="rSid" maxlength="8" autocapitalize="characters" spellcheck="false" placeholder="例如：4A01"></div>' +
       '<div class="field"><label for="rName">姓名</label><input id="rName" maxlength="20" placeholder="例如：陳小明"></div>' +
-      '<div class="field"><label for="rPw">設定密碼</label><input id="rPw" type="password" maxlength="64" autocomplete="new-password"><p class="hint">最少 6 個字元。請不要使用其他帳戶的密碼。</p></div>' +
+      '<div class="field"><label for="rPw">設定密碼</label><input id="rPw" type="password" maxlength="64" autocomplete="new-password"><p class="hint">最少 6 個字元。老師可以查閱這個密碼（方便你忘記時查回），所以請不要使用其他帳戶的密碼。</p></div>' +
       '<div class="field"><label for="rPw2">再輸入一次密碼</label><input id="rPw2" type="password" maxlength="64" autocomplete="new-password"></div>' +
       '<p class="flash" data-flash role="alert" hidden></p>' +
     '</form></main>' +
@@ -802,7 +808,7 @@ function vTrips(){
   const empty = !S.sync.pulled && S.sync.busy ? '<p class="loading">正在取回雲端紀錄……</p>'
     : '<div class="empty"><p>還未有考察紀錄。</p><p>出發考察當日，按下方「新增考察」建立紀錄。</p></div>';
   return bar("我的考察", {sync:true}) +
-    '<main class="view"><p class="hello">' + esc(s.name) + '　' + esc(s.cls) + ' 班 ' + s.no + ' 號</p>' +
+    '<main class="view"><p class="hello">' + esc(s.name) + '　' + esc(codeOf(s.cls, s.no)) + '</p>' +
     (S.volatile ? '<p class="flash">這個瀏覽器未能保存資料，請盡快連接網絡，讓紀錄上載到雲端。</p>' : '') +
     (INAPP ? '<p class="flash">你正在其他 app 內置的瀏覽器開啟考察手記，紀錄有機會遺失。請按右上角選單，改用 Safari 或 Chrome 開啟。</p>' : '') +
     '<section class="triplist" aria-label="考察列表">' + (list.length ? list.map(t => tripCard(t, "opentrip", S.points)).join("") : empty) + '</section></main>' +
@@ -919,16 +925,13 @@ function vAdmin(){
   const top = bar("YHP 後台", {refresh:true, logout:true});
   const c = need("overview", "tOverview", {});
   if (!c.data) return top + '<main class="view">' + stateHTML(c, "overview") + '</main>';
-  const d = c.data, regLocal = d.regUntil ? Date.now() + (d.regUntil - d.now) : 0, open = regLocal > Date.now();
+  const d = c.data, nReg = d.students.filter(x => x.registered).length, nOff = d.students.length - nReg;
   const nTrips = d.students.reduce((s, x) => s + x.trips, 0), nSub = d.students.reduce((s, x) => s + x.submitted, 0);
-  const reg = '<section class="regbox' + (open ? ' open' : '') + '" aria-labelledby="hReg">' +
-    '<p class="reg-status" id="hReg">' + (open ? '學生登記開放中' : '學生登記已關閉') + '</p>' +
-    '<p class="reg-sub">' + (open ? '開放至 ' + fmtWhen(regLocal) + '。學生在登入畫面按「第一次使用？按此登記帳戶」。'
-      : '開放後學生才可以自行登記帳戶及設定密碼，建議在課堂上全班一起登記。') + '</p>' +
-    '<div class="btnrow">' + (open ? '<button type="button" class="btn btn-ghost sm" data-act="setreg" data-m="0">關閉登記</button>'
-      : '<button type="button" class="btn btn-primary sm" data-act="setreg" data-m="30">開放 30 分鐘</button><button type="button" class="btn btn-ghost sm" data-act="setreg" data-m="1440">開放 1 日</button>') + '</div></section>';
+  const reg = '<section class="regbox' + (nOff ? '' : ' open') + '" aria-labelledby="hReg">' +
+    '<p class="reg-status" id="hReg">學生名單 ' + d.students.length + ' 人：已登記 ' + nReg + ' 人' + (nOff ? '，未登記 ' + nOff + ' 人' : '') + '</p>' +
+    '<p class="reg-sub">學生第一次使用時，在登入畫面按「第一次使用？按此登記帳戶」，輸入班別學號（例如 4A01）及自己設定密碼。名單以外的學號不能登記；加新學生要改 Apps Script 的 ROSTER，再執行「匯入名單」。</p></section>';
   const head = '<section class="adminhead"><p class="eyebrow">老師後台</p><h2 class="th-place">YHP</h2>' +
-    '<p class="th-sum"><b>' + d.students.length + '</b> 位學生　<b>' + nTrips + '</b> 次考察　<b>' + d.qsets.length + '</b> 組題目　<b>' + nSub + '</b> 份已提交答案</p></section>';
+    '<p class="th-sum"><b>' + nReg + '</b> 位學生已登記　<b>' + nTrips + '</b> 次考察　<b>' + d.qsets.length + '</b> 組題目　<b>' + nSub + '</b> 份已提交答案</p></section>';
   const seg = '<div class="seg" role="tablist" aria-label="後台分頁">' + [["students","學生紀錄"],["qsets","考察題目"]].map(([k, l]) =>
     '<button type="button" role="tab" data-act="admintab" data-tab="' + k + '" aria-selected="' + (tab === k) + '">' + l + '</button>').join("") + '</div>';
   let body;
@@ -936,12 +939,12 @@ function vAdmin(){
     let last = null;
     body = d.students.length ? '<div class="slist">' + d.students.map(s => {
       let h = "";
-      if (s.cls !== last) { last = s.cls; h = '<p class="label grp">' + esc(s.cls) + ' 班　' + d.students.filter(x => x.cls === s.cls).length + ' 人</p>'; }
-      return h + '<button type="button" class="srow" data-act="openstudent" data-sid="' + s.sid + '"><span class="avatar" aria-hidden="true">' + esc(s.name.slice(0, 1)) + '</span>' +
-        '<span class="sr-main"><span class="sr-name">' + pad(s.no) + '　' + esc(s.name) + '</span>' +
-        '<span class="sr-sub">' + s.trips + ' 次考察 · ' + s.submitted + ' 份答案' + (s.lastLogin ? ' · ' + fmtStamp(s.lastLogin) + ' 登入' : '') + '</span></span>' +
-        (s.temp ? '<span class="pill-todo">臨時密碼</span>' : '') + '</button>';
-    }).join("") + '</div>' : '<div class="empty"><p>還未有學生登記。</p><p>按上方「開放 30 分鐘」，再請學生在登入畫面登記帳戶。</p></div>';
+      if (s.cls !== last) { last = s.cls; const inCls = d.students.filter(x => x.cls === s.cls); h = '<p class="label grp">' + esc(s.cls) + ' 班　' + inCls.filter(x => x.registered).length + ' / ' + inCls.length + ' 人已登記</p>'; }
+      return h + '<button type="button" class="srow' + (s.registered ? '' : ' off') + '" data-act="openstudent" data-sid="' + s.sid + '"><span class="avatar" aria-hidden="true">' + esc(s.name ? s.name.slice(0, 1) : s.cls) + '</span>' +
+        '<span class="sr-main"><span class="sr-name">' + esc(codeOf(s.cls, s.no)) + '　' + esc(s.name || "（未登記）") + '</span>' +
+        '<span class="sr-sub">' + (s.registered ? s.trips + ' 次考察 · ' + s.submitted + ' 份答案' + (s.lastLogin ? ' · ' + fmtStamp(s.lastLogin) + ' 登入' : '') : '還未設定密碼') + '</span></span>' +
+        (s.registered ? '' : '<span class="pill-off">未登記</span>') + '</button>';
+    }).join("") + '</div>' : '<div class="empty"><p>名單還未有學生。</p><p>請在 Apps Script 執行一次「匯入名單」。</p></div>';
   } else {
     body = d.qsets.length ? '<div class="slist">' + d.qsets.map(q =>
       '<button type="button" class="qsrow" data-act="openqset" data-id="' + q.id + '"><span class="qs-code">' + esc(q.code) + '</span>' +
@@ -955,16 +958,18 @@ function vAdmin(){
 function vAStudent(sid){
   const c = need("stu:" + sid, "tStudent", {sid});
   if (!c.data) return bar("學生紀錄", {back:"back"}) + '<main class="view">' + stateHTML(c, "stu:" + sid) + '</main>';
-  const d = c.data, s = d.student, trips = sortTrips(d.trips);
-  const temp = S.t["temp:" + sid] || s.temp;
-  return bar(s.name, {back:"back"}) + '<main class="view"><section class="adminhead"><p class="eyebrow">學生紀錄</p><h2 class="th-place">' + esc(s.name) + '</h2>' +
-    '<p class="th-sum">' + esc(s.cls) + ' 班 ' + s.no + ' 號　·　<b>' + trips.length + '</b> 次考察　<b>' + d.responses.filter(r => r.status === "submitted").length + '</b> 份已提交答案</p>' +
+  const d = c.data, s = d.student, trips = sortTrips(d.trips), code = codeOf(s.cls, s.no), shown = !!S.t["showpw:" + sid];
+  const pwBox = !s.registered ? '<p class="hint">這位學生還未登記。學生第一次使用時，在登入畫面按「第一次使用？按此登記帳戶」，輸入 ' + esc(code) + ' 及自己設定密碼。</p>'
+    : s.password ? '<div class="pwrow"><span class="label">密碼</span><span class="pwval">' + (shown ? esc(s.password) : "●●●●●●") + '</span>' +
+        '<button type="button" class="btn btn-ghost sm" data-act="togglepw" data-sid="' + sid + '">' + (shown ? "隱藏" : "顯示密碼") + '</button></div>'
+    : '<p class="hint">這位學生用舊版本登記，密碼已加密，暫時查閱不到；學生下次登入後，這裏就會顯示密碼。</p>';
+  return bar(s.name || code, {back:"back"}) + '<main class="view"><section class="adminhead"><p class="eyebrow">學生紀錄</p><h2 class="th-place">' + esc(s.name || "（未登記）") + '</h2>' +
+    '<p class="th-sum">' + esc(code) + '　·　<b>' + trips.length + '</b> 次考察　<b>' + d.responses.filter(r => r.status === "submitted").length + '</b> 份已提交答案</p>' +
     (s.lastLogin ? '<p class="hint">最近登入：' + fmtStamp(s.lastLogin) + '</p>' : '') + '</section>' +
+    '<section class="regbox" aria-label="登入資料">' + pwBox + '</section>' +
     '<section class="triplist" aria-label="考察列表">' + (trips.length ? trips.map(t => tripCard(t, "atrip", d.points, sid)).join("") : '<div class="empty"><p>這位學生還未有考察紀錄。</p></div>') + '</section>' +
-    '<div class="danger-zone">' +
-      (temp ? '<div class="bigcode"><p class="eyebrow">臨時密碼</p><p class="digits sm">' + esc(temp) + '</p><p class="hint">請把臨時密碼告訴' + esc(s.name) + '。學生用它登入後，需要立即設定自己的密碼。</p></div>' : '') +
-      '<p class="hint">學生忘記密碼時，按下面按鈕產生臨時密碼。原本的密碼會即時失效。</p>' +
-      confirmBtn("resetpw:" + sid, "重設密碼", "再按一次確認重設") + '</div></main>';
+    (s.registered ? '<div class="danger-zone"><p class="hint">如果有人用錯了這個學號登記，可以清除登記，讓真正的學生重新登記及設定密碼。考察紀錄會保留。</p>' +
+      confirmBtn("clearreg:" + sid, "清除登記", "再按一次確認清除登記") + '</div>' : '') + '</main>';
 }
 function vATrip(sid, id){
   const c = need("stu:" + sid, "tStudent", {sid});
@@ -984,7 +989,7 @@ function vAResp(rid){
   if (!c.data) return bar("學生答案", {back:"back"}) + '<main class="view">' + stateHTML(c, "resp:" + rid) + '</main>';
   const d = c.data, s = d.student;
   return bar("學生答案", {back:"back"}) + '<main class="view">' +
-    answerBody(d.response, {teacher:true, who: s ? s.name + "（" + s.cls + " 班 " + s.no + " 號）" : "", place: d.place}) + '</main>';
+    answerBody(d.response, {teacher:true, who: s ? s.name + "（" + codeOf(s.cls, s.no) + "）" : "", place: d.place}) + '</main>';
 }
 function vQset(id){
   const c = need("qs:" + id, "tQset", {id});
@@ -1002,7 +1007,7 @@ function vQset(id){
     '<section class="block" aria-labelledby="hResp"><div class="block-head"><h3 id="hResp">學生答案</h3><span class="count">' + sub.length + ' 份已提交' + (drafts ? '・' + drafts + ' 份作答中' : '') + (avg ? '・平均 ' + avg + ' 分' : '') + '</span></div>' +
       (rs.length ? '<div class="slist">' + rs.map(r =>
         '<button type="button" class="srow" data-act="aopenresp" data-id="' + r.id + '"><span class="avatar" aria-hidden="true">' + esc(r.name.slice(0, 1)) + '</span>' +
-        '<span class="sr-main"><span class="sr-name">' + esc(r.name) + '</span><span class="sr-sub">' + esc(r.cls) + ' 班 ' + r.no + ' 號' + (r.status === "submitted" ? ' · ' + fmtStamp(r.submittedAt) + ' 提交' : '') + '</span></span>' +
+        '<span class="sr-main"><span class="sr-name">' + esc(r.name) + '</span><span class="sr-sub">' + esc(codeOf(r.cls, r.no)) + (r.status === "submitted" ? ' · ' + fmtStamp(r.submittedAt) + ' 提交' : '') + '</span></span>' +
         (r.status === "submitted" ? scorePill(r.score, r.total) : '<span class="pill-todo">作答中</span>') + '</button>').join("") + '</div>'
         : '<p class="hint">還未有學生輸入這個題目編號。</p>') + '</section>' +
     '<div class="danger-zone">' + confirmBtn("delqs:" + id, "刪除這組題目", "再按一次確認刪除（學生將看不到這組題目及答案）") + '</div>' +
@@ -1049,7 +1054,7 @@ function renderSheet(){
     root.innerHTML = '<div class="scrim" data-act="closesheet"></div>' +
       '<div class="sheet" role="dialog" aria-modal="true" aria-labelledby="acTitle">' +
       '<div class="sheet-head"><h3 id="acTitle">帳戶</h3><button type="button" class="iconbtn" data-act="closesheet" aria-label="關閉">' + ICON.x + '</button></div>' +
-      '<div class="sheet-body"><dl class="acct"><dt>姓名</dt><dd>' + esc(s.name) + '</dd><dt>班別</dt><dd>' + esc(s.cls) + ' 班 ' + s.no + ' 號</dd></dl>' +
+      '<div class="sheet-body"><dl class="acct"><dt>姓名</dt><dd>' + esc(s.name) + '</dd><dt>班別學號</dt><dd>' + esc(codeOf(s.cls, s.no)) + '</dd></dl>' +
         '<p class="syncline" role="status">' + esc(syncText()) + '</p>' +
         '<div class="btnrow"><button type="button" class="btn btn-ghost sm" data-act="syncnow"' + (S.sync.busy ? ' disabled' : '') + '>' + ICON.refresh + '立即同步</button>' +
         '<button type="button" class="btn btn-ghost sm" data-act="tochangepw">更改密碼</button></div>' +
@@ -1284,26 +1289,23 @@ const countPoints = txt => String(txt || "").split(/\n+/).map(l => l.trim()).fil
 const A = {
   /* 帳戶 */
   async login(){
-    const cls = $("#inCls").value.trim(), no = $("#inNo").value.trim(), pw = $("#inPw").value;
-    const teacher = cls.toUpperCase() === TEACHER;
-    if (!cls) return flashIn("請輸入班別。");
-    if (!teacher && !/^\d{1,2}$/.test(no)) return flashIn("請輸入學號。");
+    const raw = $("#inSid").value.trim(), pw = $("#inPw").value, teacher = raw.toUpperCase() === TEACHER, m = parseCode(raw);
+    if (!teacher && !m) return flashIn("請輸入班別學號，例如 4A01。");
     if (!pw) return flashIn(teacher ? "請輸入老師密碼。" : "請輸入密碼。");
     flashIn(""); setBusy("loginBtn", true, "登入中……");
-    try { await startSession(await api("login", {cls, no, password: pw})); }
+    try { await startSession(await api("login", teacher ? {cls: TEACHER, password: pw} : {cls: m.cls, no: m.no, password: pw})); }
     catch (e) { setBusy("loginBtn", false, "登入"); flashIn(e.message); }
   },
   toregister(){ go("register"); },
   tologin(){ go("login"); },
   async register(){
-    const cls = $("#rCls").value.trim(), no = $("#rNo").value.trim(), name = $("#rName").value.trim(), pw = $("#rPw").value, pw2 = $("#rPw2").value;
-    if (!cls || cls.toUpperCase() === TEACHER) return flashIn("請輸入正確的班別，例如 5A。");
-    if (!/^\d{1,2}$/.test(no)) return flashIn("請輸入學號。");
+    const m = parseCode($("#rSid").value), name = $("#rName").value.trim(), pw = $("#rPw").value, pw2 = $("#rPw2").value;
+    if (!m) return flashIn("請輸入正確的班別學號，例如 4A01。");
     if (!name) return flashIn("請輸入姓名。");
     if (pw.length < 6) return flashIn("密碼最少要有 6 個字元。");
     if (pw !== pw2) return flashIn("兩次輸入的密碼不一樣，請再輸入一次。");
     flashIn(""); setBusy("regBtn", true, "登記中……");
-    try { await startSession(await api("register", {cls, no, name, password: pw})); toast("登記成功，歡迎使用考察手記"); }
+    try { await startSession(await api("register", {cls: m.cls, no: m.no, name, password: pw})); toast("登記成功，歡迎使用考察手記"); }
     catch (e) { setBusy("regBtn", false, "登記並登入"); flashIn(e.message); }
   },
   async savepw(){
@@ -1462,14 +1464,7 @@ const A = {
   /* 老師 */
   trefresh(){ S.t = {}; refresh(); },
   tretry(el){ delete S.t[el.dataset.key]; refresh(); },
-  async setreg(el){
-    const m = +el.dataset.m; el.disabled = true;
-    try {
-      const d = await api("tSetReg", {minutes: m});
-      const o = S.t.overview; if (o && o.data) Object.assign(o.data, {regUntil: d.regUntil, now: d.now});
-      refresh(); toast(m ? "已開放登記" : "已關閉登記");
-    } catch (e) { el.disabled = false; toast(e.message); }
-  },
+  togglepw(el){ const k = "showpw:" + el.dataset.sid; if (S.t[k]) delete S.t[k]; else S.t[k] = true; refresh(); },
   admintab(el){ go("admin", {tab: el.dataset.tab}); },
   openstudent(el){ go("astudent", {sid: el.dataset.sid, back: {name: "admin", tab: "students"}}); },
   atrip(el){ go("atrip", {sid: el.dataset.sid, id: el.dataset.id, back: Object.assign({}, S.route)}); },
@@ -1538,11 +1533,11 @@ const A = {
     } else if (kind === "delqs") {
       try { await api("tDeleteQset", {id}); S.t = {}; go("admin", {tab: "qsets"}); toast("已刪除題目"); }
       catch (e) { toast(e.message); refresh(); }
-    } else if (kind === "resetpw") {
+    } else if (kind === "clearreg") {
       try {
-        const d = await api("tResetPassword", {sid: id});
-        S.t["temp:" + id] = d.temp; delete S.t.overview;
-        refresh(); toast("已產生臨時密碼");
+        await api("tClearReg", {sid: id});
+        delete S.t["stu:" + id]; delete S.t["showpw:" + id]; delete S.t.overview;
+        refresh(); toast("已清除登記，學生需要重新登記");
       } catch (e) { toast(e.message); refresh(); }
     }
   }
@@ -1559,7 +1554,7 @@ document.addEventListener("input", e => {
   const t = e.target;
   if (t.id === "inNote" && S.draft) { S.draft.note = t.value; if (S.confirm === "leave") S.confirm = null; saveDraftSoon(500); }
   else if (t.id === "pkSearch") renderPkList();
-  else if (t.id === "inCls") syncLoginMode();
+  else if (t.id === "inSid") syncLoginMode();
   else if (t.dataset && t.dataset.ans !== undefined && S.route.name === "answer") {
     const r = S.responses.find(x => x.id === S.route.rid);
     if (r && r.status !== "submitted") {
