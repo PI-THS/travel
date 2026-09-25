@@ -404,8 +404,9 @@ function req(store, mode, fn){
   return new Promise(res => {
     try {
       const t = idb.transaction(store, mode); const q = fn(t.objectStore(store));
-      t.oncomplete = () => res(q && q.result); t.onerror = t.onabort = () => res(undefined);
-    } catch (e) { res(undefined); }
+      t.oncomplete = () => res(q && q.result);
+      t.onerror = t.onabort = () => { if (mode === "readwrite") logErr("idb", store + " " + ((t.error && t.error.name) || "寫入失敗"), false); res(undefined); };
+    } catch (e) { logErr("idb", store + " " + (e && e.name), false); res(undefined); }
   });
 }
 async function put(store, obj){ mem[store].set(obj.id, obj); if (idb) await req(store, "readwrite", s => s.put(obj)); }
@@ -446,8 +447,8 @@ async function localURL(id, size){
   if (urlCache.has(key)) return urlCache.get(key);
   if (!isStudent()) return null;
   const p = await getOne("photos", id);
-  const blob = p && (size === "l" ? p.full : (p.thumb || p.full));
-  return blob ? setURL(key, blob) : null;
+  const data = p && (size === "l" ? p.full : (p.thumb || p.full));
+  return data ? setURL(key, asBlob(data)) : null;
 }
 function hydrate(root){
   root.querySelectorAll("img[data-photo]").forEach(async img => {
@@ -477,13 +478,13 @@ async function pumpPhotos(){
         const key = w.id + "|" + w.size; want.delete(key);
         const ph = res.photos && res.photos[w.id];
         if (!ph) { missing.add(key); continue; }
-        const blob = b64ToBlob(ph.data, "image/jpeg");
+        const buf = b64ToBuf(ph.data);
         if (isStudent()) {
           const p = (await getOne("photos", w.id)) || {id: w.id, w: ph.w, h: ph.h, remote: true, thumb: null, full: null};
-          if (w.size === "l") p.full = blob; else p.thumb = blob;
+          if (w.size === "l") p.full = buf; else p.thumb = buf;
           await put("photos", p);
         }
-        const u = setURL(key, blob);
+        const u = setURL(key, asBlob(buf));
         document.querySelectorAll('img[data-photo="' + w.id + '"]').forEach(img => { if ((img.dataset.size || "s") === w.size || !img.getAttribute("src")) img.src = u; });
       }
     }
@@ -491,38 +492,123 @@ async function pumpPhotos(){
 }
 async function dropPhoto(id){ if (!id) return; await del("photos", id); dropURLs(id); }
 
-function loadImg(url){ return new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = url; }); }
-async function drawJPEG(img, max, q){
-  const w0 = img.naturalWidth, h0 = img.naturalHeight, s = Math.min(1, max / Math.max(w0, h0));
+function loadImg(url){ return new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = () => rej(new Error("未能讀取圖片")); i.src = url; }); }
+function freeCanvas(c){ if (c) { c.width = 0; c.height = 0; } }   // iPhone 限制 canvas 總記憶體，用完即刻釋放
+async function drawJPEG(src, max, q){
+  const w0 = src.naturalWidth || src.width, h0 = src.naturalHeight || src.height, s = Math.min(1, max / Math.max(w0, h0));
   const w = Math.max(1, Math.round(w0 * s)), h = Math.max(1, Math.round(h0 * s));
   const c = document.createElement("canvas"); c.width = w; c.height = h;
-  c.getContext("2d").drawImage(img, 0, 0, w, h);
+  const g = c.getContext("2d");
+  if (!g) { freeCanvas(c); throw new Error("canvas 無法使用（原圖 " + w0 + "×" + h0 + "）"); }
+  g.drawImage(src, 0, 0, w, h);
   const blob = await new Promise(r => c.toBlob(r, "image/jpeg", q));
-  if (!blob) throw new Error("toBlob");
-  return {blob, w, h};
+  if (!blob) { freeCanvas(c); throw new Error("壓縮失敗（原圖 " + w0 + "×" + h0 + "）"); }
+  return {blob, w, h, c};
 }
 async function makePhoto(file){
   const url = URL.createObjectURL(file);
+  let img = null, full = null, thumb = null;
   try {
-    const img = await loadImg(url);
-    const full = await drawJPEG(img, 1280, 0.8), thumb = await drawJPEG(img, 480, 0.72);
-    return {id: uid(), full: full.blob, thumb: thumb.blob, w: full.w, h: full.h, remote: false};
-  } finally { URL.revokeObjectURL(url); }
+    img = await loadImg(url);
+    full = await drawJPEG(img, 1280, 0.8);
+    img.src = ""; img = null;                    // 手機原相可達數千萬像素，縮細之後即刻放手
+    thumb = await drawJPEG(full.c, 480, 0.72);   // 縮圖由已縮細嘅相再縮，唔再用原相
+    return {id: uid(), full: await asBuf(full.blob), thumb: await asBuf(thumb.blob), w: full.w, h: full.h, remote: false};
+  } finally {
+    if (img) img.src = "";
+    freeCanvas(full && full.c); freeCanvas(thumb && thumb.c);
+    URL.revokeObjectURL(url);
+  }
 }
-function blobToB64(blob){ return new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(String(r.result).split(",")[1] || ""); r.onerror = rej; r.readAsDataURL(blob); }); }
-function b64ToBlob(b64, type){ const bin = atob(b64), u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); return new Blob([u], {type}); }
+// 相片以 ArrayBuffer 存入 IndexedDB（部分 iPhone 版本存 Blob 之後會讀唔返）
+const asBlob = x => (x instanceof Blob ? x : new Blob([x], {type: "image/jpeg"}));
+async function asBuf(x){
+  if (!x || x instanceof ArrayBuffer) return x || null;
+  if (x.arrayBuffer) return await x.arrayBuffer();
+  return await new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = () => rej(r.error); r.readAsArrayBuffer(x); });
+}
+function bufToB64(buf){ const u = new Uint8Array(buf); let s = ""; for (let i = 0; i < u.length; i += 0x8000) s += String.fromCharCode.apply(null, u.subarray(i, i + 0x8000)); return btoa(s); }
+function b64ToBuf(b64){ const bin = atob(b64), u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); return u.buffer; }
 
 /* ── 狀態 ── */
 const S = {
   session: null, authLost: false, route: {name: "boot"}, trips: [], points: [], responses: [],
   draft: null, qdraft: null, sheet: null, pkBook: 0, confirm: null, flash: null, menu: false, codeOpen: false,
-  viewer: null, volatile: false, t: {},
-  sync: {pending: 0, busy: false, offline: false, error: null, note: null, last: 0, lastPull: 0, pulled: false, timer: null}
+  viewer: null, volatile: false, t: {}, draftRestored: false, saving: false,
+  sync: {pending: 0, busy: false, offline: false, error: null, note: null, last: 0, lastPull: 0, pulled: false, timer: null, inflight: null}
 };
 const isStudent = () => !!(S.session && S.session.role === "student");
 const isTeacher = () => !!(S.session && S.session.role === "teacher");
 
-function go(name, params = {}){ S.route = Object.assign({}, params, {name}); S.confirm = null; S.flash = null; S.menu = false; S.codeOpen = false; render(); try { window.scrollTo(0, 0); } catch (e) {} }
+/* ── 錯誤紀錄：送去伺服器「錯誤紀錄」工作表，方便查問題 ── */
+const LOGQ = [];
+const INAPP = /(FBAN|FBAV|Instagram|Line\/|MicroMessenger|WhatsApp|Snapchat|TikTok|musical_ly)/i.test(navigator.userAgent);
+const STANDALONE = (() => { try { return !!(navigator.standalone || matchMedia("(display-mode: standalone)").matches); } catch (e) { return false; } })();
+function logErr(kind, msg, persist = true){
+  try {
+    LOGQ.push({t: new Date().toISOString(), kind, msg: String(msg || "").slice(0, 300), route: S.route ? S.route.name : "", ua: navigator.userAgent.slice(0, 160), standalone: STANDALONE});
+    while (LOGQ.length > 40) LOGQ.shift();
+    if (persist) put("meta", {id: "logs", items: LOGQ.slice()});
+  } catch (e) {}
+}
+window.addEventListener("error", e => logErr("error", (e.message || "") + " @" + String(e.filename || "").split("/").pop() + ":" + (e.lineno || "")));
+window.addEventListener("unhandledrejection", e => { const r = e.reason; logErr("promise", r && (r.message || r.name) ? (r.name || "") + " " + (r.message || "") : String(r)); });
+async function sendLogs(){
+  if (!S.session || S.authLost || !LOGQ.length) return;
+  const items = LOGQ.splice(0, 30);
+  try { await api("clientLog", {items}); }
+  catch (e) { if (e.net || e.code === "busy") LOGQ.unshift(...items); }   // 伺服器未更新就放棄
+  put("meta", {id: "logs", items: LOGQ.slice()});
+}
+// 記低 app 係咪喺前景：下次開啟時，如果上次喺前景突然結束（閃退），就寫入錯誤紀錄
+function markAlive(fg){ if (idb) put("meta", {id: "alive", fg, route: S.route ? S.route.name : "", photos: S.draft ? S.draft.photos.length : 0, t: Date.now()}); }
+
+/* ── 返回鍵：Android 返回掣／iPhone 向右掃，會返上一頁，唔會成個 app 走咗 ── */
+const ROOTS = new Set(["boot", "setup", "login", "trips", "admin"]);
+let guard = false, dropPop = false, guardT = null;
+function wantGuard(){ return !!S.viewer || !!S.sheet || !(ROOTS.has(S.route.name) || (S.route.name === "setpw" && S.route.must)); }
+function guardSoon(){ clearTimeout(guardT); guardT = setTimeout(syncGuard, 0); }
+function syncGuard(){
+  const w = wantGuard();
+  try {
+    if (w && !guard) { history.pushState({kaocha: 1}, ""); guard = true; }
+    else if (!w && guard) { guard = false; dropPop = true; history.back(); }
+  } catch (e) {}
+}
+window.addEventListener("popstate", () => {
+  if (dropPop) { dropPop = false; return; }
+  guard = false;
+  if (S.viewer) A.closeviewer();
+  else if (S.sheet) A.closesheet();
+  else if (!ROOTS.has(S.route.name)) inAppBack();
+  guardSoon();
+});
+function inAppBack(){
+  const n = S.route.name;
+  if (n === "point") return A.leavepoint();
+  if (n === "trip" || n === "newtrip") return go("trips");
+  if (n === "register") return go("login");
+  if (n === "setpw" && S.route.must) return;
+  A.back();
+}
+
+/* ── 未儲存嘅紀錄點自動暫存：app 閃退或重新載入之後可以取回 ── */
+let draftT = null;
+function saveDraftSoon(ms = 300){
+  clearTimeout(draftT);
+  draftT = setTimeout(() => { if (S.draft && isStudent()) put("meta", {id: "draft", d: JSON.parse(JSON.stringify(S.draft))}); }, ms);
+}
+async function clearDraft(){ clearTimeout(draftT); S.draftRestored = false; await del("meta", "draft"); }
+async function restoreDraft(){
+  const dr = await getOne("meta", "draft");
+  if (!dr || !dr.d) return false;
+  if (!S.trips.some(t => t.id === dr.d.tripId)) { await del("meta", "draft"); return false; }
+  S.draft = Object.assign(dr.d, {_busy: 0}); S.draftRestored = true;
+  logErr("restore", "已恢復未儲存的紀錄點（相片 " + S.draft.photos.length + " 張）");
+  return true;
+}
+
+function go(name, params = {}){ S.route = Object.assign({}, params, {name}); S.confirm = null; S.flash = null; S.menu = false; S.codeOpen = false; render(); try { window.scrollTo(0, 0); } catch (e) {} guardSoon(); markAlive(document.visibilityState !== "hidden"); }
 function render(){
   const r = S.route; let html;
   switch (r.name) {
@@ -676,6 +762,7 @@ function vLogin(){
       '<p class="fineprint">忘記密碼請找老師重設。</p></div>' +
     '</form>' +
     (S.volatile ? '<p class="flash">這個瀏覽器未能保存資料，未上載的紀錄在關閉頁面後會消失。請改用 Safari 或 Chrome 開啟。</p>' : '') +
+    (INAPP ? '<p class="flash">你正在其他 app 內置的瀏覽器開啟考察手記，紀錄有機會遺失。請按右上角選單，改用 Safari 或 Chrome 開啟。</p>' : '') +
     '</main>';
 }
 function syncLoginMode(){
@@ -717,6 +804,7 @@ function vTrips(){
   return bar("我的考察", {sync:true}) +
     '<main class="view"><p class="hello">' + esc(s.name) + '　' + esc(s.cls) + ' 班 ' + s.no + ' 號</p>' +
     (S.volatile ? '<p class="flash">這個瀏覽器未能保存資料，請盡快連接網絡，讓紀錄上載到雲端。</p>' : '') +
+    (INAPP ? '<p class="flash">你正在其他 app 內置的瀏覽器開啟考察手記，紀錄有機會遺失。請按右上角選單，改用 Safari 或 Chrome 開啟。</p>' : '') +
     '<section class="triplist" aria-label="考察列表">' + (list.length ? list.map(t => tripCard(t, "opentrip", S.points)).join("") : empty) + '</section></main>' +
     '<div class="dock"><button type="button" class="btn btn-primary" data-act="newtrip">' + ICON.plus + '新增考察</button></div>';
 }
@@ -778,18 +866,20 @@ function selTopicHTML(tp){
     '<button type="button" class="iconbtn sm" data-act="rmtopic" data-k="' + esc(tp.k) + '" aria-label="移除這個課題">' + ICON.x + '</button></div>' + conc + '</div>';
 }
 function vPoint(){
-  const d = S.draft, t = S.trips.find(x => x.id === d.tripId);
+  const d = S.draft, t = S.trips.find(x => x.id === d.tripId), busy = d._busy || 0;
   const slots = d.photos.map(id => '<div class="slot">' + photoTag(id, "s", true) + '<button type="button" class="slot-x" data-act="rmphoto" data-id="' + id + '" aria-label="移除這張相片">' + ICON.x + '</button></div>').join("") +
-    (d.photos.length < 3 ? '<label class="slot add" for="inPhoto" tabindex="0" role="button">' + ICON.cam + '<span>' + (d.photos.length ? "再加一張" : "拍攝或選擇相片") + '</span></label>' : '');
+    (busy ? '<div class="slot add" role="status">' + ICON.cam + '<span>處理相片中……</span></div>'
+      : d.photos.length < 3 ? '<label class="slot add" for="inPhoto" tabindex="0" role="button">' + ICON.cam + '<span>' + (d.photos.length ? "再加一張" : "拍攝或選擇相片") + '</span></label>' : '');
   const topics = d.topics.length ? d.topics.map(selTopicHTML).join("")
     : '<button type="button" class="pickcta" data-act="openpicker">' + ICON.search + '<span>選擇與這個觀察相關的課題</span></button>';
   const customs = d.concepts.filter(c => c.k === "custom");
   return bar("紀錄點 " + pad(d.seq), {back:"leavepoint"}) +
     '<main class="view">' +
     '<p class="pe-meta"><span class="wp sm" aria-hidden="true">' + pad(d.seq) + '</span><span>' + esc(t ? t.place : "") + '</span><span aria-hidden="true">·</span><span>' + fmtTime(d.time) + '</span></p>' +
+    (S.draftRestored ? '<p class="okbox">已恢復上次未儲存的紀錄點，請檢查後按「儲存紀錄點」。</p>' : '') +
     '<section class="block" aria-labelledby="hPhotos"><div class="block-head"><h3 id="hPhotos">相片</h3><span class="count">' + d.photos.length + ' / 3</span></div>' +
       '<div class="slots">' + slots + '</div><input id="inPhoto" class="vh" type="file" accept="image/*" multiple tabindex="-1">' +
-      '<p class="hint">每個紀錄點最多三張。相片會自動壓縮，有網絡時自動上載。</p></section>' +
+      '<p class="hint">每個紀錄點最多三張。相片會自動壓縮，有網絡時自動上載。如果影相時 app 閃退，可以先用手機相機影相，再按這裏選擇相片。</p></section>' +
     '<section class="block" aria-labelledby="hTopics"><div class="block-head"><h3 id="hTopics">相關課題及概念</h3>' +
       (d.topics.length ? '<button type="button" class="linkbtn" data-act="openpicker">' + ICON.plus + '選擇課題</button>' : '') + '</div>' +
       '<div class="seltopics">' + topics + '</div>' +
@@ -802,7 +892,7 @@ function vPoint(){
     (S.flash ? '<p class="flash" role="alert">' + esc(S.flash) + '</p>' : '') +
     (d.isNew ? '' : '<div class="danger-zone">' + confirmBtn("delpoint:" + d.id, "刪除這個紀錄點", "再按一次確認刪除") + '</div>') +
     '</main>' +
-    '<div class="dock"><button type="button" class="btn btn-primary" data-act="savepoint">' + ICON.check + '儲存紀錄點</button></div>';
+    '<div class="dock"><button type="button" class="btn btn-primary" data-act="savepoint"' + (busy ? ' disabled' : '') + '>' + (busy ? '處理相片中……' : ICON.check + '儲存紀錄點') + '</button></div>';
 }
 function vAnswer(rid){
   const r = S.responses.find(x => x.id === rid);
@@ -935,7 +1025,7 @@ function vQEdit(){
 }
 
 /* ── 底部抽屜：課題選單、帳戶 ── */
-function openSheet(kind){ S.sheet = kind; document.documentElement.classList.add("locked"); renderSheet(); }
+function openSheet(kind){ S.sheet = kind; document.documentElement.classList.add("locked"); renderSheet(); guardSoon(); }
 function syncText(){
   const s = S.sync;
   if (s.busy && s.pending) return "正在上載紀錄……";
@@ -1004,8 +1094,8 @@ function renderViewer(){
 let opSeq = 0, flushing = null, syncing = null;
 async function enqueue(op, ref, delay = 800){
   const ops = await getAll("outbox");
-  if (!ops.some(o => o.op === op && o.ref === ref)) {
-    await put("outbox", {id: Date.now() * 1000 + (opSeq++ % 1000), op, ref});
+  if (!ops.some(o => o.op === op && o.ref === ref && o.id !== S.sync.inflight)) {
+    await put("outbox", {id: Date.now() * 1000 + (opSeq++ % 1000), op, ref, tries: 0});
     S.sync.pending = ops.length + 1; paintSync();
   }
   clearTimeout(S.sync.timer); S.sync.timer = setTimeout(() => { flush(); }, delay);
@@ -1022,28 +1112,44 @@ async function doFlush(){
       if (!ops.length) { S.sync.error = null; S.sync.offline = false; S.sync.last = Date.now(); break; }
       paintSync();
       const op = ops[0];
+      let keep = false;
+      S.sync.inflight = op.id;
       try { await runOp(op); S.sync.offline = false; }
       catch (e) {
-        if (e.net || e.code === "busy" || e.code === "error" || e.code === "auth") { S.sync.offline = !!e.net; S.sync.error = e.net ? null : e.message; break; }
-        S.sync.note = e.message;   // 例如考察已在其他手機刪除：這一項不再重試
-      }
+        if (e.net || e.code === "busy" || e.code === "auth") { S.sync.offline = !!e.net; S.sync.error = e.net ? null : e.message; keep = true; }
+        else {
+          // 其他錯誤先再試幾次；仍然失敗就跳過，免得一項卡住後面全部
+          op.tries = (op.tries || 0) + 1;
+          logErr("sync", op.op + " 第" + op.tries + "次失敗：" + (e.code || e.name || "") + " " + e.message);
+          if (op.tries < (e.code === "error" ? 5 : e.code ? 1 : 3)) { await put("outbox", op); S.sync.error = e.message; keep = true; }
+          else {
+            S.sync.note = e.message;
+            const store = op.op === "trip" ? "trips" : op.op === "point" ? "points" : null;
+            if (store) { const x = await getOne(store, op.ref); if (x) { x.rejected = true; await put(store, x); } }
+          }
+        }
+      } finally { S.sync.inflight = null; }
+      if (keep) break;
       await del("outbox", op.id);
     }
   } finally {
     S.sync.busy = false;
     S.sync.pending = (await getAll("outbox")).length;
     paintSync();
+    sendLogs();
   }
 }
+async function markSynced(store, id){ const x = await getOne(store, id); if (x && !x.synced) { x.synced = true; delete x.rejected; await put(store, x); } }
 async function runOp(op){
-  if (op.op === "trip") { const t = await getOne("trips", op.ref); if (t) await api("saveTrip", {trip: t}); }
+  if (op.op === "trip") { const t = await getOne("trips", op.ref); if (t) { await api("saveTrip", {trip: t}); await markSynced("trips", op.ref); } }
   else if (op.op === "tripdel") await api("deleteTrip", {id: op.ref});
-  else if (op.op === "point") { const p = await getOne("points", op.ref); if (p) await api("savePoint", {point: p}); }
+  else if (op.op === "point") { const p = await getOne("points", op.ref); if (p) { await api("savePoint", {point: p}); await markSynced("points", op.ref); } }
   else if (op.op === "pointdel") await api("deletePoint", {id: op.ref});
   else if (op.op === "photo") {
     const ph = await getOne("photos", op.ref);
     if (ph && !ph.remote && ph.full) {
-      await api("uploadPhoto", {id: ph.id, full: await blobToB64(ph.full), thumb: ph.thumb ? await blobToB64(ph.thumb) : "", w: ph.w, h: ph.h});
+      const full = bufToB64(await asBuf(ph.full)), thumb = ph.thumb ? bufToB64(await asBuf(ph.thumb)) : "";
+      await api("uploadPhoto", {id: ph.id, full, thumb, w: ph.w, h: ph.h});
       ph.remote = true; await put("photos", ph);
     }
   }
@@ -1058,10 +1164,11 @@ async function pull(){
   const pend = new Set((await getAll("outbox")).map(o => o.ref));
   Object.assign(S.session, {name: d.me.name, cls: d.me.cls, no: d.me.no}); await put("meta", S.session);
   const sTrips = new Set(d.trips.map(t => t.id)), sPoints = new Set(d.points.map(p => p.id)), sResp = new Set(d.responses.map(r => r.id));
-  for (const t of await getAll("trips")) if (!sTrips.has(t.id) && !pend.has(t.id)) await del("trips", t.id);
-  for (const t of d.trips) if (!pend.has(t.id)) await put("trips", t);
-  for (const p of await getAll("points")) if (!sPoints.has(p.id) && !pend.has(p.id)) await del("points", p.id);
-  for (const p of d.points) if (!pend.has(p.id)) await put("points", p);
+  // 只刪除「曾經上載、而家伺服器冇」嘅紀錄（即係喺其他手機刪咗）；未上載過嘅一定保留
+  for (const t of await getAll("trips")) if (!sTrips.has(t.id) && !pend.has(t.id) && t.synced) await del("trips", t.id);
+  for (const t of d.trips) if (!pend.has(t.id)) await put("trips", Object.assign(t, {synced: true}));
+  for (const p of await getAll("points")) if (!sPoints.has(p.id) && !pend.has(p.id) && p.synced) await del("points", p.id);
+  for (const p of d.points) if (!pend.has(p.id)) await put("points", Object.assign(p, {synced: true}));
   const local = new Map((await getAll("photos")).map(p => [p.id, p]));
   for (const m of d.photos) {
     const p = local.get(m.id);
@@ -1075,6 +1182,23 @@ async function pull(){
   }
   await gcPhotos();
   await loadLocal();
+  await reconcile();
+}
+// 補回漏咗排隊嘅紀錄（例如撳完儲存即刻閃退）
+async function reconcile(){
+  const has = new Set((await getAll("outbox")).map(o => o.op + ":" + o.ref));
+  const photos = new Map((await getAll("photos")).map(p => [p.id, p]));
+  const needPhoto = id => { const p = photos.get(id); return p && !p.remote && p.full && !has.has("photo:" + id); };
+  let n = 0;
+  for (const t of await getAll("trips")) {
+    if (!t.synced && !t.rejected && !has.has("trip:" + t.id)) { await enqueue("trip", t.id); n++; }
+    if (t.cover && needPhoto(t.cover)) { await enqueue("photo", t.cover); n++; }
+  }
+  for (const p of await getAll("points")) {
+    for (const id of p.photos) if (needPhoto(id)) { await enqueue("photo", id); n++; }
+    if (!p.synced && !p.rejected && !has.has("point:" + p.id)) { await enqueue("point", p.id); n++; }
+  }
+  if (n) logErr("reconcile", "補回 " + n + " 項未上載的紀錄");
 }
 async function gcPhotos(){
   const keep = new Set();
@@ -1082,6 +1206,7 @@ async function gcPhotos(){
   (await getAll("points")).forEach(p => p.photos.forEach(id => keep.add(id)));
   (await getAll("outbox")).forEach(o => { if (o.op === "photo") keep.add(o.ref); });
   if (S.draft) S.draft.photos.forEach(id => keep.add(id));
+  const dr = await getOne("meta", "draft"); if (dr && dr.d) dr.d.photos.forEach(id => keep.add(id));
   for (const p of await getAll("photos")) if (!keep.has(p.id)) await dropPhoto(p.id);
 }
 function syncNow(){
@@ -1092,7 +1217,7 @@ function syncNow(){
       S.sync.busy = true; paintSync();
       await pull();
       S.sync.pulled = true; S.sync.lastPull = Date.now(); S.sync.offline = false;
-    } catch (e) { if (e.net) S.sync.offline = true; else S.sync.error = e.message; }
+    } catch (e) { if (e.net) S.sync.offline = true; else { S.sync.error = e.message; logErr("pull", (e.code || e.name || "") + " " + e.message); } }
     finally {
       S.sync.busy = false; syncing = null; paintSync();
       if (isStudent() && (S.route.name === "trips" || (S.route.name === "trip" && !S.codeOpen && !S.menu))) refresh();
@@ -1106,6 +1231,7 @@ async function loadLocal(){
 }
 async function wipeLocal(){
   for (const s of ["trips","points","photos","responses","outbox"]) await clearStore(s);
+  await del("meta", "draft");
   resetPhotoCache();
   S.trips = []; S.points = []; S.responses = []; S.draft = null;
   Object.assign(S.sync, {pending: 0, error: null, note: null, offline: false, last: 0, lastPull: 0, pulled: false});
@@ -1123,7 +1249,9 @@ async function startSession(d){
   await put("meta", S.session);
   if (me.role === "teacher") return go("admin", {tab: "students"});
   await loadLocal();
-  if (d.mustChange) go("setpw", {must: true}); else go("trips");
+  if (d.mustChange) go("setpw", {must: true});
+  else if (await restoreDraft()) go("point");
+  else go("trips");
   syncNow();
 }
 async function authLost(){
@@ -1202,22 +1330,28 @@ const A = {
   opentrip(el){ go("trip", {id: el.dataset.id}); },
   pickplace(el){ const i = $("#inPlace"); if (i) i.value = el.dataset.v; },
   async createTrip(){
-    const place = $("#inPlace").value.trim(); if (!place) return;
-    const now = new Date().toISOString();
-    const t = {id: uid(), place, date: $("#inDate").value || todayStr(), purpose: $("#inPurpose").value.trim(), cover: null, createdAt: now, updatedAt: now};
-    await put("trips", t); S.trips.push(t); go("trip", {id: t.id}); await enqueue("trip", t.id);
+    const place = $("#inPlace").value.trim(); if (!place || S.saving) return;
+    S.saving = true;
+    try {
+      const now = new Date().toISOString();
+      const t = {id: uid(), place, date: $("#inDate").value || todayStr(), purpose: $("#inPurpose").value.trim(), cover: null, createdAt: now, updatedAt: now};
+      await put("trips", t); await enqueue("trip", t.id);
+      S.trips.push(t); go("trip", {id: t.id});
+    } finally { S.saving = false; }
   },
   menu(){ S.menu = !S.menu; S.confirm = null; refresh(); },
   async addcover(input){
     const f = (input.files || [])[0]; input.value = ""; if (!f) return;
     const t = S.trips.find(x => x.id === S.route.id); if (!t) return;
+    toast("處理圖片中……");
     try {
       const ph = await makePhoto(f); await put("photos", ph);
-      const old = t.cover; t.cover = ph.id; t.updatedAt = new Date().toISOString(); await put("trips", t);
-      if (old) await dropPhoto(old);
-      refresh(); toast("已更新封面");
+      const old = t.cover; t.cover = ph.id; t.updatedAt = new Date().toISOString(); t.synced = false; await put("trips", t);
       await enqueue("photo", ph.id); await enqueue("trip", t.id);
-    } catch (e) { toast("未能讀取這張圖片，請再選擇一次。"); }
+      if (old) await dropPhoto(old);
+      if (S.route.name === "trip") refresh();
+      toast("已更新封面");
+    } catch (e) { logErr("photo", "封面：" + (e && e.message) + "｜" + (f.type || "") + " " + Math.round((f.size || 0) / 1024) + "KB"); toast("未能讀取這張圖片，請再選擇一次。"); }
   },
   opencode(){ S.codeOpen = true; S.flash = null; refresh(); const i = $("#inCode"); if (i) i.focus(); },
   async loadcode(){
@@ -1251,61 +1385,78 @@ const A = {
     const d = S.draft;
     if (d && isDirty(d) && S.confirm !== "leave") { S.confirm = "leave"; S.flash = "這個紀錄點尚未儲存。再按一次左上角的返回，即會放棄剛才的修改。"; return refresh(); }
     if (d) { for (const id of d._added) await dropPhoto(id); }
+    await clearDraft();
     const tid = d ? d.tripId : null; S.draft = null; tid ? go("trip", {id: tid}) : go("trips");
   },
   async addphoto(input){
     const files = [...(input.files || [])]; input.value = "";
     const d = S.draft; if (!d || !files.length) return; S.flash = null;
-    for (const f of files) {
-      if (d.photos.length >= 3) { S.flash = "每個紀錄點最多三張相片，其餘相片未有加入。"; break; }
-      try { const ph = await makePhoto(f); await put("photos", ph); d.photos.push(ph.id); d._added.push(ph.id); }
-      catch (e) { S.flash = "未能讀取其中一張相片，請再選擇一次。"; }
+    const room = Math.max(0, 3 - d.photos.length - (d._busy || 0)), take = files.slice(0, room);
+    if (files.length > room) S.flash = "每個紀錄點最多三張相片，其餘相片未有加入。";
+    d._busy = (d._busy || 0) + take.length; refresh();
+    for (const f of take) {
+      try {
+        const ph = await makePhoto(f); await put("photos", ph);
+        if (S.draft !== d) { await dropPhoto(ph.id); continue; }   // 已經離開編輯畫面
+        d.photos.push(ph.id); d._added.push(ph.id); saveDraftSoon(0);
+      } catch (e) {
+        S.flash = "未能讀取其中一張相片，請再選擇一次。";
+        logErr("photo", (e && e.message) + "｜" + (f.type || "") + " " + Math.round((f.size || 0) / 1024) + "KB");
+      } finally { d._busy = Math.max(0, (d._busy || 0) - 1); }
+      if (S.draft === d && S.route.name === "point") refresh();
+      await new Promise(r => setTimeout(r, 60));   // 俾瀏覽器時間釋放記憶體，先處理下一張
     }
-    refresh();
   },
   async rmphoto(el){
     const d = S.draft, id = el.dataset.id; d.photos = d.photos.filter(x => x !== id);
     if (d._added.includes(id)) { d._added = d._added.filter(x => x !== id); await dropPhoto(id); } else d._removed.push(id);
-    refresh();
+    saveDraftSoon(0); refresh();
   },
-  viewphoto(el){ S.viewer = el.dataset.id; renderViewer(); },
-  closeviewer(){ S.viewer = null; renderViewer(); },
+  viewphoto(el){ S.viewer = el.dataset.id; renderViewer(); guardSoon(); },
+  closeviewer(){ S.viewer = null; renderViewer(); guardSoon(); },
   openpicker(){ openSheet("picker"); },
-  closesheet(){ S.sheet = null; $("#sheet").innerHTML = ""; document.documentElement.classList.remove("locked"); S.confirm = null; if (S.route.name === "point") refresh(); },
+  closesheet(){ S.sheet = null; $("#sheet").innerHTML = ""; document.documentElement.classList.remove("locked"); S.confirm = null; if (S.route.name === "point") refresh(); guardSoon(); },
   pkbook(el){ S.pkBook = +el.dataset.b; renderSheet(); },
   picktopic(el){
     const d = S.draft, k = el.dataset.k, i = d.topics.findIndex(t => t.k === k);
     if (i >= 0) { d.topics.splice(i, 1); d.concepts = d.concepts.filter(c => c.k !== k); el.setAttribute("aria-pressed", "false"); }
     else { const info = TOPIC.get(k); d.topics.push({k, t: info.t, b: info.b}); el.setAttribute("aria-pressed", "true"); }
-    updatePkCount();
+    updatePkCount(); saveDraftSoon();
   },
   customtopic(el){
     const v = (el.dataset.v || "").trim(); if (!v) return; const k = "c:" + v;
     if (!S.draft.topics.some(t => t.k === k)) S.draft.topics.push({k, t: v, b: 0});
-    $("#pkSearch").value = ""; renderPkList(); updatePkCount();
+    $("#pkSearch").value = ""; renderPkList(); updatePkCount(); saveDraftSoon();
   },
-  rmtopic(el){ const d = S.draft, k = el.dataset.k; d.topics = d.topics.filter(t => t.k !== k); d.concepts = d.concepts.filter(c => c.k !== k); refresh(); },
+  rmtopic(el){ const d = S.draft, k = el.dataset.k; d.topics = d.topics.filter(t => t.k !== k); d.concepts = d.concepts.filter(c => c.k !== k); saveDraftSoon(); refresh(); },
   togglec(el){
     const d = S.draft, k = el.dataset.k, v = el.dataset.v, i = d.concepts.findIndex(c => c.k === k && c.c === v);
     if (i >= 0) { d.concepts.splice(i, 1); el.setAttribute("aria-pressed", "false"); } else { d.concepts.push({k, c: v}); el.setAttribute("aria-pressed", "true"); }
+    saveDraftSoon();
   },
   addconcept(){
     const i = $("#inConcept"), v = (i && i.value || "").trim(); if (!v) return;
     if (!S.draft.concepts.some(c => c.k === "custom" && c.c === v)) S.draft.concepts.push({k: "custom", c: v});
-    refresh(); const again = $("#inConcept"); if (again) again.focus();
+    saveDraftSoon(); refresh(); const again = $("#inConcept"); if (again) again.focus();
   },
-  rmconcept(el){ const v = el.dataset.v; S.draft.concepts = S.draft.concepts.filter(c => !(c.k === "custom" && c.c === v)); refresh(); },
+  rmconcept(el){ const v = el.dataset.v; S.draft.concepts = S.draft.concepts.filter(c => !(c.k === "custom" && c.c === v)); saveDraftSoon(); refresh(); },
   async savepoint(){
-    const d = S.draft; d.note = ($("#inNote") ? $("#inNote").value : d.note) || "";
+    const d = S.draft; if (!d || S.saving || d._busy) return;
+    d.note = ($("#inNote") ? $("#inNote").value : d.note) || "";
     if (!d.photos.length && !d.topics.length && !d.concepts.length && !d.note.trim()) { S.flash = "這個紀錄點還未有任何內容：請加入相片、選擇課題或輸入文字。"; return refresh(); }
-    const now = new Date().toISOString();
-    const pt = {id: d.id, tripId: d.tripId, seq: d.seq, time: d.time, photos: d.photos, topics: d.topics, concepts: d.concepts, note: d.note.trim(), createdAt: d.createdAt || now, updatedAt: now};
-    await put("points", pt);
-    for (const id of d._removed) await dropPhoto(id);
-    const i = S.points.findIndex(p => p.id === pt.id); if (i >= 0) S.points[i] = pt; else S.points.push(pt);
-    S.draft = null; go("trip", {id: pt.tripId}); toast("已儲存紀錄點 " + pad(pt.seq));
-    for (const id of pt.photos) { const ph = await getOne("photos", id); if (ph && !ph.remote) await enqueue("photo", id); }
-    await enqueue("point", pt.id);
+    S.saving = true;
+    try {
+      const now = new Date().toISOString();
+      const pt = {id: d.id, tripId: d.tripId, seq: d.seq, time: d.time, photos: d.photos, topics: d.topics, concepts: d.concepts, note: d.note.trim(), createdAt: d.createdAt || now, updatedAt: now};
+      await put("points", pt);
+      // 先排好上載次序，先至離開畫面：就算即刻閃退，下次開 app 都會照上載
+      for (const id of pt.photos) { const ph = await getOne("photos", id); if (ph && !ph.remote) await enqueue("photo", id); }
+      await enqueue("point", pt.id);
+      for (const id of d._removed) await dropPhoto(id);
+      const i = S.points.findIndex(p => p.id === pt.id); if (i >= 0) S.points[i] = pt; else S.points.push(pt);
+      await clearDraft();
+      S.draft = null; go("trip", {id: pt.tripId}); toast("已儲存紀錄點 " + pad(pt.seq));
+    } finally { S.saving = false; }
   },
 
   /* 老師 */
@@ -1361,7 +1512,7 @@ const A = {
       const d = S.draft, p = S.points.find(x => x.id === id);
       const ids = new Set([...(p ? p.photos : []), ...(d ? d.photos : []), ...(d ? d._removed : [])]);
       for (const pid of ids) await dropPhoto(pid);
-      await del("points", id); S.points = S.points.filter(x => x.id !== id);
+      await del("points", id); S.points = S.points.filter(x => x.id !== id); await clearDraft();
       const tid = d ? d.tripId : (p ? p.tripId : null); S.draft = null; tid ? go("trip", {id: tid}) : go("trips"); toast("已刪除紀錄點");
       await enqueue("pointdel", id);
     } else if (kind === "submit") {
@@ -1380,6 +1531,7 @@ const A = {
         S.flash = e.net ? "需要網絡才可以提交。答案已暫存在這部手機，連接網絡後再按提交。" : e.message; refresh();
       }
     } else if (kind === "logout") {
+      await sendLogs();
       api("logout").catch(() => {});
       await wipeLocal(); await del("meta", "session"); await del("meta", "owner");
       S.session = null; A.closesheet(); go("login"); toast("已登出");
@@ -1405,7 +1557,7 @@ document.addEventListener("change", e => {
 let ansT;
 document.addEventListener("input", e => {
   const t = e.target;
-  if (t.id === "inNote" && S.draft) { S.draft.note = t.value; if (S.confirm === "leave") S.confirm = null; }
+  if (t.id === "inNote" && S.draft) { S.draft.note = t.value; if (S.confirm === "leave") S.confirm = null; saveDraftSoon(500); }
   else if (t.id === "pkSearch") renderPkList();
   else if (t.id === "inCls") syncLoginMode();
   else if (t.dataset && t.dataset.ans !== undefined && S.route.name === "answer") {
@@ -1432,23 +1584,34 @@ document.addEventListener("submit", e => {
   else if (id === "tripForm") A.createTrip(); else if (id === "codeForm") A.loadcode(); else if (id === "qForm") A.saveqset();
 });
 window.addEventListener("online", () => { if (isStudent()) syncNow(); });
-document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible" && isStudent() && Date.now() - S.sync.lastPull > 120000) syncNow(); });
+document.addEventListener("visibilitychange", () => {
+  const vis = document.visibilityState === "visible";
+  markAlive(vis);
+  if (!vis && S.draft) saveDraftSoon(0);
+  if (vis && isStudent() && Date.now() - S.sync.lastPull > 120000) syncNow();
+});
+window.addEventListener("pagehide", () => { markAlive(false); if (S.draft) saveDraftSoon(0); });
 setInterval(() => { if (isStudent() && S.sync.pending && !S.sync.busy) flush(); }, 60000);
 
 (async function boot(){
   if (!API) return go("setup");
   const ok = await openDB(); S.volatile = !ok;
   try {
+    const lg = await getOne("meta", "logs"); if (lg && lg.items) LOGQ.push(...lg.items.slice(-40));
+    const alive = await getOne("meta", "alive");
+    if (alive && alive.fg) logErr("crash", "上次在「" + (alive.route || "") + "」畫面時突然結束" + (alive.photos ? "（編輯中相片 " + alive.photos + " 張）" : ""));
     const sess = await getOne("meta", "session");
     if (sess && sess.token) {
       S.session = sess;
-      if (sess.role === "teacher") return go("admin", {tab: "students"});
+      if (sess.role === "teacher") { go("admin", {tab: "students"}); sendLogs(); return; }
       await loadLocal();
-      if (sess.mustChange) go("setpw", {must: true}); else go("trips");
+      if (sess.mustChange) go("setpw", {must: true});
+      else if (await restoreDraft()) go("point");
+      else go("trips");
       syncNow();
       return;
     }
-  } catch (e) {}
+  } catch (e) { logErr("boot", e && e.message); }
   go("login");
 })();
 </script>
