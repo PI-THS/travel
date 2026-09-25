@@ -575,35 +575,83 @@ const ICON = {
 const STORES = ["trips","points","photos","responses","meta","outbox"];
 const mem = {}; STORES.forEach(s => { mem[s] = new Map(); });
 let idb = null;
-function openDB(){
+function openOnce(){
   return new Promise(res => {
+    let done = false;
+    const fin = ok => { if (!done) { done = true; clearTimeout(timer); res(ok); } };
+    const timer = setTimeout(() => fin(false), 6000);   // 個別手機開資料庫會卡住：等太耐就當開唔到，唔好停喺載入中
     try {
       const r = indexedDB.open("kaocha-shouji-formal", 1);
       r.onupgradeneeded = () => { const d = r.result; STORES.forEach(s => { if (!d.objectStoreNames.contains(s)) d.createObjectStore(s, {keyPath:"id"}); }); };
-      r.onsuccess = () => { idb = r.result; res(true); };
-      r.onerror = () => res(false);
-      r.onblocked = () => res(false);
-    } catch (e) { res(false); }
+      r.onsuccess = () => { if (done) { try { r.result.close(); } catch (e) {} return; } idb = r.result; fin(true); };
+      r.onerror = () => fin(false);
+      r.onblocked = () => fin(false);
+    } catch (e) { fin(false); }
   });
 }
-function req(store, mode, fn){
+async function openDB(){
+  if (await openOnce()) return true;
+  await new Promise(r => setTimeout(r, 400));   // 開唔到就隔一陣再試一次
+  return openOnce();
+}
+// iPhone 由背景返嚟，資料庫連線有時會斷：重新連線再做一次
+let reopening = null;
+function reopen(){
+  if (!reopening) {
+    try { if (idb) idb.close(); } catch (e) {}
+    reopening = openOnce().then(ok => {
+      if (!ok) { idb = null; S.volatile = true; logErr("idb", "資料庫連線中斷，未能重新連線", false); }
+      reopening = null; return ok;
+    });
+  }
+  return reopening;
+}
+function req(store, mode, fn, again){
   return new Promise(res => {
+    let over = false;
+    const fail = (name, lost) => {
+      if (over) return; over = true;
+      if (lost && !again) return reopen().then(ok => (ok ? req(store, mode, fn, true) : undefined)).then(res);
+      if (mode === "readwrite" || lost) logErr("idb", store + " " + (name || "寫入失敗"), false);
+      res(undefined);
+    };
     try {
       const t = idb.transaction(store, mode); const q = fn(t.objectStore(store));
-      t.oncomplete = () => res(q && q.result);
-      t.onerror = t.onabort = () => { if (mode === "readwrite") logErr("idb", store + " " + ((t.error && t.error.name) || "寫入失敗"), false); res(undefined); };
-    } catch (e) { logErr("idb", store + " " + (e && e.name), false); res(undefined); }
+      t.oncomplete = () => { over = true; res(q && q.result); };
+      t.onerror = t.onabort = () => { const n = t.error && t.error.name; fail(n, n === "UnknownError" || n === "InvalidStateError"); };
+    } catch (e) { const n = e && e.name; fail(n, n === "InvalidStateError" || n === "UnknownError"); }
   });
 }
 async function put(store, obj){ mem[store].set(obj.id, obj); if (idb) await req(store, "readwrite", s => s.put(obj)); }
 async function del(store, id){ mem[store].delete(id); if (idb) await req(store, "readwrite", s => s.delete(id)); }
 async function getOne(store, id){ if (mem[store].has(id)) return mem[store].get(id); if (!idb) return undefined; const v = await req(store, "readonly", s => s.get(id)); if (v) mem[store].set(id, v); return v; }
-async function getAll(store){ if (!idb) return [...mem[store].values()]; const v = await req(store, "readonly", s => s.getAll()); (v || []).forEach(o => mem[store].set(o.id, o)); return v || []; }
+async function getAll(store){
+  if (!idb) return [...mem[store].values()];
+  const v = await req(store, "readonly", s => s.getAll());
+  if (!v) return [...mem[store].values()];   // 讀唔到就用返記憶體入面嘅資料，唔好當成冇紀錄
+  v.forEach(o => mem[store].set(o.id, o)); return v;
+}
 async function clearStore(store){ mem[store].clear(); if (idb) await req(store, "readwrite", s => s.clear()); }
 
+/* ── 登入資料：IndexedDB 之外再喺 localStorage 留一份，手機重新載入頁面時資料庫讀唔到，都唔會變咗登出 ── */
+const SKEY = "yhp-travel-session";
+function sessBackup(s){ try { if (s && s.token) localStorage.setItem(SKEY, JSON.stringify(s)); } catch (e) {} }
+function sessFromBackup(){ try { const s = JSON.parse(localStorage.getItem(SKEY) || "null"); return s && s.token && s.role ? s : null; } catch (e) { return null; } }
+async function saveSession(){ sessBackup(S.session); await put("meta", S.session); }
+// 只清走屬於呢個登入嘅資料：舊分頁收到「登入已失效」，唔會連新登入都清埋
+async function dropSession(token){
+  try { const b = sessFromBackup(); if (!b || b.token === token) localStorage.removeItem(SKEY); } catch (e) {}
+  const m = mem.meta.get("session"); if (!m || m.token === token) mem.meta.delete("session");
+  if (idb) { const v = await req("meta", "readonly", s => s.get("session")); if (v && v.token === token) await req("meta", "readwrite", s => s.delete("session")); }
+}
+
 /* ── 伺服器 ── */
+// 登入畫面一出現就先喚醒伺服器：Apps Script 閒置一段時間後，第一個要求會慢一兩秒
+let warmAt = 0;
+function warmUp(){ if (!API || Date.now() - warmAt < 120000) return; warmAt = Date.now(); api("ping").catch(() => {}); }
 async function api(action, params = {}){
-  const body = JSON.stringify(Object.assign({action, token: S.session ? S.session.token : ""}, params));
+  const tok = S.session ? S.session.token : "";
+  const body = JSON.stringify(Object.assign({action, token: tok}, params));
   const ctl = typeof AbortController === "function" ? new AbortController() : null;
   const timer = ctl ? setTimeout(() => ctl.abort(), 90000) : null;
   let data;
@@ -613,10 +661,11 @@ async function api(action, params = {}){
   } catch (e) {
     const err = new Error("未能連接伺服器，請檢查網絡後再試。"); err.net = true; throw err;
   } finally { if (timer) clearTimeout(timer); }
+  warmAt = Date.now();
   if (!data || !data.ok) {
     const err = new Error((data && data.message) || "伺服器發生錯誤，請稍後再試。");
     err.code = (data && data.code) || "error";
-    if (err.code === "auth" && S.session) authLost();
+    if (err.code === "auth" && S.session && S.session.token === tok) authLost(action);   // 舊登入嘅遲來回覆唔會登出新登入
     throw err;
   }
   return data;
@@ -818,6 +867,7 @@ function render(){
   const app = $("#app"); app.innerHTML = html; hydrate(app);
   if (r.name === "point") initCarousel(app);
   if (r.name === "login") syncLoginMode();
+  if (r.name === "login" || r.name === "register") warmUp();
 }
 function refresh(){ const y = window.scrollY; render(); try { window.scrollTo(0, y); } catch (e) {} if (S.sheet === "account") renderSheet(); }
 let toastT; function toast(msg){ const el = $("#toast"); el.textContent = msg; el.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => { el.hidden = true; }, 2600); }
@@ -1387,7 +1437,7 @@ async function pull(){
   const d = await api("pull");
   if (!isStudent()) return;
   const pend = new Set((await getAll("outbox")).map(o => o.ref));
-  Object.assign(S.session, {name: d.me.name, cls: d.me.cls, no: d.me.no}); await put("meta", S.session);
+  Object.assign(S.session, {name: d.me.name, cls: d.me.cls, no: d.me.no}); await saveSession();
   const sTrips = new Set(d.trips.map(t => t.id)), sPoints = new Set(d.points.map(p => p.id)), sResp = new Set(d.responses.map(r => r.id));
   // 只刪除「曾經上載、而家伺服器冇」嘅紀錄（即係喺其他手機刪咗）；未上載過嘅一定保留
   for (const t of await getAll("trips")) if (!sTrips.has(t.id) && !pend.has(t.id) && t.synced) await del("trips", t.id);
@@ -1431,7 +1481,7 @@ async function gcPhotos(){
   (await getAll("points")).forEach(p => p.photos.forEach(id => keep.add(id)));
   (await getAll("outbox")).forEach(o => { if (o.op === "photo") keep.add(o.ref); });
   if (S.draft) S.draft.photos.forEach(id => keep.add(id));
-  const dr = await getOne("meta", "draft"); if (dr && dr.d) dr.d.photos.forEach(id => keep.add(id));
+  const dr = await getOne("meta", "draft"); if (dr && dr.d && Array.isArray(dr.d.photos)) dr.d.photos.forEach(id => keep.add(id));
   for (const p of await getAll("photos")) if (!keep.has(p.id)) await dropPhoto(p.id);
 }
 function syncNow(){
@@ -1467,25 +1517,27 @@ async function startSession(d){
   if (me.role === "student") {
     const owner = await getOne("meta", "owner");
     if (owner && owner.sid !== me.sid) await wipeLocal();
-    await put("meta", {id: "owner", sid: me.sid, name: me.name});
+    await put("meta", {id: "owner", sid: me.sid, name: me.name, cls: me.cls, no: me.no});
+    try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {}); } catch (e) {}   // 請瀏覽器唔好自動清走未上載嘅紀錄
   }
   S.session = {id: "session", token: d.token, role: me.role, sid: me.sid || "", cls: me.cls || "", no: me.no || "", name: me.name || "", mustChange: !!d.mustChange};
-  S.authLost = false; S.t = {};
-  await put("meta", S.session);
-  if (me.role === "teacher") return go("admin", {tab: "students"});
+  S.authLost = false; S.t = d.overview ? {overview: {data: d.overview}} : {};   // 老師：登入時已一併取得後台首頁資料
+  await saveSession();
+  if (me.role === "teacher") { go("admin", {tab: "students"}); sendLogs(); return; }
   await loadLocal();
   if (d.mustChange) go("setpw", {must: true});
   else if (await restoreDraft()) go("point");
   else go("trips");
   syncNow();
 }
-async function authLost(){
+async function authLost(why){
   if (!S.session || S.authLost) return;
   S.authLost = true;
-  const teacher = isTeacher(), name = S.session.name;
-  S.session = null; S.t = {}; resetPhotoCache(); await del("meta", "session"); S.sheet = null; renderSheet(); document.documentElement.classList.remove("locked");
+  const teacher = isTeacher(), s = S.session, name = s.name;
+  logErr("auth", "伺服器表示登入已失效（" + (why || "") + "）");   // 重新登入後會送去「錯誤紀錄」工作表，方便查原因
+  S.session = null; S.t = {}; resetPhotoCache(); await dropSession(s.token); S.sheet = null; renderSheet(); document.documentElement.classList.remove("locked");
   const n = teacher ? 0 : (await getAll("outbox")).length;
-  go("login", {msg: "登入已失效，請重新登入。" + (n ? "這部手機仍有 " + n + " 項屬於" + name + "的紀錄未上載，請以同一帳戶登入，紀錄便會自動上載。" : "")});
+  go("login", {code: teacher ? TEACHER : codeOf(s.cls, s.no), msg: "登入已失效，請重新登入。" + (n ? "這部手機仍有 " + n + " 項屬於" + name + "的紀錄未上載，請以同一帳戶登入，紀錄便會自動上載。" : "")});
 }
 
 /* ── 動作 ── */
@@ -1536,14 +1588,14 @@ const A = {
     flashIn(""); setBusy("pwBtn", true, "儲存中……");
     try {
       await api("changePassword", {password: a});
-      S.session.mustChange = false; await put("meta", S.session);
+      S.session.mustChange = false; await saveSession();
       const back = S.route.back; back ? go(back.name, back) : go("trips"); toast("已更新密碼");
     } catch (e) { setBusy("pwBtn", false, "儲存密碼"); flashIn(e.message); }
   },
   account(){ openSheet("account"); },
   syncnow(){ syncNow(); },
   tochangepw(){ const back = Object.assign({}, S.route); A.closesheet(); go("setpw", {must: false, back}); },
-  async tlogout(){ api("logout").catch(() => {}); S.session = null; S.t = {}; resetPhotoCache(); await del("meta", "session"); go("login"); },
+  async tlogout(){ const tok = S.session ? S.session.token : ""; api("logout").catch(() => {}); S.session = null; S.t = {}; resetPhotoCache(); await dropSession(tok); go("login"); },
   info(){ openSheet("account"); },
   back(){ const b = S.route.back; if (b) go(b.name, b); else go(isTeacher() ? "admin" : "trips"); },
 
@@ -1772,8 +1824,9 @@ const A = {
       }
     } else if (kind === "logout") {
       await sendLogs();
+      const tok = S.session ? S.session.token : "";
       api("logout").catch(() => {});
-      await wipeLocal(); await del("meta", "session"); await del("meta", "owner");
+      await wipeLocal(); await dropSession(tok); await del("meta", "owner");
       S.session = null; A.closesheet(); go("login"); toast("已登出");
     } else if (kind === "delqs") {
       try { await api("tDeleteQset", {id}); S.t = {}; go("admin", {tab: "qsets"}); toast("已刪除題目"); }
@@ -1829,6 +1882,7 @@ document.addEventListener("visibilitychange", () => {
   markAlive(vis);
   if (!vis && S.draft) saveDraftSoon(0);
   if (vis && isStudent() && Date.now() - S.sync.lastPull > 120000) syncNow();
+  else if (vis && (isTeacher() || !S.session)) warmUp();
 });
 window.addEventListener("pagehide", () => { markAlive(false); if (S.draft) saveDraftSoon(0); });
 setInterval(() => { if (isStudent() && S.sync.pending && !S.sync.busy) flush(); }, 60000);
@@ -1836,23 +1890,38 @@ setInterval(() => { if (isStudent() && S.sync.pending && !S.sync.busy) flush(); 
 (async function boot(){
   if (!API) return go("setup");
   const ok = await openDB(); S.volatile = !ok;
+  let sess = null, owner = null, fresh = false;
   try {
     const lg = await getOne("meta", "logs"); if (lg && lg.items) LOGQ.push(...lg.items.slice(-40));
     const alive = await getOne("meta", "alive");
     if (alive && alive.fg) logErr("crash", "上次在「" + (alive.route || "") + "」畫面時突然結束" + (alive.photos ? "（編輯中相片 " + alive.photos + " 張）" : ""));
-    const sess = await getOne("meta", "session");
-    if (sess && sess.token) {
-      S.session = sess;
-      if (sess.role === "teacher") { go("admin", {tab: "students"}); sendLogs(); return; }
-      await loadLocal();
-      if (sess.mustChange) go("setpw", {must: true});
-      else if (await restoreDraft()) go("point");
-      else go("trips");
-      syncNow();
-      return;
-    }
+    sess = await getOne("meta", "session");
+    owner = await getOne("meta", "owner");
+    fresh = ok && !lg && !alive && !owner;
   } catch (e) { logErr("boot", e && e.message); }
-  go("login");
+  const bak = sessFromBackup();
+  if (!(sess && sess.token) && bak) {
+    sess = bak; put("meta", sess);
+    logErr("session", (ok ? "資料庫找不到登入資料" : "資料庫未能開啟") + "，已用後備資料保持登入");
+  } else if (sess && sess.token && !bak) sessBackup(sess);
+  if (!(sess && sess.token)) {
+    // 記低點解要重新登入（登入後送去「錯誤紀錄」）：全新空白通常代表瀏覽器清走咗資料，或者喺其他 app 內置瀏覽器開啟
+    if (!ok) logErr("session", "資料庫未能開啟，需要重新登入");
+    else if (fresh) logErr("session", "這個瀏覽器沒有本機資料（第一次使用，或瀏覽器清除了資料）");
+    return go("login", owner && owner.cls ? {code: codeOf(owner.cls, owner.no)} : {});
+  }
+  S.session = sess;
+  if (sess.role === "teacher") { go("admin", {tab: "students"}); sendLogs(); return; }
+  await loadLocal();
+  try {
+    if (sess.mustChange) go("setpw", {must: true});
+    else if (await restoreDraft()) go("point");
+    else go("trips");
+  } catch (e) {
+    logErr("boot", "未能開啟上次的畫面：" + (e && e.message));   // 畫面出錯唔等於登出：返去考察列表
+    S.draft = null; S.draftRestored = false; go("trips");
+  }
+  syncNow();
 })();
 </script>
 </body>
