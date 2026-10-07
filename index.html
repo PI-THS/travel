@@ -1593,16 +1593,18 @@ const A = {
   /* 帳戶 */
   tologin(){ go("login"); },
   async register(){
+    if (S.registering || isStudent()) return;   // 連按兩次或者已經登入：唔好再送出
     const name = $("#rName").value.normalize("NFKC").replace(/\s+/g, ""), cls = $("#rCls").value.normalize("NFKC").replace(/\s+/g, "").toUpperCase(), no = parseInt($("#rNo").value.normalize("NFKC"), 10);
     if (!/^[㐀-䶿一-鿿豈-﫿]{2,8}$/.test(name)) return flashIn("請輸入中文姓名（2 至 8 個中文字）。");
     if (!/^[0-9A-Z\-]{1,6}$/.test(cls) || cls === TEACHER) return flashIn("請輸入正確的班別，例如 4A。");
     if (!(no >= 1 && no <= 99)) return flashIn("請輸入正確的學號，例如 01。");
-    flashIn(""); setBusy("regBtn", true, "登記中……");
+    flashIn(""); setBusy("regBtn", true, "登記中……"); S.registering = true;
     try { await startSession(await api("gRegister", {ticket: S.route.ticket, name, cls, no})); toast("登記成功，歡迎使用旅遊日誌"); }
     catch (e) {
+      if (isStudent()) return;
       if (e.code === "ticket") return go("login", {msg: e.message});
       setBusy("regBtn", false, "登記並登入"); flashIn(e.message);
-    }
+    } finally { S.registering = false; }
   },
   toeditclass(){ const back = Object.assign({}, S.route); A.closesheet(); go("editclass", {back}); },
   async saveclass(){
