@@ -854,6 +854,7 @@ function render(){
     case "setup": html = vSetup(); break;
     case "login": html = vLogin(); break;
     case "register": html = vRegister(); break;
+    case "editclass": html = vEditClass(); break;
     case "trips": html = vTrips(); break;
     case "newtrip": html = vNewTrip(); break;
     case "trip": html = vTrip(r.id); break;
@@ -1025,26 +1026,16 @@ function vSetup(){
     '<p class="fineprint">請老師按「設定步驟」第 6 步，在 config.js 填上 Apps Script 網址。</p></div></main>';
 }
 function vLogin(){
-  const r = S.route, teacher = !!r.teacher;
+  const r = S.route;
   const warn = INAPP ? '<p class="flash">你正在其他 app 內置的瀏覽器開啟這個網頁，Google 登入未必可用，紀錄亦有機會遺失。請按右上角選單，改用 Safari 或 Chrome 開啟。</p>' : '';
-  const student = '<div class="panel stack">' +
+  return '<main class="login">' + brandHTML() + '<div class="panel stack">' +
       (r.msg ? '<p class="flash">' + esc(r.msg) + '</p>' : '') +
-      '<p class="label">學生登入</p>' +
-      '<p class="fineprint">請使用你的 Google 帳戶登入。第一次登入需要登記中文姓名、班別及學號。</p>' +
+      '<p class="label">登入</p>' +
+      '<p class="fineprint">請使用 Google 帳戶登入。學生第一次登入需要登記中文姓名、班別及學號；老師登入後直接進入後台。</p>' +
       (GCID ? '<div id="gBtn" class="gbtn" aria-live="polite"><p class="loading">正在載入 Google 登入……</p></div>'
-            : '<p class="flash">老師未設定 Google 登入：請在 config.js 填上 GOOGLE_CLIENT_ID。</p>') +
+            : '<p class="flash">未設定 Google 登入：請在 config.js 填上 GOOGLE_CLIENT_ID。</p>') +
       '<p class="flash" data-flash role="alert" hidden></p>' +
-      '<div class="quick"><button type="button" class="linkbtn" data-act="toteacher">老師登入</button></div>' +
-    '</div>';
-  const tform = '<form id="loginForm" class="panel stack" novalidate>' +
-      (r.msg ? '<p class="flash">' + esc(r.msg) + '</p>' : '') +
-      '<p class="label">老師登入</p>' +
-      '<div class="field"><label for="inPw">老師密碼</label><input id="inPw" type="password" maxlength="64" autocomplete="current-password"></div>' +
-      '<p class="flash" data-flash role="alert" hidden></p>' +
-      '<button class="btn btn-primary btn-block" type="submit" id="loginBtn">登入</button>' +
-      '<div class="quick"><button type="button" class="linkbtn" data-act="tologin">學生登入（Google 帳戶）</button></div>' +
-    '</form>';
-  return '<main class="login">' + brandHTML() + (teacher ? tform : student) +
+    '</div>' +
     (S.volatile ? '<p class="flash">這個瀏覽器未能保存資料，未上載的紀錄在關閉頁面後會消失。請改用 Safari 或 Chrome 開啟。</p>' : '') +
     warn + '</main>';
 }
@@ -1082,13 +1073,28 @@ function vRegister(){
       '<div class="field"><span class="label">Google 帳戶</span><p class="gmail">' + esc(r.email || "") + '</p></div>' +
       '<div class="field"><label for="rName">中文姓名</label><input id="rName" maxlength="8" placeholder="例如：陳小明" autocomplete="off"></div>' +
       '<div class="rowfields">' +
-        '<div class="field"><label for="rCls">班別</label><input id="rCls" maxlength="2" autocapitalize="characters" spellcheck="false" placeholder="例如：4A"></div>' +
+        '<div class="field"><label for="rCls">班別</label><input id="rCls" maxlength="6" autocapitalize="characters" spellcheck="false" placeholder="例如：4A"></div>' +
         '<div class="field"><label for="rNo">學號</label><input id="rNo" maxlength="2" inputmode="numeric" pattern="[0-9]*" placeholder="例如：01"></div>' +
       '</div>' +
-      '<p class="hint">登記後，班別及學號不能自行更改。如有錯誤，請通知老師。</p>' +
+      '<p class="hint">姓名登記後不能更改，請確認寫對。升班後可以在「帳戶」自行更改班別及學號。</p>' +
       '<p class="flash" data-flash role="alert" hidden></p>' +
     '</form></main>' +
     '<div class="dock"><button type="submit" form="regForm" class="btn btn-primary" id="regBtn">登記並登入</button></div>';
+}
+
+function vEditClass(){
+  const u = S.session;
+  return bar("更改班別學號", {back:"back"}) +
+    '<main class="view"><form id="classForm" class="stack" autocomplete="off" novalidate>' +
+      '<p class="hint">升班後，請在這裏更新你的班別及學號。你的考察紀錄會保留。</p>' +
+      '<div class="field"><span class="label">姓名</span><p class="gmail">' + esc(u.name) + '</p><p class="hint">姓名登記後不能更改。如有錯誤，請通知老師。</p></div>' +
+      '<div class="rowfields">' +
+        '<div class="field"><label for="cCls">班別</label><input id="cCls" maxlength="6" autocapitalize="characters" spellcheck="false" placeholder="例如：5A" value="' + esc(u.cls) + '"></div>' +
+        '<div class="field"><label for="cNo">學號</label><input id="cNo" maxlength="2" inputmode="numeric" pattern="[0-9]*" placeholder="例如：01" value="' + esc(pad(u.no)) + '"></div>' +
+      '</div>' +
+      '<p class="flash" data-flash role="alert" hidden></p>' +
+    '</form></main>' +
+    '<div class="dock"><button type="submit" form="classForm" class="btn btn-primary" id="classBtn">儲存</button></div>';
 }
 
 /* ── 學生畫面 ── */
@@ -1221,11 +1227,11 @@ function vAdmin(){
   const top = bar("YHP 後台", {refresh:true, logout:true});
   const c = need("overview", "tOverview", {});
   if (!c.data) return top + '<main class="view">' + stateHTML(c, "overview") + '</main>';
-  const d = c.data, nReg = d.students.filter(x => x.registered).length, nOff = d.students.length - nReg;
+  const d = c.data, nReg = d.students.length;
   const nTrips = d.students.reduce((s, x) => s + x.trips, 0), nSub = d.students.reduce((s, x) => s + x.submitted, 0);
-  const reg = '<section class="regbox' + (nOff ? '' : ' open') + '" aria-labelledby="hReg">' +
-    '<p class="reg-status" id="hReg">學生名單 ' + d.students.length + ' 人：已登記 ' + nReg + ' 人' + (nOff ? '，未登記 ' + nOff + ' 人' : '') + '</p>' +
-    '<p class="reg-sub">學生第一次使用時，用 Google 帳戶登入，再登記中文姓名、班別及學號。名單以外的學號不能登記；加新學生要改 Apps Script 的 ROSTER，再執行「匯入名單」。</p></section>';
+  const reg = '<section class="regbox open" aria-labelledby="hReg">' +
+    '<p class="reg-status" id="hReg">已登記學生 ' + nReg + ' 人</p>' +
+    '<p class="reg-sub">學生用 Google 帳戶登入，並自行登記中文姓名、班別及學號，不需要預先輸入名單。學生登記後會自動出現在下面；登記錯誤的可以在學生頁面清除登記。</p></section>';
   const head = '<section class="adminhead"><p class="eyebrow">老師後台</p><h2 class="th-place">YHP</h2>' +
     '<div class="stats">' + [[nReg, "已登記學生"], [nTrips, "考察"], [d.qsets.length, "組題目"], [nSub, "份答案"]].map(([n, l]) => '<span><b>' + pad(n) + '</b>' + l + '</span>').join("") + '</div></section>';
   const seg = '<div class="seg" role="tablist" aria-label="後台分頁">' + [["students","學生紀錄"],["qsets","考察題目"]].map(([k, l]) =>
@@ -1235,12 +1241,12 @@ function vAdmin(){
     let last = null;
     body = d.students.length ? '<div class="slist">' + d.students.map(s => {
       let h = "";
-      if (s.cls !== last) { last = s.cls; const inCls = d.students.filter(x => x.cls === s.cls); h = '<p class="label grp">' + esc(s.cls) + ' 班　' + inCls.filter(x => x.registered).length + ' / ' + inCls.length + ' 人已登記</p>'; }
+      if (s.cls !== last) { last = s.cls; const inCls = d.students.filter(x => x.cls === s.cls); h = '<p class="label grp">' + esc(s.cls) + ' 班　' + inCls.length + ' 人</p>'; }
       return h + '<button type="button" class="srow' + (s.registered ? '' : ' off') + '" data-act="openstudent" data-sid="' + s.sid + '"><span class="avatar" aria-hidden="true">' + esc(s.name ? s.name.slice(0, 1) : s.cls) + '</span>' +
         '<span class="sr-main"><span class="sr-name">' + esc(codeOf(s.cls, s.no)) + '　' + esc(s.name || "（未登記）") + '</span>' +
         '<span class="sr-sub">' + (s.registered ? s.trips + ' 次考察 · ' + s.submitted + ' 份答案' + (s.lastLogin ? ' · ' + fmtStamp(s.lastLogin) + ' 登入' : '') + (s.email ? '<br>' + esc(s.email) : '') : '還未用 Google 帳戶登記') + '</span></span>' +
         (s.registered ? '' : '<span class="pill-off">未登記</span>') + '</button>';
-    }).join("") + '</div>' : '<div class="empty"><p>名單還未有學生。</p><p>請在 Apps Script 執行一次「匯入名單」。</p></div>';
+    }).join("") + '</div>' : '<div class="empty"><p>還未有學生登記。</p><p>學生用 Google 帳戶登入並登記後，會顯示在這裏。</p></div>';
   } else {
     body = d.qsets.length ? '<div class="slist">' + d.qsets.map(q =>
       '<button type="button" class="qsrow" data-act="openqset" data-id="' + q.id + '"><span class="qs-code">' + esc(q.code) + '</span>' +
@@ -1351,7 +1357,8 @@ function renderSheet(){
       '<div class="sheet-head"><h3 id="acTitle">帳戶</h3><button type="button" class="iconbtn" data-act="closesheet" aria-label="關閉">' + ICON.x + '</button></div>' +
       '<div class="sheet-body"><dl class="acct"><dt>姓名</dt><dd>' + esc(s.name) + '</dd><dt>班別學號</dt><dd>' + esc(codeOf(s.cls, s.no)) + '</dd>' + (s.email ? '<dt>GOOGLE</dt><dd>' + esc(s.email) + '</dd>' : '') + '</dl>' +
         '<p class="syncline" role="status">' + esc(syncText()) + '</p>' +
-        '<div class="btnrow"><button type="button" class="btn btn-ghost sm" data-act="syncnow"' + (S.sync.busy ? ' disabled' : '') + '>' + ICON.refresh + '立即同步</button></div>' +
+        '<div class="btnrow"><button type="button" class="btn btn-ghost sm" data-act="syncnow"' + (S.sync.busy ? ' disabled' : '') + '>' + ICON.refresh + '立即同步</button>' +
+        '<button type="button" class="btn btn-ghost sm" data-act="toeditclass">更改班別學號</button></div>' +
         confirmBtn("logout", "登出", n ? "尚有 " + n + " 項未上載，登出會遺失。再按一次確認登出" : "再按一次確認登出") +
         '<p class="fineprint">登出後，這部手機上的紀錄會被清除；再次登入即可從雲端取回已上載的紀錄。</p>' +
       '</div></div>';
@@ -1560,7 +1567,7 @@ async function authLost(why){
   logErr("auth", "伺服器表示登入已失效（" + (why || "") + "）");   // 重新登入後會送去「錯誤紀錄」工作表，方便查原因
   S.session = null; S.t = {}; resetPhotoCache(); await dropSession(s.token); S.sheet = null; renderSheet(); document.documentElement.classList.remove("locked");
   const n = teacher ? 0 : (await getAll("outbox")).length;
-  go("login", {teacher, msg: "登入已失效，請重新登入。" + (n ? "這部手機仍有 " + n + " 項屬於" + name + "（" + codeOf(s.cls, s.no) + "）的紀錄未上載，請用 Google 帳戶登入並登記同一個班別學號，紀錄便會自動上載。" : "")});
+  go("login", {msg: "登入已失效，請重新登入。" + (n ? "這部手機仍有 " + n + " 項屬於" + name + "（" + codeOf(s.cls, s.no) + "）的紀錄未上載，請用 Google 帳戶登入並登記同一個班別學號，紀錄便會自動上載。" : "")});
 }
 
 /* ── 動作 ── */
@@ -1584,19 +1591,11 @@ const countPoints = txt => String(txt || "").split(/\n+/).map(l => l.trim()).fil
 
 const A = {
   /* 帳戶 */
-  async login(){
-    const pw = $("#inPw").value;
-    if (!pw) return flashIn("請輸入老師密碼。");
-    flashIn(""); setBusy("loginBtn", true, "登入中……");
-    try { await startSession(await api("login", {cls: TEACHER, password: pw})); }
-    catch (e) { setBusy("loginBtn", false, "登入"); flashIn(e.message); }
-  },
-  toteacher(){ go("login", {teacher: true}); },
   tologin(){ go("login"); },
   async register(){
     const name = $("#rName").value.normalize("NFKC").replace(/\s+/g, ""), cls = $("#rCls").value.normalize("NFKC").replace(/\s+/g, "").toUpperCase(), no = parseInt($("#rNo").value.normalize("NFKC"), 10);
     if (!/^[㐀-䶿一-鿿豈-﫿]{2,8}$/.test(name)) return flashIn("請輸入中文姓名（2 至 8 個中文字）。");
-    if (!/^\d[A-Z]$/.test(cls)) return flashIn("請輸入正確的班別，例如 4A。");
+    if (!/^[0-9A-Z\-]{1,6}$/.test(cls) || cls === TEACHER) return flashIn("請輸入正確的班別，例如 4A。");
     if (!(no >= 1 && no <= 99)) return flashIn("請輸入正確的學號，例如 01。");
     flashIn(""); setBusy("regBtn", true, "登記中……");
     try { await startSession(await api("gRegister", {ticket: S.route.ticket, name, cls, no})); toast("登記成功，歡迎使用旅遊日誌"); }
@@ -1605,9 +1604,23 @@ const A = {
       setBusy("regBtn", false, "登記並登入"); flashIn(e.message);
     }
   },
+  toeditclass(){ const back = Object.assign({}, S.route); A.closesheet(); go("editclass", {back}); },
+  async saveclass(){
+    const cls = $("#cCls").value.normalize("NFKC").replace(/\s+/g, "").toUpperCase(), no = parseInt($("#cNo").value.normalize("NFKC"), 10);
+    if (!/^[0-9A-Z\-]{1,6}$/.test(cls) || cls === TEACHER) return flashIn("請輸入正確的班別，例如 5A。");
+    if (!(no >= 1 && no <= 99)) return flashIn("請輸入正確的學號，例如 01。");
+    if (cls === S.session.cls && no === S.session.no) return A.back();
+    flashIn(""); setBusy("classBtn", true, "儲存中……");
+    try {
+      const d = await api("updateClass", {cls, no});
+      Object.assign(S.session, {cls: d.me.cls, no: d.me.no}); await saveSession();
+      await put("meta", {id: "owner", sid: d.me.sid, name: d.me.name, cls: d.me.cls, no: d.me.no});
+      A.back(); toast("已更新為 " + codeOf(d.me.cls, d.me.no));
+    } catch (e) { setBusy("classBtn", false, "儲存"); flashIn(e.message); }
+  },
   account(){ openSheet("account"); },
   syncnow(){ syncNow(); },
-  async tlogout(){ const tok = S.session ? S.session.token : ""; api("logout").catch(() => {}); S.session = null; S.t = {}; resetPhotoCache(); await dropSession(tok); go("login", {teacher: true}); },
+  async tlogout(){ const tok = S.session ? S.session.token : ""; api("logout").catch(() => {}); S.session = null; S.t = {}; resetPhotoCache(); await dropSession(tok); try { google.accounts.id.disableAutoSelect(); } catch (e) {} go("login"); },
   info(){ openSheet("account"); },
   back(){ const b = S.route.back; if (b) go(b.name, b); else go(isTeacher() ? "admin" : "trips"); },
 
@@ -1884,7 +1897,7 @@ document.addEventListener("keydown", e => {
 });
 document.addEventListener("submit", e => {
   e.preventDefault(); const id = e.target.id;
-  if (id === "loginForm") A.login(); else if (id === "regForm") A.register();
+  if (id === "regForm") A.register(); else if (id === "classForm") A.saveclass();
   else if (id === "tripForm") A.createTrip(); else if (id === "codeForm") A.loadcode(); else if (id === "qForm") A.saveqset();
 });
 window.addEventListener("online", () => { if (isStudent()) syncNow(); });
