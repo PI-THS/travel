@@ -135,6 +135,9 @@ input::placeholder,textarea::placeholder{color:var(--ink-3)}
 .pp-sub{margin:0;font:500 .7rem var(--f-mono);letter-spacing:.55em;padding-left:.55em;opacity:.85}
 .panel{background:var(--sheet);border-radius:.8rem;padding:1.4rem 1.25rem 1.2rem;box-shadow:var(--shadow)}
 .quick{display:flex;flex-direction:column;gap:.2rem;padding-top:.7rem;border-top:1.5px dashed var(--rule)}
+.gbtn{display:flex;justify-content:center;min-height:44px}
+.gmail{margin:0;padding:.6rem .8rem;border-radius:.4rem;background:var(--sunk);font:500 .9rem var(--f-ui);color:var(--ink);word-break:break-all}
+.rowfields{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
 
 /* 考察列表：車飛 */
 .hello{margin:0;display:flex;align-items:baseline;gap:.6rem;font:700 1.02rem var(--f-ui);color:var(--ink)}
@@ -440,6 +443,7 @@ fieldset.qedit legend{float:left;width:100%;padding:0;font:700 1.1rem var(--f-ha
 <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 
 <script src="config.js"></script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 
 <script>
 const DATA = {"books":[{"n":1,"t":"旅遊導論"},{"n":2,"t":"款待導論"},{"n":3,"t":"地理名勝‧主題公園及景點要素"},{"n":4,"t":"客務關係及服務‧行業趨勢議題"}],"topics":[{"b":1,"n":1,"t":"旅遊業整合模式","c":["旅客","旅遊推廣者","旅遊服務供應商","經濟因素","政治因素","社會因素","文化因素","環境因素","科技因素"]},{"b":1,"n":2,"t":"旅行、旅遊與旅客","c":["有時間性","離開原居地","自願","往返","性質","短程旅遊（不過夜）","本地旅客","國際旅客"]},{"b":1,"n":3,"t":"旅遊的形式","c":["公幹/商務旅遊","文化旅遊","環保旅遊","學習旅遊","宗教朝聖","保健旅遊","探訪親友","運動旅遊"]},{"b":1,"n":4,"t":"高恆分類法","c":["旅行團群體旅客","個別的群體旅客","探險式旅客","漫遊式旅客","環境泡泡","制度化旅遊","非制度化旅遊"]},{"b":1,"n":5,"t":"蒲樂分類法","c":["保守型","接近保守型","中庸型","接近探奇型","探奇型"]},{"b":1,"n":6,"t":"旅客行為守則及旅遊時的關注事項（風險）","c":["尊重人權","協助保護自然環境","尊重文化資源","遵守公平貿易原則","了解當地習俗","罪行的可能性","人身安全","財務風險","健康","有特殊需要的旅客"]},{"b":1,"n":7,"t":"旅遊的動機","c":["好奇心","快樂","健康","運動","專業及公商務","自我/尊重的需求","親友交往","尋根","宗教信仰及精神審美"]},{"b":1,"n":8,"t":"旅客流量概念下的行程模式","c":["雙向往返模式","中轉圓形往返模式","圓形往返模式","幅射往返模式"]},{"b":1,"n":9,"t":"馬斯勞需求定論","c":["生理需要","安全需要","社交需要","尊重需要","自我實現需要"]},{"b":1,"n":10,"t":"丹恩的推拉因素","c":["推動因素","拉動因素"]},{"b":1,"n":11,"t":"旅遊產品的特性","c":["無形性","生產與消費不可分割性","差異性","不可保存性","互補性及替代性","不可擁有及不可轉移","需求與價格不固定","帶有風險"]},{"b":1,"n":12,"t":"旅遊產品的生命週期","c":["開發階段","引入階段","成長階段","成熟階段","衰退階段"]},{"b":1,"n":13,"t":"巴特勒旅遊目的地的生命週期","c":["發掘","投入","發展","鞏固","停滯","重生","衰落"]},{"b":1,"n":14,"t":"承載力","c":["空間承載力","環境承載力","心理承載力","經濟承載力","社會文化承載力"]},{"b":1,"n":15,"t":"郵輪","c":["母港","停靠港","自給自足的目的地","小型郵輪","大型郵輪","超級大型郵輪","登船卡"]},{"b":1,"n":16,"t":"旅遊產品的分銷途徑","c":["單向模式","雙向模式","多向模式","旅行代理商","旅行團經營商","旅遊批發商","旅遊零售商"]},{"b":1,"n":17,"t":"政府在旅遊業的角色","c":["政策制定者","宣傳推廣者","監管者","直接經營者"]},{"b":1,"n":18,"t":"資金流動三重效應","c":["第一重效應","第二重效應","第三重效應","流失","旅遊業乘數效應"]},{"b":1,"n":19,"t":"多克西的旅客情緒指標","c":["興奮愉快階段","理所當然階段","煩厭不快階段","敵對感覺階段","得不償失階段"]},{"b":1,"n":20,"t":"旅遊業統計數據範疇","c":["地理環境","人口特性","消費心態","社會經濟影響"]},{"b":1,"n":21,"t":"公營及私營機構在本地旅遊業中擔當的角色","c":["香港旅遊發展局","旅遊事務署","香港旅遊業議會","香港貿易發展局","香港酒店業協會","機場管理局","優質旅遊服務計劃","旅遊業賠償基金"]},{"b":1,"n":22,"t":"國際主要旅遊機構","c":["聯合國世界旅遊組織（UNWTO）","亞太旅遊協會（PATA）"]},{"b":1,"n":23,"t":"香港的旅遊資源","c":["尖沙咀海濱","太平山頂","香港迪士尼樂園","香港海洋公園","昂坪360","女人街／男人街","蘭桂坊／蘇豪區","香港會議展覽中心","大館","中環街市","南豐紗廠","戲曲中心","M+","香港故宮文化博物館","香港地質公園","米埔自然保護區","麥理浩徑","大潭郊野公園"]},{"b":1,"n":24,"t":"旅遊業的影響","c":["社會文化正面影響","示範效應","文化商業化","擠塞","直接職位","間接職位","無形出口","流失","過分依賴","非生物環境影響","生物環境影響"]},{"b":1,"n":25,"t":"會議、獎勵、商務及展覽旅遊（MICE）","c":["會議","獎勵旅遊","商務","展覽","消費展覽會","商貿展覽會"]},{"b":1,"n":26,"t":"衡量目標的五個原則（SMART）","c":["明確性","衡量性","一致性","實際","有時限性"]},{"b":2,"n":1,"t":"酒店類型","c":["地理位置","功能設施","服務水平","規模","房價","評級","產權"]},{"b":2,"n":2,"t":"計算酒店的級別","c":["酒店設施","酒店地點","職員與客房數目比例","酒店實際平均房租","商務組合","甲級高價酒店","乙級高價酒店","中價酒店","旅客賓館"]},{"b":2,"n":3,"t":"客房五大分類","c":["標準級客房","特級客房","豪華級客房","行政套房","總統套房"]},{"b":2,"n":4,"t":"影響酒店房價的因素","c":["旅遊季節節慶及活動","房間的級別","房間計價方法","租住時間長短","顧客類別"]},{"b":2,"n":5,"t":"計算酒店銷售收入的方法","c":["入住率","每日平均房價（ADR）","每間可銷售房收入（RevPAR）","超額預訂"]},{"b":2,"n":6,"t":"酒店三類管理模式","c":["獨立擁有及經營","管理合約","特許經營"]},{"b":2,"n":7,"t":"酒店的組織架構","c":["前線部門","後勤部門","客務部","餐飲部","營業及市場推廣部","財務部","人力資源部","工程部","保安部"]},{"b":2,"n":8,"t":"顧客流程與酒店運作","c":["抵埗前","抵埗","入住","離開"]},{"b":2,"n":9,"t":"前堂部","c":["前堂經理","大堂副經理","款接部","禮賓部","訂房部","電話通訊部"]},{"b":2,"n":10,"t":"管家部","c":["管家部辦公室","客房樓層","公共地方","制服及布草房","洗衣房","其他職能"]},{"b":2,"n":11,"t":"本港餐飲服務的市場分類","c":["酒店市場","閒暇市場","商業及工業市場","交通市場","學生市場","零售市場","醫護市場","其他公營部門市場"]},{"b":2,"n":12,"t":"規劃餐單時應考慮的因素","c":["市場方面","顧客方面","營運方面","與食物有關的因素","食材成本與餐單價格"]},{"b":2,"n":13,"t":"餐廳的設計佈局","c":["用餐區","水吧","款接部","收銀部","經理室及行政部","員工儲物室和更衣室","電子銷售終端機（POS）"]},{"b":2,"n":14,"t":"感官五個方面","c":["視覺","觸覺","聽覺","嗅覺","溫度"]},{"b":2,"n":15,"t":"防火安全","c":["可燃物","溫度","氧氣","連鎖反應","二氧化碳式滅火筒","乾粉式滅火筒","水式滅火筒","泡沫式滅火筒","滅火氈"]},{"b":2,"n":16,"t":"食物污染","c":["細菌性","化學性","物理性","沙門氏菌","金黃葡萄球菌","副溶血性弧菌","李斯特菌"]},{"b":2,"n":17,"t":"食物安全五要點","c":["精明選擇","保持清潔","生熟分開","煮熟食物","安全溫度"]},{"b":3,"n":1,"t":"基本世界地理概念","c":["亞洲","歐洲","非洲","北美洲","南美洲","大洋洲","南極洲"]},{"b":3,"n":2,"t":"氣候的分類及其特徵","c":["熱帶氣候","乾旱氣候","溫帶氣候","大陸性氣候","極地氣候"]},{"b":3,"n":3,"t":"成功的景點的特性","c":["高品質","真實性","獨特性","吸客能力","活動選擇","可達度高"]},{"b":3,"n":4,"t":"Kotler產品的三個層次","c":["核心產品","實際產品","延伸產品"]},{"b":3,"n":5,"t":"亞洲","c":["中國","馬來西亞","泰國","沙特阿拉伯","迪拜（阿聯酋）"]},{"b":3,"n":6,"t":"非洲","c":["摩洛哥","南非","突尼斯","埃及"]},{"b":3,"n":7,"t":"歐洲","c":["法國","意大利","西班牙"]},{"b":3,"n":8,"t":"北美洲","c":["美國","墨西哥","加拿大"]},{"b":3,"n":9,"t":"南美洲","c":["巴西","阿根廷","智利"]},{"b":4,"n":1,"t":"顧客服務五個重要指標(RATER)","c":["可靠性","可信性","有形性","關懷性","反應性"]},{"b":4,"n":2,"t":"忠誠度計劃","c":["簡單積分計劃","級別積分計劃","夥伴計劃"]},{"b":4,"n":3,"t":"服務金三角","c":["企業","員工","顧客","對外行銷","互動行銷","內部行銷"]},{"b":4,"n":4,"t":"「關鍵時刻」的定義及其重要性","c":["關鍵時刻","接觸點"]},{"b":4,"n":5,"t":"服務品質差距","c":["差距一：認識差距","差距二：服務設計及標準差距","差距三：服務表現差距","差距四：溝通差距","差距五：顧客差距"]},{"b":4,"n":6,"t":"招待不易取悅的客人","c":["憤怒的客人","不滿意的客人","猶豫不決的客人","苛刻或專橫的客人","粗魯或不顧及他人的客人","喋喋不休的客人"]},{"b":4,"n":7,"t":"可持續發展旅遊業的十二個目標","c":["自然的完整性","生物多樣性","資源效益","環境純淨度","社會公平性","旅遊體驗","地區管理","地區福祉","文化獨特性","經濟可行性","地區性繁榮","僱員質素"]},{"b":4,"n":8,"t":"旅遊業的同質化與標準化","c":["同質化","標準化"]},{"b":4,"n":9,"t":"本土文化商品化與矮化","c":["文化商品化","矮化"]},{"b":4,"n":10,"t":"公平貿易","c":["公平夥伴合作關係","公平利益分配","旅客與本地居民的公平貿易","合理使用自然資源","合理薪酬與工作環境"]},{"b":4,"n":11,"t":"五個世代的特點","c":["老一輩","嬰兒潮","X世代","Y世代","Z世代"]},{"b":4,"n":12,"t":"過度旅遊","c":["市面秩序混亂","公共交通受阻","資源被佔用","物價樓價上漲","生活受阻及小販攤檔滋擾"]},{"b":4,"n":13,"t":"GDS系統","c":["全球分銷系統（GDS）","旅客紀錄（PNR）","Abacus","Amadeus","Sabre"]},{"b":4,"n":14,"t":"網上旅遊代理商","c":["提供一站式搜尋","採用元搜索技術","價格便宜","溝通與討論平台"]},{"b":4,"n":15,"t":"低成本航空公司","c":["只提供有限服務","營運成本較低","使用次級機場","使用非繁忙時間"]},{"b":4,"n":16,"t":"酒店資產管理系統（PMS）","c":["協調各部門運作","提高服務水平","運作標準化","品牌建立","節省營運成本"]},{"b":4,"n":17,"t":"銷售點系統","c":["樓面點餐","廚房出菜","櫃檯結帳","現場座位管理"]}]};
@@ -533,6 +537,7 @@ function initCarousel(root){
   }, {passive: true});
 }
 const TEACHER = "YHP";
+const GCID = String(window.GOOGLE_CLIENT_ID || "").trim();   // Google 登入用戶端 ID 喺 config.js 設定
 const codeOf = (cls, no) => String(cls || "") + pad(no || 0);          // 例如 4A01
 function parseCode(v){
   const m = String(v || "").normalize("NFKC").replace(/[\s\-]/g, "").toUpperCase().match(/^(\d[A-Z])(\d{1,2})$/);
@@ -801,7 +806,7 @@ function markAlive(fg){ if (idb) put("meta", {id: "alive", fg, route: S.route ? 
 /* ── 返回鍵：Android 返回掣／iPhone 向右掃，會返上一頁，唔會成個 app 走咗 ── */
 const ROOTS = new Set(["boot", "setup", "login", "trips", "admin"]);
 let guard = false, dropPop = false, guardT = null;
-function wantGuard(){ return !!S.viewer || !!S.sheet || !(ROOTS.has(S.route.name) || (S.route.name === "setpw" && S.route.must)); }
+function wantGuard(){ return !!S.viewer || !!S.sheet || !ROOTS.has(S.route.name); }
 function guardSoon(){ clearTimeout(guardT); guardT = setTimeout(syncGuard, 0); }
 function syncGuard(){
   const w = wantGuard();
@@ -823,7 +828,6 @@ function inAppBack(){
   if (n === "point") return A.leavepoint();
   if (n === "trip" || n === "newtrip") return go("trips");
   if (n === "register") return go("login");
-  if (n === "setpw" && S.route.must) return;
   A.back();
 }
 
@@ -850,7 +854,6 @@ function render(){
     case "setup": html = vSetup(); break;
     case "login": html = vLogin(); break;
     case "register": html = vRegister(); break;
-    case "setpw": html = vSetPw(); break;
     case "trips": html = vTrips(); break;
     case "newtrip": html = vNewTrip(); break;
     case "trip": html = vTrip(r.id); break;
@@ -866,7 +869,7 @@ function render(){
   }
   const app = $("#app"); app.innerHTML = html; hydrate(app);
   if (r.name === "point") initCarousel(app);
-  if (r.name === "login") syncLoginMode();
+  if (r.name === "login") initGoogle();
   if (r.name === "login" || r.name === "register") warmUp();
 }
 function refresh(){ const y = window.scrollY; render(); try { window.scrollTo(0, y); } catch (e) {} if (S.sheet === "account") renderSheet(); }
@@ -1022,47 +1025,70 @@ function vSetup(){
     '<p class="fineprint">請老師按「設定步驟」第 6 步，在 config.js 填上 Apps Script 網址。</p></div></main>';
 }
 function vLogin(){
-  const r = S.route;
-  return '<main class="login">' + brandHTML() +
-    '<form id="loginForm" class="panel stack" novalidate>' +
+  const r = S.route, teacher = !!r.teacher;
+  const warn = INAPP ? '<p class="flash">你正在其他 app 內置的瀏覽器開啟這個網頁，Google 登入未必可用，紀錄亦有機會遺失。請按右上角選單，改用 Safari 或 Chrome 開啟。</p>' : '';
+  const student = '<div class="panel stack">' +
       (r.msg ? '<p class="flash">' + esc(r.msg) + '</p>' : '') +
-      '<div class="field"><label for="inSid">班別學號</label><input id="inSid" maxlength="8" autocapitalize="characters" autocomplete="username" spellcheck="false" placeholder="例如：4A01" value="' + esc(r.code || "") + '"></div>' +
-      '<div class="field"><label for="inPw" id="lPw">密碼</label><input id="inPw" type="password" maxlength="64" autocomplete="current-password"></div>' +
+      '<p class="label">學生登入</p>' +
+      '<p class="fineprint">請使用你的 Google 帳戶登入。第一次登入需要登記中文姓名、班別及學號。</p>' +
+      (GCID ? '<div id="gBtn" class="gbtn" aria-live="polite"><p class="loading">正在載入 Google 登入……</p></div>'
+            : '<p class="flash">老師未設定 Google 登入：請在 config.js 填上 GOOGLE_CLIENT_ID。</p>') +
+      '<p class="flash" data-flash role="alert" hidden></p>' +
+      '<div class="quick"><button type="button" class="linkbtn" data-act="toteacher">老師登入</button></div>' +
+    '</div>';
+  const tform = '<form id="loginForm" class="panel stack" novalidate>' +
+      (r.msg ? '<p class="flash">' + esc(r.msg) + '</p>' : '') +
+      '<p class="label">老師登入</p>' +
+      '<div class="field"><label for="inPw">老師密碼</label><input id="inPw" type="password" maxlength="64" autocomplete="current-password"></div>' +
       '<p class="flash" data-flash role="alert" hidden></p>' +
       '<button class="btn btn-primary btn-block" type="submit" id="loginBtn">登入</button>' +
-      '<div class="quick"><button type="button" class="linkbtn" data-act="toregister">第一次使用？按此登記帳戶</button>' +
-      '<p class="fineprint">忘記密碼可以請老師查閱。</p></div>' +
-    '</form>' +
+      '<div class="quick"><button type="button" class="linkbtn" data-act="tologin">學生登入（Google 帳戶）</button></div>' +
+    '</form>';
+  return '<main class="login">' + brandHTML() + (teacher ? tform : student) +
     (S.volatile ? '<p class="flash">這個瀏覽器未能保存資料，未上載的紀錄在關閉頁面後會消失。請改用 Safari 或 Chrome 開啟。</p>' : '') +
-    (INAPP ? '<p class="flash">你正在其他 app 內置的瀏覽器開啟這個網頁，紀錄有機會遺失。請按右上角選單，改用 Safari 或 Chrome 開啟。</p>' : '') +
-    '</main>';
+    warn + '</main>';
 }
-function syncLoginMode(){
-  const c = $("#inSid"); if (!c) return;
-  const l = $("#lPw"); if (l) l.textContent = c.value.trim().toUpperCase() === TEACHER ? "老師密碼" : "密碼";
+// Google 登入掣：等 Google 個程式庫載入完先畫
+let gReady = false, gWait = null;
+function initGoogle(){
+  const box = $("#gBtn"); if (!box || !GCID) return;
+  const g = window.google && google.accounts && google.accounts.id;
+  if (!g) {
+    if (!gWait) gWait = Date.now();
+    if (Date.now() - gWait > 12000) { box.innerHTML = '<p class="flash">未能載入 Google 登入。請檢查網絡，然後重新整理這一頁。</p>'; logErr("gsi", "Google 登入程式庫載入失敗"); return; }
+    return void setTimeout(initGoogle, 250);
+  }
+  if (!gReady) {
+    g.initialize({client_id: GCID, callback: onGoogle, ux_mode: "popup", auto_select: false, cancel_on_tap_outside: true, itp_support: true});
+    gReady = true;
+  }
+  box.innerHTML = "";
+  g.renderButton(box, {type: "standard", theme: "filled_blue", size: "large", text: "signin_with", shape: "pill", logo_alignment: "left", locale: "zh-HK", width: Math.max(220, Math.min(360, box.clientWidth || 300))});
+}
+async function onGoogle(resp){
+  if (!resp || !resp.credential || S.route.name !== "login") return;
+  flashIn(""); const box = $("#gBtn"); if (box) box.style.opacity = ".4";
+  try {
+    const d = await api("gLogin", {idToken: resp.credential});
+    if (d.token) await startSession(d);
+    else go("register", {ticket: d.ticket, email: d.email});
+  } catch (e) { if (box) box.style.opacity = ""; flashIn(e.message); }
 }
 function vRegister(){
+  const r = S.route;
   return bar("登記帳戶", {back:"tologin"}) +
     '<main class="view"><form id="regForm" class="stack" autocomplete="off" novalidate>' +
-      '<p class="hint">每位同學只需登記一次，之後用班別學號及自己設定的密碼登入。</p>' +
-      '<div class="field"><label for="rSid">班別學號</label><input id="rSid" maxlength="8" autocapitalize="characters" spellcheck="false" placeholder="例如：4A01"></div>' +
-      '<div class="field"><label for="rName">姓名</label><input id="rName" maxlength="20" placeholder="例如：陳小明"></div>' +
-      '<div class="field"><label for="rPw">設定密碼</label><input id="rPw" type="password" maxlength="64" autocomplete="new-password"><p class="hint">最少 6 個字元。老師可以查閱這個密碼（方便你忘記時查回），所以請不要使用其他帳戶的密碼。</p></div>' +
-      '<div class="field"><label for="rPw2">再輸入一次密碼</label><input id="rPw2" type="password" maxlength="64" autocomplete="new-password"></div>' +
+      '<p class="hint">每位同學只需登記一次，之後用同一個 Google 帳戶登入即可。</p>' +
+      '<div class="field"><span class="label">Google 帳戶</span><p class="gmail">' + esc(r.email || "") + '</p></div>' +
+      '<div class="field"><label for="rName">中文姓名</label><input id="rName" maxlength="8" placeholder="例如：陳小明" autocomplete="off"></div>' +
+      '<div class="rowfields">' +
+        '<div class="field"><label for="rCls">班別</label><input id="rCls" maxlength="2" autocapitalize="characters" spellcheck="false" placeholder="例如：4A"></div>' +
+        '<div class="field"><label for="rNo">學號</label><input id="rNo" maxlength="2" inputmode="numeric" pattern="[0-9]*" placeholder="例如：01"></div>' +
+      '</div>' +
+      '<p class="hint">登記後，班別及學號不能自行更改。如有錯誤，請通知老師。</p>' +
       '<p class="flash" data-flash role="alert" hidden></p>' +
     '</form></main>' +
     '<div class="dock"><button type="submit" form="regForm" class="btn btn-primary" id="regBtn">登記並登入</button></div>';
-}
-function vSetPw(){
-  const must = S.route.must;
-  return bar(must ? "設定新密碼" : "更改密碼", must ? {} : {back:"back"}) +
-    '<main class="view"><form id="pwForm" class="stack" novalidate>' +
-      '<p class="hint">' + (must ? "你正在使用老師提供的臨時密碼，請設定你自己的密碼。" : "請輸入新的密碼。") + '</p>' +
-      '<div class="field"><label for="nPw">新密碼</label><input id="nPw" type="password" maxlength="64" autocomplete="new-password"><p class="hint">最少 6 個字元。請不要使用其他帳戶的密碼。</p></div>' +
-      '<div class="field"><label for="nPw2">再輸入一次</label><input id="nPw2" type="password" maxlength="64" autocomplete="new-password"></div>' +
-      '<p class="flash" data-flash role="alert" hidden></p>' +
-    '</form></main>' +
-    '<div class="dock"><button type="submit" form="pwForm" class="btn btn-primary" id="pwBtn">儲存密碼</button></div>';
 }
 
 /* ── 學生畫面 ── */
@@ -1199,7 +1225,7 @@ function vAdmin(){
   const nTrips = d.students.reduce((s, x) => s + x.trips, 0), nSub = d.students.reduce((s, x) => s + x.submitted, 0);
   const reg = '<section class="regbox' + (nOff ? '' : ' open') + '" aria-labelledby="hReg">' +
     '<p class="reg-status" id="hReg">學生名單 ' + d.students.length + ' 人：已登記 ' + nReg + ' 人' + (nOff ? '，未登記 ' + nOff + ' 人' : '') + '</p>' +
-    '<p class="reg-sub">學生第一次使用時，在登入畫面按「第一次使用？按此登記帳戶」，輸入班別學號（例如 4A01）及自己設定密碼。名單以外的學號不能登記；加新學生要改 Apps Script 的 ROSTER，再執行「匯入名單」。</p></section>';
+    '<p class="reg-sub">學生第一次使用時，用 Google 帳戶登入，再登記中文姓名、班別及學號。名單以外的學號不能登記；加新學生要改 Apps Script 的 ROSTER，再執行「匯入名單」。</p></section>';
   const head = '<section class="adminhead"><p class="eyebrow">老師後台</p><h2 class="th-place">YHP</h2>' +
     '<div class="stats">' + [[nReg, "已登記學生"], [nTrips, "考察"], [d.qsets.length, "組題目"], [nSub, "份答案"]].map(([n, l]) => '<span><b>' + pad(n) + '</b>' + l + '</span>').join("") + '</div></section>';
   const seg = '<div class="seg" role="tablist" aria-label="後台分頁">' + [["students","學生紀錄"],["qsets","考察題目"]].map(([k, l]) =>
@@ -1212,7 +1238,7 @@ function vAdmin(){
       if (s.cls !== last) { last = s.cls; const inCls = d.students.filter(x => x.cls === s.cls); h = '<p class="label grp">' + esc(s.cls) + ' 班　' + inCls.filter(x => x.registered).length + ' / ' + inCls.length + ' 人已登記</p>'; }
       return h + '<button type="button" class="srow' + (s.registered ? '' : ' off') + '" data-act="openstudent" data-sid="' + s.sid + '"><span class="avatar" aria-hidden="true">' + esc(s.name ? s.name.slice(0, 1) : s.cls) + '</span>' +
         '<span class="sr-main"><span class="sr-name">' + esc(codeOf(s.cls, s.no)) + '　' + esc(s.name || "（未登記）") + '</span>' +
-        '<span class="sr-sub">' + (s.registered ? s.trips + ' 次考察 · ' + s.submitted + ' 份答案' + (s.lastLogin ? ' · ' + fmtStamp(s.lastLogin) + ' 登入' : '') : '還未設定密碼') + '</span></span>' +
+        '<span class="sr-sub">' + (s.registered ? s.trips + ' 次考察 · ' + s.submitted + ' 份答案' + (s.lastLogin ? ' · ' + fmtStamp(s.lastLogin) + ' 登入' : '') + (s.email ? '<br>' + esc(s.email) : '') : '還未用 Google 帳戶登記') + '</span></span>' +
         (s.registered ? '' : '<span class="pill-off">未登記</span>') + '</button>';
     }).join("") + '</div>' : '<div class="empty"><p>名單還未有學生。</p><p>請在 Apps Script 執行一次「匯入名單」。</p></div>';
   } else {
@@ -1228,17 +1254,16 @@ function vAdmin(){
 function vAStudent(sid){
   const c = need("stu:" + sid, "tStudent", {sid});
   if (!c.data) return bar("學生紀錄", {back:"back"}) + '<main class="view">' + stateHTML(c, "stu:" + sid) + '</main>';
-  const d = c.data, s = d.student, trips = sortTrips(d.trips), code = codeOf(s.cls, s.no), shown = !!S.t["showpw:" + sid];
-  const pwBox = !s.registered ? '<p class="hint">這位學生還未登記。學生第一次使用時，在登入畫面按「第一次使用？按此登記帳戶」，輸入 ' + esc(code) + ' 及自己設定密碼。</p>'
-    : s.password ? '<div class="pwrow"><span class="label">密碼</span><span class="pwval">' + (shown ? esc(s.password) : "●●●●●●") + '</span>' +
-        '<button type="button" class="btn btn-ghost sm" data-act="togglepw" data-sid="' + sid + '">' + (shown ? "隱藏" : "顯示密碼") + '</button></div>'
-    : '<p class="hint">這位學生用舊版本登記，密碼已加密，暫時查閱不到；學生下次登入後，這裏就會顯示密碼。</p>';
+  const d = c.data, s = d.student, trips = sortTrips(d.trips), code = codeOf(s.cls, s.no);
+  const pwBox = !s.registered ? '<p class="hint">這位學生還未登記。學生第一次使用時，用 Google 帳戶登入，再輸入中文姓名及 ' + esc(code) + '。</p>'
+    : '<div class="pwrow"><span class="label">Google 帳戶</span><span class="pwval">' + esc(s.email || "（未有紀錄）") + '</span></div>' +
+      (s.registeredAt ? '<p class="hint">登記時間：' + fmtStamp(s.registeredAt) + '</p>' : '');
   return bar(s.name || code, {back:"back", plain:true}) + '<main class="view"><section class="adminhead"><p class="eyebrow">學生紀錄</p><h2 class="th-place plain">' + esc(s.name || "（未登記）") + '</h2>' +
     '<p class="th-sum">' + esc(code) + '　·　<b>' + trips.length + '</b> 次考察　<b>' + d.responses.filter(r => r.status === "submitted").length + '</b> 份已提交答案</p>' +
     (s.lastLogin ? '<p class="hint">最近登入：' + fmtStamp(s.lastLogin) + '</p>' : '') + '</section>' +
     '<section class="regbox" aria-label="登入資料">' + pwBox + '</section>' +
     '<section class="triplist" aria-label="考察列表">' + (trips.length ? trips.map(t => tripCard(t, "atrip", d.points, sid)).join("") : '<div class="empty"><p>這位學生還未有考察紀錄。</p></div>') + '</section>' +
-    (s.registered ? '<div class="danger-zone"><p class="hint">如果有人用錯了這個學號登記，可以清除登記，讓真正的學生重新登記及設定密碼。考察紀錄會保留。</p>' +
+    (s.registered ? '<div class="danger-zone"><p class="hint">如果有人用錯了這個學號登記，可以清除登記（解除 Google 帳戶），讓真正的學生用自己的 Google 帳戶重新登記。考察紀錄會保留。</p>' +
       confirmBtn("clearreg:" + sid, "清除登記", "再按一次確認清除登記") + '</div>' : '') + '</main>';
 }
 function vATrip(sid, id){
@@ -1324,10 +1349,9 @@ function renderSheet(){
     root.innerHTML = '<div class="scrim" data-act="closesheet"></div>' +
       '<div class="sheet" role="dialog" aria-modal="true" aria-labelledby="acTitle">' +
       '<div class="sheet-head"><h3 id="acTitle">帳戶</h3><button type="button" class="iconbtn" data-act="closesheet" aria-label="關閉">' + ICON.x + '</button></div>' +
-      '<div class="sheet-body"><dl class="acct"><dt>姓名</dt><dd>' + esc(s.name) + '</dd><dt>班別學號</dt><dd>' + esc(codeOf(s.cls, s.no)) + '</dd></dl>' +
+      '<div class="sheet-body"><dl class="acct"><dt>姓名</dt><dd>' + esc(s.name) + '</dd><dt>班別學號</dt><dd>' + esc(codeOf(s.cls, s.no)) + '</dd>' + (s.email ? '<dt>GOOGLE</dt><dd>' + esc(s.email) + '</dd>' : '') + '</dl>' +
         '<p class="syncline" role="status">' + esc(syncText()) + '</p>' +
-        '<div class="btnrow"><button type="button" class="btn btn-ghost sm" data-act="syncnow"' + (S.sync.busy ? ' disabled' : '') + '>' + ICON.refresh + '立即同步</button>' +
-        '<button type="button" class="btn btn-ghost sm" data-act="tochangepw">更改密碼</button></div>' +
+        '<div class="btnrow"><button type="button" class="btn btn-ghost sm" data-act="syncnow"' + (S.sync.busy ? ' disabled' : '') + '>' + ICON.refresh + '立即同步</button></div>' +
         confirmBtn("logout", "登出", n ? "尚有 " + n + " 項未上載，登出會遺失。再按一次確認登出" : "再按一次確認登出") +
         '<p class="fineprint">登出後，這部手機上的紀錄會被清除；再次登入即可從雲端取回已上載的紀錄。</p>' +
       '</div></div>';
@@ -1437,7 +1461,7 @@ async function pull(){
   const d = await api("pull");
   if (!isStudent()) return;
   const pend = new Set((await getAll("outbox")).map(o => o.ref));
-  Object.assign(S.session, {name: d.me.name, cls: d.me.cls, no: d.me.no}); await saveSession();
+  Object.assign(S.session, {name: d.me.name, cls: d.me.cls, no: d.me.no, email: d.me.email || S.session.email || ""}); await saveSession();
   const sTrips = new Set(d.trips.map(t => t.id)), sPoints = new Set(d.points.map(p => p.id)), sResp = new Set(d.responses.map(r => r.id));
   // 只刪除「曾經上載、而家伺服器冇」嘅紀錄（即係喺其他手機刪咗）；未上載過嘅一定保留
   for (const t of await getAll("trips")) if (!sTrips.has(t.id) && !pend.has(t.id) && t.synced) await del("trips", t.id);
@@ -1520,13 +1544,12 @@ async function startSession(d){
     await put("meta", {id: "owner", sid: me.sid, name: me.name, cls: me.cls, no: me.no});
     try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {}); } catch (e) {}   // 請瀏覽器唔好自動清走未上載嘅紀錄
   }
-  S.session = {id: "session", token: d.token, role: me.role, sid: me.sid || "", cls: me.cls || "", no: me.no || "", name: me.name || "", mustChange: !!d.mustChange};
+  S.session = {id: "session", token: d.token, role: me.role, sid: me.sid || "", cls: me.cls || "", no: me.no || "", name: me.name || "", email: me.email || ""};
   S.authLost = false; S.t = d.overview ? {overview: {data: d.overview}} : {};   // 老師：登入時已一併取得後台首頁資料
   await saveSession();
   if (me.role === "teacher") { go("admin", {tab: "students"}); sendLogs(); return; }
   await loadLocal();
-  if (d.mustChange) go("setpw", {must: true});
-  else if (await restoreDraft()) go("point");
+  if (await restoreDraft()) go("point");
   else go("trips");
   syncNow();
 }
@@ -1537,7 +1560,7 @@ async function authLost(why){
   logErr("auth", "伺服器表示登入已失效（" + (why || "") + "）");   // 重新登入後會送去「錯誤紀錄」工作表，方便查原因
   S.session = null; S.t = {}; resetPhotoCache(); await dropSession(s.token); S.sheet = null; renderSheet(); document.documentElement.classList.remove("locked");
   const n = teacher ? 0 : (await getAll("outbox")).length;
-  go("login", {code: teacher ? TEACHER : codeOf(s.cls, s.no), msg: "登入已失效，請重新登入。" + (n ? "這部手機仍有 " + n + " 項屬於" + name + "的紀錄未上載，請以同一帳戶登入，紀錄便會自動上載。" : "")});
+  go("login", {teacher, msg: "登入已失效，請重新登入。" + (n ? "這部手機仍有 " + n + " 項屬於" + name + "（" + codeOf(s.cls, s.no) + "）的紀錄未上載，請用 Google 帳戶登入並登記同一個班別學號，紀錄便會自動上載。" : "")});
 }
 
 /* ── 動作 ── */
@@ -1562,40 +1585,29 @@ const countPoints = txt => String(txt || "").split(/\n+/).map(l => l.trim()).fil
 const A = {
   /* 帳戶 */
   async login(){
-    const raw = $("#inSid").value.trim(), pw = $("#inPw").value, teacher = raw.toUpperCase() === TEACHER, m = parseCode(raw);
-    if (!teacher && !m) return flashIn("請輸入班別學號，例如 4A01。");
-    if (!pw) return flashIn(teacher ? "請輸入老師密碼。" : "請輸入密碼。");
+    const pw = $("#inPw").value;
+    if (!pw) return flashIn("請輸入老師密碼。");
     flashIn(""); setBusy("loginBtn", true, "登入中……");
-    try { await startSession(await api("login", teacher ? {cls: TEACHER, password: pw} : {cls: m.cls, no: m.no, password: pw})); }
+    try { await startSession(await api("login", {cls: TEACHER, password: pw})); }
     catch (e) { setBusy("loginBtn", false, "登入"); flashIn(e.message); }
   },
-  toregister(){ go("register"); },
+  toteacher(){ go("login", {teacher: true}); },
   tologin(){ go("login"); },
   async register(){
-    const m = parseCode($("#rSid").value), name = $("#rName").value.trim(), pw = $("#rPw").value, pw2 = $("#rPw2").value;
-    if (!m) return flashIn("請輸入正確的班別學號，例如 4A01。");
-    if (!name) return flashIn("請輸入姓名。");
-    if (pw.length < 6) return flashIn("密碼最少要有 6 個字元。");
-    if (pw !== pw2) return flashIn("兩次輸入的密碼不一樣，請再輸入一次。");
+    const name = $("#rName").value.normalize("NFKC").replace(/\s+/g, ""), cls = $("#rCls").value.normalize("NFKC").replace(/\s+/g, "").toUpperCase(), no = parseInt($("#rNo").value.normalize("NFKC"), 10);
+    if (!/^[㐀-䶿一-鿿豈-﫿]{2,8}$/.test(name)) return flashIn("請輸入中文姓名（2 至 8 個中文字）。");
+    if (!/^\d[A-Z]$/.test(cls)) return flashIn("請輸入正確的班別，例如 4A。");
+    if (!(no >= 1 && no <= 99)) return flashIn("請輸入正確的學號，例如 01。");
     flashIn(""); setBusy("regBtn", true, "登記中……");
-    try { await startSession(await api("register", {cls: m.cls, no: m.no, name, password: pw})); toast("登記成功，歡迎使用旅遊日誌"); }
-    catch (e) { setBusy("regBtn", false, "登記並登入"); flashIn(e.message); }
-  },
-  async savepw(){
-    const a = $("#nPw").value, b = $("#nPw2").value;
-    if (a.length < 6) return flashIn("密碼最少要有 6 個字元。");
-    if (a !== b) return flashIn("兩次輸入的密碼不一樣，請再輸入一次。");
-    flashIn(""); setBusy("pwBtn", true, "儲存中……");
-    try {
-      await api("changePassword", {password: a});
-      S.session.mustChange = false; await saveSession();
-      const back = S.route.back; back ? go(back.name, back) : go("trips"); toast("已更新密碼");
-    } catch (e) { setBusy("pwBtn", false, "儲存密碼"); flashIn(e.message); }
+    try { await startSession(await api("gRegister", {ticket: S.route.ticket, name, cls, no})); toast("登記成功，歡迎使用旅遊日誌"); }
+    catch (e) {
+      if (e.code === "ticket") return go("login", {msg: e.message});
+      setBusy("regBtn", false, "登記並登入"); flashIn(e.message);
+    }
   },
   account(){ openSheet("account"); },
   syncnow(){ syncNow(); },
-  tochangepw(){ const back = Object.assign({}, S.route); A.closesheet(); go("setpw", {must: false, back}); },
-  async tlogout(){ const tok = S.session ? S.session.token : ""; api("logout").catch(() => {}); S.session = null; S.t = {}; resetPhotoCache(); await dropSession(tok); go("login"); },
+  async tlogout(){ const tok = S.session ? S.session.token : ""; api("logout").catch(() => {}); S.session = null; S.t = {}; resetPhotoCache(); await dropSession(tok); go("login", {teacher: true}); },
   info(){ openSheet("account"); },
   back(){ const b = S.route.back; if (b) go(b.name, b); else go(isTeacher() ? "admin" : "trips"); },
 
@@ -1761,7 +1773,6 @@ const A = {
   /* 老師 */
   trefresh(){ S.t = {}; refresh(); },
   tretry(el){ delete S.t[el.dataset.key]; refresh(); },
-  togglepw(el){ const k = "showpw:" + el.dataset.sid; if (S.t[k]) delete S.t[k]; else S.t[k] = true; refresh(); },
   admintab(el){ go("admin", {tab: el.dataset.tab}); },
   openstudent(el){ go("astudent", {sid: el.dataset.sid, back: {name: "admin", tab: "students"}}); },
   atrip(el){ go("atrip", {sid: el.dataset.sid, id: el.dataset.id, back: Object.assign({}, S.route)}); },
@@ -1827,6 +1838,7 @@ const A = {
       const tok = S.session ? S.session.token : "";
       api("logout").catch(() => {});
       await wipeLocal(); await dropSession(tok); await del("meta", "owner");
+      try { google.accounts.id.disableAutoSelect(); } catch (e) {}
       S.session = null; A.closesheet(); go("login"); toast("已登出");
     } else if (kind === "delqs") {
       try { await api("tDeleteQset", {id}); S.t = {}; go("admin", {tab: "qsets"}); toast("已刪除題目"); }
@@ -1834,7 +1846,7 @@ const A = {
     } else if (kind === "clearreg") {
       try {
         await api("tClearReg", {sid: id});
-        delete S.t["stu:" + id]; delete S.t["showpw:" + id]; delete S.t.overview;
+        delete S.t["stu:" + id]; delete S.t.overview;
         refresh(); toast("已清除登記，學生需要重新登記");
       } catch (e) { toast(e.message); refresh(); }
     }
@@ -1852,7 +1864,6 @@ document.addEventListener("input", e => {
   const t = e.target;
   if (t.id === "inNote" && S.draft) { S.draft.note = t.value; if (S.confirm === "leave") S.confirm = null; saveDraftSoon(500); }
   else if (t.id === "pkSearch") renderPkList();
-  else if (t.id === "inSid") syncLoginMode();
   else if (t.dataset && t.dataset.ans !== undefined && S.route.name === "answer") {
     const r = S.responses.find(x => x.id === S.route.rid);
     if (r && r.status !== "submitted") {
@@ -1873,7 +1884,7 @@ document.addEventListener("keydown", e => {
 });
 document.addEventListener("submit", e => {
   e.preventDefault(); const id = e.target.id;
-  if (id === "loginForm") A.login(); else if (id === "regForm") A.register(); else if (id === "pwForm") A.savepw();
+  if (id === "loginForm") A.login(); else if (id === "regForm") A.register();
   else if (id === "tripForm") A.createTrip(); else if (id === "codeForm") A.loadcode(); else if (id === "qForm") A.saveqset();
 });
 window.addEventListener("online", () => { if (isStudent()) syncNow(); });
@@ -1908,14 +1919,13 @@ setInterval(() => { if (isStudent() && S.sync.pending && !S.sync.busy) flush(); 
     // 記低點解要重新登入（登入後送去「錯誤紀錄」）：全新空白通常代表瀏覽器清走咗資料，或者喺其他 app 內置瀏覽器開啟
     if (!ok) logErr("session", "資料庫未能開啟，需要重新登入");
     else if (fresh) logErr("session", "這個瀏覽器沒有本機資料（第一次使用，或瀏覽器清除了資料）");
-    return go("login", owner && owner.cls ? {code: codeOf(owner.cls, owner.no)} : {});
+    return go("login");
   }
   S.session = sess;
   if (sess.role === "teacher") { go("admin", {tab: "students"}); sendLogs(); return; }
   await loadLocal();
   try {
-    if (sess.mustChange) go("setpw", {must: true});
-    else if (await restoreDraft()) go("point");
+    if (await restoreDraft()) go("point");
     else go("trips");
   } catch (e) {
     logErr("boot", "未能開啟上次的畫面：" + (e && e.message));   // 畫面出錯唔等於登出：返去考察列表
