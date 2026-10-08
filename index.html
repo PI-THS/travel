@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#F3F1EA">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="YHP與我的旅遊日誌">
-<title>YHP與我的旅遊日誌</title>
+<meta name="apple-mobile-web-app-title" content="我的旅遊手帳">
+<title>我的旅遊手帳</title>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=Noto+Sans+HK:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap">
 <style>
@@ -96,8 +96,8 @@ svg{flex:none}
 .field{display:flex;flex-direction:column;gap:.25rem}
 .field.hide{display:none}
 label,.label{font:700 .8rem var(--f-ui);letter-spacing:.08em;color:var(--ink-2)}
-input:not([type=file]):not([type=checkbox]){width:100%;min-height:2.9rem;padding:.5rem .1rem;border:0;border-bottom:1.5px solid var(--ink-3);border-radius:0;background:transparent;font:500 1.08rem var(--f-ui);color:var(--ink)}
-input:not([type=file]):not([type=checkbox]):focus{outline:none;border-bottom-color:var(--ink);box-shadow:inset 0 -1.5px 0 var(--ink)}
+input:not([type=file]):not([type=checkbox]):not([type=radio]){width:100%;min-height:2.9rem;padding:.5rem .1rem;border:0;border-bottom:1.5px solid var(--ink-3);border-radius:0;background:transparent;font:500 1.08rem var(--f-ui);color:var(--ink)}
+input:not([type=file]):not([type=checkbox]):not([type=radio]):focus{outline:none;border-bottom-color:var(--ink);box-shadow:inset 0 -1.5px 0 var(--ink)}
 textarea{--lh:1.95rem;width:100%;min-height:calc(var(--lh) * 3 + 1rem);padding:.5rem .7rem;border:1.5px solid var(--rule);border-radius:.35rem;resize:vertical;font:400 1.02rem/var(--lh) var(--f-ui);color:var(--ink);
   background:var(--sheet) repeating-linear-gradient(to bottom,transparent 0,transparent calc(var(--lh) - 1px),var(--rule) calc(var(--lh) - 1px),var(--rule) var(--lh));background-position:0 .5rem;background-attachment:local}
 textarea:focus{outline:none;border-color:var(--ink)}
@@ -126,6 +126,27 @@ input::placeholder,textarea::placeholder{color:var(--ink-3)}
 
 /* 登入：護照封面 */
 .login{display:flex;flex-direction:column;gap:1.5rem;padding-bottom:3rem}
+/* 登入：封面圖（中間空白位放註冊／登入） */
+.cover-page{margin-inline:-1rem;padding-bottom:2.5rem}
+.cover-wrap{position:relative;aspect-ratio:768/1376;background:#F8F3E8}
+.cover-wrap>img{display:block;width:100%;height:100%;object-fit:cover}
+.cover-login{position:absolute;left:30.5%;width:45%;top:75%;height:17.5%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.35rem;text-align:center}
+.cl-title{margin:0;font:700 clamp(1rem,5.2vw,1.4rem)/1.2 var(--f-hand);letter-spacing:.12em;padding-left:.12em;color:#5B3A24}
+.cover-login .gbtn{min-height:40px;align-items:center}
+.cover-login .gbtn .loading{margin:0;font-size:.78rem}
+.cover-login .linkbtn{min-height:1.9rem;padding:.1rem;font-size:.8rem;color:#5B3A24;text-decoration-color:#C9A659}
+.cl-row{display:flex;gap:.35rem;width:100%}
+#inLc{flex:1;min-width:0;min-height:2.5rem;padding:.3rem .45rem;border:1.5px solid #5B3A24;border-radius:.4rem;background:rgba(255,255,255,.92);font:500 1rem var(--f-mono);text-align:center}
+.cl-row .btn{flex:none;min-height:2.5rem;padding:0 .7rem}
+.cover-alert{position:absolute;top:1.5%;left:4%;right:4%;z-index:2;display:flex;flex-direction:column;align-items:center;gap:.4rem}
+.cover-alert .flash{width:100%;background:rgba(255,250,244,.97);box-shadow:var(--shadow)}
+.cover-alert .btn{background:rgba(255,250,244,.97)}
+.cover-help{margin:.9rem 1rem 0;font-size:.8rem;line-height:1.7;color:var(--ink-2)}
+.cover-fallback{display:none}
+.cover-wrap.noimg{aspect-ratio:auto;padding:2rem 1rem}
+.cover-wrap.noimg>img{display:none}
+.cover-wrap.noimg .cover-fallback{display:block;margin:0 0 1.2rem;text-align:center;font:700 2rem var(--f-hand);color:#5B3A24}
+.cover-wrap.noimg .cover-login,.cover-wrap.noimg .cover-alert{position:static;width:auto;height:auto;margin-bottom:1rem}
 .passport{position:relative;display:flex;flex-direction:column;align-items:center;gap:.55rem;margin:0 -1rem;padding:2.4rem 1.5rem 2.3rem;background:var(--navy);color:var(--gold);border-radius:0 0 1.6rem 1.6rem;text-align:center;overflow:hidden}
 .passport::after{content:"";position:absolute;inset:.7rem .7rem .8rem;border:1px solid var(--gold-line);border-top:0;border-radius:0 0 1.1rem 1.1rem;pointer-events:none}
 .pp-top{margin:0;font:500 .74rem var(--f-ui);letter-spacing:.42em;padding-left:.42em}
@@ -405,12 +426,28 @@ div.stopcard .st-note{display:block;white-space:pre-wrap}
 fieldset.qedit{position:relative;display:flex;flex-direction:column;gap:.9rem;min-width:0;margin:0;padding:1rem .95rem 1rem 1.55rem;border:0;border-radius:.3rem;background:var(--sheet);box-shadow:var(--shadow)}
 fieldset.qedit::before{content:"";position:absolute;left:.85rem;top:0;bottom:0;border-left:1.5px solid var(--stamp);opacity:.35}
 .pt-keys{display:block;margin-top:.1rem;font:500 .74rem/1.5 var(--f-mono);color:var(--ink-3)}
+.ans-head{margin:.35rem 0 0;font:700 .8rem var(--f-ui);letter-spacing:.06em;color:var(--stamp)}
+.pts.ans-red li,.pts.ans-red .pt-mark,.pts.ans-red .pt-keys{color:var(--stamp)}
+.pts.ans-red .pt-keys{opacity:.8}
+fieldset.modes{display:flex;flex-direction:column;gap:.35rem;margin:0;padding:0;border:0}
+fieldset.modes legend{margin-bottom:.3rem;font:700 .9rem var(--f-ui)}
 .pts-more{margin:.3rem 0 0;font:700 .74rem var(--f-ui);color:var(--ink-3)}
 .catgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.45rem}
 .catbtn{display:flex;align-items:center;gap:.5rem;min-height:2.9rem;padding:.4rem .7rem;border:1.5px solid var(--rule);border-radius:.45rem;background:var(--sheet);font:700 .86rem/1.35 var(--f-ui);color:var(--ink);text-align:left}
 .catbtn b{flex:none;font:500 1rem var(--f-mono);color:var(--ink-3)}
 .catbtn[aria-pressed="true"]{border-color:var(--navy);background:var(--navy);color:var(--on-navy)}
 .catbtn[aria-pressed="true"] b{color:var(--gold)}
+.qgcons{display:flex;flex-direction:column;gap:.45rem}
+.qgcon{display:flex;flex-direction:column;border:1.5px solid var(--rule);border-radius:.45rem;background:var(--sheet)}
+.qgcon.on{border-color:var(--navy);box-shadow:inset 4px 0 0 var(--gold)}
+.qgcon-row{display:flex;align-items:stretch}
+.qgcon-b{flex:1;display:flex;align-items:center;gap:.6rem;min-height:2.9rem;padding:.5rem .75rem;border:0;background:none;font:700 .9rem/1.45 var(--f-ui);color:var(--ink);text-align:left}
+.qgcon-b::before{content:"";flex:none;width:1.1rem;height:1.1rem;border:1.5px solid var(--ink-3);border-radius:50%;background:var(--paper)}
+.qgcon-b[aria-checked="true"]::before{border:.32rem solid var(--navy);background:var(--gold)}
+.qgcon-i{flex:none;display:grid;place-items:center;width:2.9rem;border:0;border-left:1.5px dashed var(--rule);background:none;font:700 italic 1.05rem Georgia,serif;color:var(--ink-2)}
+.qgcon-i[aria-expanded="true"]{color:var(--gold);background:var(--navy);border-radius:0 .35rem 0 0}
+.qgcon-info{margin:0;padding:.55rem .8rem .7rem 2.4rem;border-top:1.5px dashed var(--rule);font:500 .84rem/1.7 var(--f-ui);color:var(--ink-2)}
+.qgcon-info b{color:var(--ink)}
 .qgtopics{display:flex;flex-direction:column;gap:.45rem}
 .qgtopics details{border-radius:.45rem;background:var(--sheet);box-shadow:var(--shadow)}
 .qgtopics summary{display:flex;align-items:center;justify-content:space-between;gap:.6rem;min-height:2.9rem;padding:.55rem .85rem;font:700 .9rem/1.4 var(--f-ui);cursor:pointer;list-style:none}
@@ -989,7 +1026,7 @@ const EMBLEM = '<svg class="pp-emblem" viewBox="0 0 64 64" fill="none" stroke="c
   '<path d="M14.6 14.6l12.2 13.2M49.4 49.4 37.2 36.2M49.4 14.6 36.2 26.8M14.6 49.4l13.2-12.2" stroke-width=".9" stroke-dasharray="1 2"/></svg>';
 function brandHTML(){
   return '<header class="passport"><p class="pp-top">旅遊與款待科</p>' + EMBLEM +
-    '<h1 class="pp-title"><span class="pp-pre">YHP與我的</span>旅遊日誌</h1><p class="pp-sub">TRAVEL JOURNAL</p></header>';
+    '<h1 class="pp-title">我的旅遊手帳</h1><p class="pp-sub">TRAVEL JOURNAL</p></header>';
 }
 function dateParts(s){ const d = new Date(s + "T00:00:00"); return isNaN(d) ? null : {y: d.getFullYear(), m: pad(d.getMonth() + 1), d: pad(d.getDate()), wd: "星期" + WD[d.getDay()]}; }
 function topicInfo(k){ return k.startsWith("c:") ? null : TOPIC.get(k); }
@@ -1165,6 +1202,13 @@ function ptHTML(text){
   const m = String(text || "").split(/\s*(?:——|—|--)\s*/), keys = m[0], note = m.slice(1).join(" ");
   return note ? esc(note) + '<span class="pt-keys">' + esc(keys) + '</span>' : esc(keys);
 }
+const ansMode = q => q.ansMode || (q.showAnswer ? "submit" : "none");
+const ANS_MODES = [["none", "學生提交後只看到得分"], ["submit", "學生提交後即可看到參考答案"], ["code", "全部同學完成後，用答案編碼開放答案"]];
+// 用答案編碼開放後：每題答案下以紅色列出完整參考答案（不論得分）
+function fullAnsHTML(q, res){
+  return '<div class="qa-res"><p class="qa-score">得分 <b>' + res.score + '</b> / ' + res.total + '</p><p class="ans-head">正確答案</p><ul class="pts ans-red">' +
+    q.points.map((p, j) => '<li><span class="pt-mark" aria-hidden="true">' + (res.got[j] ? ICON.check : '•') + '</span><span>' + ptHTML(p) + (res.got[j] ? '<span class="vh">（你已答中）</span>' : '') + '</span></li>').join("") + '</ul></div>';
+}
 function resultHTML(q, res){
   const any = res.got.length > res.total;   // 任答 n 項：未答中嘅只列作「其他可接受答案」
   const li = (g, j) => '<li class="' + (g ? 'hit' : any ? 'key' : 'miss') + '"><span class="pt-mark" aria-hidden="true">' + (g ? ICON.check : any ? '·' : ICON.x) + '</span>' +
@@ -1183,13 +1227,14 @@ function answerBody(r, o){
   const body = q.questions.map((x, i) => {
     const a = r.answers[i] || {text:""}, txt = (a.text || "").trim();
     let main;
-    if (done) main = '<p class="qa-ans' + (txt ? '' : ' none') + '">' + (txt ? esc(a.text) : "（未有作答）") + '</p>' + resultHTML(x, r.results[i]);
+    if (done) main = '<p class="qa-ans' + (txt ? '' : ' none') + '">' + (txt ? esc(a.text) : "（未有作答）") + '</p>' +
+      (!o.teacher && r.unlocked && ansMode(q) === "code" && x.points ? fullAnsHTML(x, r.results[i]) : resultHTML(x, r.results[i]));
     else if (o.teacher) main = '<p class="qa-ans none">' + (txt ? esc(a.text) + "\n（作答中，尚未提交）" : "（尚未作答）") + '</p>' +
       (x.points ? '<ul class="pts">' + x.points.map(pt => '<li class="key"><span class="pt-mark" aria-hidden="true">' + ICON.check + '</span><span>' + ptHTML(pt) + '</span></li>').join("") + '</ul>' : '');
     else main = '<label class="vh" for="ans' + i + '">第 ' + (i + 1) + ' 題答案</label><textarea id="ans' + i + '" data-ans="' + i + '" rows="4" maxlength="800" placeholder="在此輸入答案">' + esc(a.text) + '</textarea>';
     return '<section class="qa"><div class="qa-head"><span class="qa-no">' + (i + 1) + '</span><p class="qa-text">' + esc(x.text) + '</p><span class="qa-marks">' + x.marks + ' 分</span></div>' + main + '</section>';
   }).join("");
-  return head + '<div class="qlist">' + body + '</div>';
+  return head + (o.extra || '') + '<div class="qlist">' + body + '</div>';
 }
 
 /* ── 登入畫面 ── */
@@ -1198,29 +1243,26 @@ function vSetup(){
     '<p class="fineprint">請老師按「設定步驟」第 6 步，在 config.js 填上 Apps Script 網址。</p></div></main>';
 }
 function vLogin(){
-  const r = S.route;
-  const env = r.lc ? '' : IOS_HOME ? '<p class="flash">你正在使用「加入主畫面」的 app，iPhone 不容許在這裏用 Google 登入。請用 Safari 開啟 ' + esc(appURL()) + ' 登入；如果這個 app 內有未上載的紀錄，請按下面「用登入碼登入」。</p>'
-    : INAPP ? '<p class="flash">你正在其他 app（例如 WhatsApp、Instagram）內置的瀏覽器開啟這個網頁，Google 不容許在這裏登入。請按右上角選單，選擇用 Safari 或 Chrome 開啟；或者複製網址，貼到 Safari 或 Chrome。</p>' : '';
-  const copy = !r.lc && (IOS_HOME || INAPP) ? '<button type="button" class="btn btn-ghost sm" data-act="copyurl">' + ICON.copy + '複製網址</button>' : '';
-  const google = (GCID ? '<div id="gBtn" class="gbtn" aria-live="polite"><p class="loading">正在載入 Google 登入……</p></div>'
-      : '<p class="flash">未設定 Google 登入：請在 config.js 填上 GOOGLE_CLIENT_ID。</p>') +
-    '<p class="flash" data-flash role="alert" hidden></p>' +
-    '<div class="quick"><button type="button" class="linkbtn" data-act="tolc">用登入碼登入</button>' +
-    '<p class="fineprint">未能用 Google 登入？請用 Safari 或 Chrome 開啟本網址；或者在另一部已登入的手機按「帳戶」→「產生登入碼」，或請老師提供登入碼。</p></div>';
-  const lc = '<form id="lcForm" class="stack" novalidate>' +
-      '<div class="field"><label for="inLc">登入碼</label><input id="inLc" maxlength="7" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" placeholder="6 位數字"></div>' +
-      '<p class="hint">在另一部已登入的手機按「帳戶」→「產生登入碼」，或請老師在後台產生。登入碼 10 分鐘內有效，只可使用一次。</p>' +
-      '<p class="flash" data-flash role="alert" hidden></p>' +
-      '<button class="btn btn-primary btn-block" type="submit" id="lcBtn">登入</button>' +
-      '<div class="quick"><button type="button" class="linkbtn" data-act="tologin">改用 Google 帳戶登入</button></div></form>';
-  return '<main class="login">' + brandHTML() + '<div class="panel stack">' +
-      (r.msg ? '<p class="flash">' + esc(r.msg) + '</p>' : '') +
-      '<p class="label">' + (r.lc ? '用登入碼登入' : '登入') + '</p>' +
-      (r.lc ? '' : '<p class="fineprint">請使用 Google 帳戶登入。學生第一次登入需要登記中文姓名、班別及學號；老師登入後直接進入後台。</p>') +
-      env + copy + (r.lc ? lc : google) +
-    '</div>' +
-    (S.volatile ? '<p class="flash">這個瀏覽器未能保存資料，未上載的紀錄在關閉頁面後會消失。請改用 Safari 或 Chrome 開啟。</p>' : '') +
-    '</main>';
+  const r = S.route, warn = [];
+  if (r.msg) warn.push(esc(r.msg));
+  if (!r.lc && IOS_HOME) warn.push('你正在使用「加入主畫面」的 app，iPhone 不容許在這裏用 Google 登入。請用 Safari 開啟 ' + esc(appURL()) + ' 登入；如果這個 app 內有未上載的紀錄，請按「用登入碼登入」。');
+  else if (!r.lc && INAPP) warn.push('你正在其他 app（例如 WhatsApp、Instagram）內置的瀏覽器開啟這個網頁，Google 不容許在這裏登入。請按右上角選單，改用 Safari 或 Chrome 開啟。');
+  if (S.volatile) warn.push('這個瀏覽器未能保存資料，未上載的紀錄在關閉頁面後會消失。請改用 Safari 或 Chrome 開啟。');
+  if (!GCID) warn.push('未設定 Google 登入：請在 config.js 填上 GOOGLE_CLIENT_ID。');
+  const alert = '<div class="cover-alert">' + warn.map(w => '<p class="flash">' + w + '</p>').join("") +
+    (!r.lc && (IOS_HOME || INAPP) ? '<button type="button" class="btn btn-ghost sm" data-act="copyurl">' + ICON.copy + '複製網址</button>' : '') +
+    '<p class="flash" data-flash role="alert" hidden></p></div>';
+  const box = r.lc
+    ? '<form id="lcForm" class="cover-login" novalidate><p class="cl-title">用登入碼登入</p>' +
+        '<div class="cl-row"><label class="vh" for="inLc">登入碼</label><input id="inLc" maxlength="7" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" placeholder="6 位數字"><button class="btn btn-primary sm" type="submit" id="lcBtn">登入</button></div>' +
+        '<button type="button" class="linkbtn" data-act="tologin">改用 Google 帳戶</button></form>'
+    : '<div class="cover-login"><p class="cl-title">註冊／登入</p>' +
+        (GCID ? '<div id="gBtn" class="gbtn" aria-live="polite"><p class="loading">載入中……</p></div>' : '') +
+        '<button type="button" class="linkbtn" data-act="tolc">用登入碼登入</button></div>';
+  return '<main class="cover-page"><div class="cover-wrap"><img src="cover.jpg" alt="我的旅遊手帳" onerror="this.parentNode.classList.add(\'noimg\')">' +
+      '<h1 class="cover-fallback">我的旅遊手帳</h1>' + box + alert + '</div>' +
+    '<p class="cover-help">' + (r.lc ? '登入碼可在另一部已登入的手機按「帳戶」→「產生登入碼」取得，或請老師在後台產生；10 分鐘內有效，只可使用一次。'
+      : '用 Google 帳戶註冊或登入。第一次登入的同學需要登記中文姓名、班別及學號；老師登入後直接進入後台。未能用 Google 登入？請用 Safari 或 Chrome 開啟本網址，或用登入碼登入。') + '</p></main>';
 }
 // 呢部手機有另一個帳戶未上載嘅紀錄：唔好靜靜雞刪走，先問清楚
 function vSwitch(){
@@ -1242,7 +1284,7 @@ function initGoogle(){
   const g = window.google && google.accounts && google.accounts.id;
   if (!g) {
     if (!gWait) gWait = Date.now();
-    if (Date.now() - gWait > 12000) { box.innerHTML = '<p class="flash">未能載入 Google 登入。請檢查網絡，然後重新整理這一頁。</p>'; logErr("gsi", "Google 登入程式庫載入失敗"); return; }
+    if (Date.now() - gWait > 12000) { box.innerHTML = '<p class="loading">未能載入，請重新整理</p>'; flashIn("未能載入 Google 登入。請檢查網絡，然後重新整理這一頁。"); logErr("gsi", "Google 登入程式庫載入失敗"); return; }
     return void setTimeout(initGoogle, 250);
   }
   if (!gReady) {
@@ -1250,7 +1292,7 @@ function initGoogle(){
     gReady = true;
   }
   box.innerHTML = "";
-  g.renderButton(box, {type: "standard", theme: "filled_blue", size: "large", text: "signin_with", shape: "pill", logo_alignment: "left", locale: "zh-HK", width: Math.max(220, Math.min(360, box.clientWidth || 300))});
+  g.renderButton(box, {type: "standard", theme: "filled_blue", size: "large", text: "signin", shape: "pill", logo_alignment: "left", locale: "zh-HK"});   // 細身掣：放得入封面空白位
 }
 async function onGoogle(resp){
   if (!resp || !resp.credential || S.route.name !== "login") return;
@@ -1402,7 +1444,12 @@ function vAnswer(rid){
   const r = S.responses.find(x => x.id === rid);
   if (!r || !r.qset) return bar("考察題目", {back:"back"}) + '<main class="view"><div class="empty"><p>找不到這組題目。</p></div></main>';
   const done = r.status === "submitted", trip = S.trips.find(t => t.id === r.tripId);
-  return bar("考察題目", {back:"back", sync:true}) + '<main class="view">' + answerBody(r, {place: trip ? trip.place : ""}) +
+  const extra = ansMode(r.qset) !== "code" || r.unlocked ? (r.unlocked ? '<p class="okbox">已輸入答案編碼：每題答案下以紅色顯示完整參考答案。</p>' : '')
+    : done ? '<form id="ansCodeForm" class="scoreedit" novalidate><div class="field"><label for="inAnsCode">答案編碼</label><input id="inAnsCode" maxlength="8" inputmode="numeric" autocomplete="off" placeholder="老師提供的答案編碼"></div>' +
+        '<button class="btn btn-primary sm" type="submit" id="ansCodeBtn">顯示答案</button>' +
+        '<p class="hint">所有同學完成後，老師會提供答案編碼。輸入後，每題答案下會以紅色顯示完整的參考答案。</p><p class="flash" data-flash role="alert" hidden></p></form>'
+    : '<p class="hint">這組題目的參考答案會在所有同學完成後，以答案編碼開放。提交答案後，可在這裏輸入老師提供的答案編碼。</p>';
+  return bar("考察題目", {back:"back", sync:true}) + '<main class="view">' + answerBody(r, {place: trip ? trip.place : "", extra}) +
     (done ? '' : '<p class="hint">答案會自動暫存。提交後不能修改，系統會按老師提供的參考答案自動評分。</p>') +
     (S.flash ? '<p class="flash" role="alert">' + esc(S.flash) + '</p>' : '') + '</main>' +
     (done ? '' : '<div class="dock"><button type="button" class="btn btn-primary" id="submitBtn" data-act="confirm" data-key="submit:' + r.id + '">' + ICON.check + (S.confirm === "submit:" + r.id ? "再按一次確認提交" : "提交答案") + '</button></div>');
@@ -1535,8 +1582,11 @@ function vQset(id){
     '<div class="bigcode"><p class="eyebrow">題目編號</p><p class="digits" id="bigDigits">' + esc(q.code) + '</p>' +
       '<p class="hint">' + (S.route.fresh ? "已產生新的題目編號，請告訴學生。" : "學生在考察紀錄內輸入這個編號即可作答。") + '</p>' +
       '<button type="button" class="btn btn-ghost sm" data-act="copycode" data-v="' + esc(q.code) + '">' + ICON.copy + '複製編號</button></div>' +
-    '<section class="qhead"><h2 class="th-place">' + esc(q.title) + '</h2><p class="th-sum">' + (q.dest ? esc(q.dest) + '　·　' : '') + q.questions.length + ' 題　共 ' + total + ' 分　·　' + (q.showAnswer ? "學生提交後可看到參考答案" : "學生提交後只看到得分") + '</p>' +
+    '<section class="qhead"><h2 class="th-place">' + esc(q.title) + '</h2><p class="th-sum">' + (q.dest && q.dest !== q.title ? esc(q.dest) + '　·　' : '') + q.questions.length + ' 題　共 ' + total + ' 分　·　' + {none: "學生提交後只看到得分", submit: "學生提交後可看到參考答案", code: "用答案編碼開放答案"}[ansMode(q)] + '</p>' +
       '<div class="btnrow"><button type="button" class="btn btn-ghost sm" data-act="editqset" data-id="' + id + '">修改題目</button></div></section>' +
+    (ansMode(q) === "code" && q.ansCode ? '<div class="bigcode"><p class="eyebrow">答案編碼</p><p class="digits sm">' + esc(q.ansCode) + '</p>' +
+      '<p class="hint">所有同學完成後，把答案編碼告訴學生。學生輸入後，每題答案下會以紅色顯示完整參考答案。</p>' +
+      '<button type="button" class="btn btn-ghost sm" data-act="copyans" data-v="' + esc(q.ansCode) + '">' + ICON.copy + '複製答案編碼</button></div>' : '') +
     '<div class="qlist">' + q.questions.map((x, i) => '<section class="qa"><div class="qa-head"><span class="qa-no">' + (i + 1) + '</span><p class="qa-text">' + esc(x.text) + '</p><span class="qa-marks">' + needOf(x) + ' 分</span></div>' +
       (x.points.length > needOf(x) ? '<p class="pts-more">任答 ' + needOf(x) + ' 項，每項 1 分</p>' : '') +
       '<ul class="pts">' + x.points.map(p => '<li class="key"><span class="pt-mark" aria-hidden="true">' + ICON.check + '</span><span>' + ptHTML(p.text) + '</span></li>').join("") + '</ul></section>').join("") + '</div>' +
@@ -1553,8 +1603,7 @@ function vQEdit(){
   const d = S.qdraft, c = d.id ? S.t["qs:" + d.id] : null, nResp = c && c.data ? c.data.responses.length : 0;
   const nOpt = q => { const m = Math.max(5, q.need || 0); let h = ""; for (let k = 1; k <= m; k++) h += '<option value="' + k + '"' + (k === (q.need || 1) ? ' selected' : '') + '>' + k + ' 項（' + k + ' 分）</option>'; return h; };
   return bar(d.id ? "修改題目" : "新增題目", {back:"back"}) + '<main class="view"><form id="qForm" class="stack" autocomplete="off" novalidate>' +
-    '<div class="field"><label for="qTitle">考察主題</label><input id="qTitle" maxlength="40" placeholder="例如：香港海洋公園考察" value="' + esc(d.title) + '"></div>' +
-    '<div class="field"><label for="qDest">目的地</label><input id="qDest" maxlength="60" placeholder="例如：香港故宮文化博物館" value="' + esc(d.dest || "") + '"></div>' +
+    '<div class="field"><label for="qDest">目的地</label><input id="qDest" maxlength="40" placeholder="例如：大館" value="' + esc(d.dest || "") + '"><p class="hint">學生作答時會見到這個名稱。</p></div>' +
     '<button type="button" class="btn btn-match btn-block" data-act="toqgen" data-i="-1">' + ICON.book + '用出題助手出題</button>' +
     '<p class="hint">出題助手按目的地、課題、概念及答案數量，從課程內容及 DSE 出題模式設計題目及參考答案。採用後仍可自行修改。</p>' +
     d.qs.map((q, i) => '<fieldset class="qedit"><legend>第 ' + (i + 1) + ' 題</legend>' +
@@ -1565,7 +1614,8 @@ function vQEdit(){
       '<div class="btnrow"><button type="button" class="linkbtn" data-act="toqgen" data-i="' + i + '">' + ICON.book + '用出題助手重出這題</button>' +
       (d.qs.length > 1 ? '<button type="button" class="linkbtn danger" data-act="rmq" data-i="' + i + '">' + ICON.x + '刪除這一題</button>' : '') + '</div></fieldset>').join("") +
     (d.qs.length < 10 ? '<button type="button" class="btn btn-ghost btn-block" data-act="addq">' + ICON.plus + '加一題</button>' : '') +
-    '<label class="check" for="qShow"><input id="qShow" type="checkbox"' + (d.show ? ' checked' : '') + '><span>學生提交後可看到參考答案</span></label>' +
+    '<fieldset class="modes"><legend>參考答案顯示方式</legend>' + ANS_MODES.map(([v, l]) => '<label class="check" for="qm_' + v + '"><input type="radio" name="qmode" id="qm_' + v + '" value="' + v + '"' + ((d.mode || "submit") === v ? ' checked' : '') + '><span>' + l + '</span></label>').join("") +
+      '<p class="hint">揀第三項，儲存後系統會產生「答案編碼」。所有同學完成後，把答案編碼告訴學生；學生輸入後，每題答案下會以紅色顯示完整參考答案。</p></fieldset>' +
     (d.id && nResp ? '<p class="hint">已有 ' + nResp + ' 位學生作答。儲存後，已提交的答案會按修改後的參考答案重新評分。</p>' : '') +
     (S.flash ? '<p class="flash" role="alert">' + esc(S.flash) + '</p>' : '') +
     '</form></main>' +
@@ -1577,26 +1627,32 @@ const QBANK = /*QBANK*/{"cats":[{"n":1,"t":"旅遊導論","tp":["1-1","1-2","1-3
 const NUMW = ["", "一", "兩", "三", "四", "五"];
 const DEST_TY = [
   ["themepark", /迪士尼|海洋公園|樂園|主題公園|disney|ocean\s*park|環球影城|universal|legoland/i],
-  ["museum", /博物館|美術館|藝術館|M\+|故宮|文物館|紀念館|科學館|太空館|展覽館|藝術中心|戲曲中心|文化中心|演藝|劇院|大會堂|文化區|museum|gallery/i],
+  ["museum", /博物館|美術館|藝術館|M\+|故宮|文物館|紀念館|科學館|太空館|展覽館|藝術中心|戲曲中心|文化中心|演藝|劇院|大會堂|文化區|展廳|展覽廳|展區|museum|gallery/i],
   ["mice", /會議展覽|會展|博覽館|亞博|展覽中心|會議中心|expo|convention/i],
-  ["hotel", /酒店|賓館|旅館|度假村|渡假村|hotel|resort/i],
-  ["restaurant", /餐廳|酒樓|茶樓|食肆|茶餐廳|咖啡|cafe|café|大排檔|美食|餐館|飯店|酒家|快餐|食堂/i],
+  ["hotel", /酒店|賓館|旅館|度假村|渡假村|客房|hotel|resort/i],
+  ["restaurant", /餐廳|酒樓|茶樓|食肆|茶餐廳|咖啡|cafe|café|大排檔|美食|餐館|飯店|酒家|快餐|食堂|餐飲|廚房/i],
   ["transport", /機場|碼頭|郵輪|車站|高鐵|口岸|港珠澳大橋|airport|terminal|pier/i],
   ["heritage", /大館|古蹟|歷史|圍村|祠|廟|寺|教堂|活化|紗廠|街市|警署|書院|城寨|炮台|遺址|唐樓|騎樓|文物徑|故居|舊/],
   ["nature", /郊野|地質公園|濕地|保護區|麥理浩徑|海灘|沙灘|泳灘|瀑布|水塘|米埔|國家公園|海岸|森林|農場|生態|石澳|大嶼山|西貢|徑$/],
-  ["shopping", /商場|購物|市集|夜市|女人街|男人街|海港城|奧特萊斯|outlet|mall|街$/i],
+  ["shopping", /商場|購物|市集|夜市|女人街|男人街|海港城|奧特萊斯|outlet|mall|禮品店|紀念品店|商店|精品店|店舖|街$/i],
   ["landmark", /山頂|天星|摩天輪|昂坪|大佛|觀景|維港|海濱|星光大道|幻彩詠香江|鐘樓|塔$/]
 ];
 const HK_PLACE = /香港|九龍|新界|港島|離島|尖沙咀|旺角|中環|上環|西環|灣仔|銅鑼灣|油麻地|佐敦|深水埗|元朗|沙田|大埔|西貢|大嶼山|東涌|赤柱|大澳|長洲|南丫島|將軍澳|荃灣|屯門|天水圍|觀塘|黃大仙|筲箕灣|柴灣|堅尼地城|淺水灣|鯉魚門|啟德|客運碼頭|[道街]$/;
-function destInfo(dest){
-  const d = String(dest || ""), ty = new Set();
-  DEST_TY.forEach(([t, re]) => { if (re.test(d)) ty.add(t); });
+// 目的地類型：main＝目的地本身，sub＝老師填的特定部份（例如大館的「餐廳」）
+function destInfo(dest, part){
+  const tyOf = x => { const t = new Set(); if (x) DEST_TY.forEach(([k, re]) => { if (re.test(x)) t.add(k); }); return t; };
+  const d = String(dest || ""), main = tyOf(d), sub = tyOf(String(part || "").trim());
   let geo = null;
   if (!HK_PLACE.test(d)) for (const [name, g] of Object.entries(QBANK.geo || {})) {   // 香港地方（例如北京道、上海街、中國客運碼頭）唔當外地
     if ((name !== "中國" && d.includes(name.replace(/（.*）/, ""))) || (g.alias || []).some(a => a && a.length > 1 && d.toLowerCase().includes(String(a).toLowerCase()))) { geo = Object.assign({name}, g); break; }
   }
-  if (geo) ty.add("overseas");
-  return {ty, geo};
+  if (geo) main.add("overseas");
+  return {ty: new Set([...main, ...sub]), main, sub, geo};
+}
+// 出題用的地點：有特定部份就寫成「大館內的餐廳」
+function qgPlace(g){
+  const p = String(g.part || "").trim().replace(/^(內的|內|的)/, "");
+  return p ? g.dest + "內的" + p : g.dest;
 }
 function qgTopic(k){
   if (/^\d-\d+$/.test(k)) { const t = TOPIC.get(k); return t ? {t: t.t, c: t.c} : null; }
@@ -1606,15 +1662,15 @@ const qgNorm = s => String(s || "").normalize("NFKC").toLowerCase().replace(/[\s
 // 由題庫及課文配對字典，砌出候選題目（tier 細＝優先）
 function qgPool(g, info){
   const cat = (QBANK.cats || []).find(c => c.n === g.cat); if (!cat) return [];
-  const selTp = new Set([...g.sel].map(x => x.split("|")[0])), tps = cat.tp.filter(k => !selTp.size || selTp.has(k)), out = [];
+  const tps = cat.tp.filter(k => !g.sel.size || g.sel.has(k)), out = [];
   (QBANK.items || []).forEach((it, i) => {
     if (!tps.includes(it.tp)) return;
     if (it.ty && it.ty.length && !it.ty.some(t => info.ty.has(t))) return;
     if (it.dyn && !info.geo) return;
     // 各洲課題入面專為外地寫嘅題目（景點、吸引原因等），只出喺該國所屬嘅洲
     if (/^3-[5-9]$/.test(it.tp) && (it.dyn || (it.ty || []).includes("overseas")) && (!info.geo || (qgTopic(it.tp) || {}).t !== info.geo.cont)) return;
-    const hit = (it.cs || []).some(c => g.sel.has(it.tp + "|" + c));
-    const tier = !g.sel.size ? (it.ty && it.ty.length ? 0 : 1) : hit ? 0 : !(it.cs || []).length ? 1 : 2;
+    // 優先：配合特定部份類型 → 配合目的地類型 → 任何地方都適用
+    const ty = it.ty || [], tier = info.sub.size ? (ty.some(t => info.sub.has(t)) ? 0 : ty.length ? 1 : 2) : (ty.length ? 0 : 1);
     out.push({src: "i" + i, tier, it});
   });
   // 後備：用課題概念清單同課文配對字典砌通用題目
@@ -1622,23 +1678,22 @@ function qgPool(g, info){
   const skipList = new Set(["1-18", "1-23", "3-1", "3-5", "3-6", "3-7", "3-8", "3-9"]);
   tps.forEach(k => {
     const T = qgTopic(k); if (!T || skipList.has(k)) return;   // 概念係景點／國家名嘅課題，唔用通用題目
-    const want = [...g.sel].filter(x => x.startsWith(k + "|")).map(x => x.slice(k.length + 1));
     const byC = new Map();   // 同一概念有幾條字典紀錄：合併做一個得分點
-    MRULES.filter(r => r.t === k && (!want.length || want.includes(r.c))).forEach(r => {
+    MRULES.filter(r => r.t === k).forEach(r => {
       const x = byC.get(r.c) || {keys: [r.c], s: r.s}; (RULES.r[r.i].k || []).forEach(w => { if (x.keys.length < 8 && !x.keys.includes(w)) x.keys.push(w); }); byC.set(r.c, x);
     });
-    if (byC.size >= 2) out.push({src: "o" + k, tier: 3, it: {tp: k, cs: [], ty: [], q: "根據你在{地}的觀察，舉出{n}個能反映「" + T.t + "」的例子，並指出所涉及的概念。",
+    if (byC.size >= 2) out.push({src: "o" + k, tier: 5, it: {tp: k, cs: [], ty: [], q: "根據你在{地}的觀察，舉出{n}個能反映「" + T.t + "」的例子，並指出所涉及的概念。",
       a: [...byC.values()].map(x => [x.keys.join("／"), x.s])}});
-    if (T.c.length >= 2) out.push({src: "l" + k, tier: 4, it: {tp: k, cs: [], ty: [], q: "以{地}為例，指出{n}項與「" + T.t + "」有關的概念，並各舉一個例子加以說明。",
+    if (T.c.length >= 2) out.push({src: "l" + k, tier: 6, it: {tp: k, cs: [], ty: [], q: "以{地}為例，指出{n}項與「" + T.t + "」有關的概念，並各舉一個例子加以說明。",
       a: T.c.map(c => { const r = MRULES.find(x => x.t === k && x.c === c); return [c, r ? r.s : ""]; })}});
   });
   return out;
 }
 function qgMake(e, g, info){
-  const it = e.it, n = g.n, T = qgTopic(it.tp);
-  const text = it.q.replace(/\{地\}/g, g.dest).replace(/\{n\}/g, NUMW[n]);
+  const it = e.it, n = g.n, T = qgTopic(it.tp), place = qgPlace(g);
+  const text = it.q.replace(/\{地\}/g, place).replace(/\{n\}/g, NUMW[n]);
   let pts = it.a || [];
-  if (it.dyn === "sights" && info.geo) pts = (info.geo.sights || []).filter(([k]) => !qgNorm(g.dest).includes(qgNorm(String(k).split(/[／\/|｜]/)[0])));   // 目的地本身唔計
+  if (it.dyn === "sights" && info.geo) pts = (info.geo.sights || []).filter(([k]) => !qgNorm(place).includes(qgNorm(String(k).split(/[／\/|｜]/)[0])));   // 目的地本身唔計
   if (it.dyn === "facts" && info.geo) {
     const nm = info.geo.name.replace(/（.*）/, "");
     pts = [[info.geo.cont, nm + "位於" + info.geo.cont + "。"]];
@@ -1648,7 +1703,7 @@ function qgMake(e, g, info){
   pts = pts.map(([k, s]) => [String(k || "").split(/[／\/|｜]/).map(x => x.trim()).filter(x => x && !qn.includes(qgNorm(x))), s || ""]).filter(([ks]) => ks.length);   // 題目已出現嘅字眼唔可以做關鍵字
   if (pts.length < n) return null;
   return {text, need: n, tp: it.tp, title: T ? T.t : "", src: e.src,
-    lines: pts.map(([ks, s]) => ks.join("／") + (s ? " —— " + String(s).replace(/\{地\}/g, g.dest) : ""))};
+    lines: pts.map(([ks, s]) => ks.join("／") + (s ? " —— " + String(s).replace(/\{地\}/g, place) : ""))};
 }
 function qgShuffle(list, seed){
   let x = seed || 1;
@@ -1657,7 +1712,7 @@ function qgShuffle(list, seed){
 }
 // 出下一條：照次序揀第一條未出過、答案數量夠嘅題目；全部出過就由頭再嚟
 function qgNext(g){
-  const info = destInfo(g.dest);
+  const info = destInfo(g.dest, g.part);
   if (!g.order) { g.order = qgShuffle(qgPool(g, info), Date.now() % 2147483647); g.pos = 0; }
   for (let round = 0; round < 2; round++) {
     while (g.pos < g.order.length) {
@@ -1674,16 +1729,20 @@ function vQGen(){
   const cats = QBANK.cats || [], cat = cats.find(c => c.n === g.cat), cur = g.cands[g.i];
   const topics = cat ? cat.tp.map(k => [k, qgTopic(k)]).filter(([, T]) => T) : [];
   return bar("出題助手", {back:"back"}) + '<main class="view">' +
-    '<div class="field"><label for="gDest">目的地</label><input id="gDest" maxlength="60" placeholder="例如：香港故宮文化博物館" value="' + esc(g.dest) + '"></div>' +
+    '<div class="field"><label for="gDest">目的地</label><input id="gDest" maxlength="60" placeholder="例如：大館" value="' + esc(g.dest) + '"></div>' +
+    '<div class="field"><label for="gPart">目的地的特定部份（選填）</label><input id="gPart" maxlength="30" placeholder="例如：餐廳、禮品店、展覽廳" value="' + esc(g.part || "") + '">' +
+      '<p class="hint">填了就以「' + esc((g.dest || "大館") + "內的" + (String(g.part || "").trim() || "餐廳")) + '」出題。</p></div>' +
     '<section class="block" aria-labelledby="hCat"><div class="block-head"><h3 id="hCat">課題</h3></div>' +
       '<div class="catgrid" role="group" aria-labelledby="hCat">' + cats.map(c => '<button type="button" class="catbtn" data-act="qgcat" data-n="' + c.n + '" aria-pressed="' + (g.cat === c.n) + '"><b>' + c.n + '</b>' + esc(c.t) + '</button>').join("") + '</div></section>' +
-    (cat ? '<section class="block" aria-labelledby="hCon"><div class="block-head"><h3 id="hCon">概念</h3><span class="count" id="qgCount">' + (g.sel.size ? '已揀 ' + g.sel.size + ' 個' : '不揀＝由系統揀') + '</span></div>' +
-      '<div class="qgtopics">' + topics.map(([k, T]) => {
-        const n = T.c.filter(c => g.sel.has(k + "|" + c)).length;
-        return '<details data-k="' + esc(k) + '"' + (g.open.has(k) ? ' open' : '') + '><summary><span>' + esc(T.t) + '</span><span class="cnt" data-cnt="' + esc(k) + '">' + (n ? '已揀 ' + n : '') + '</span></summary>' +
-          '<div class="conchips">' + T.c.map(c => '<button type="button" class="concept" data-act="qgc" data-k="' + esc(k + "|" + c) + '" aria-pressed="' + g.sel.has(k + "|" + c) + '">' + esc(c) + '</button>').join("") + '</div></details>';
+    (cat ? '<section class="block" aria-labelledby="hCon"><div class="block-head"><h3 id="hCon">概念</h3><span class="count">只可揀一個；不揀＝由系統揀</span></div>' +
+      '<div class="qgcons" role="radiogroup" aria-labelledby="hCon">' + topics.map(([k, T]) => {
+        const on = g.sel.has(k), open = g.info.has(k);
+        return '<div class="qgcon' + (on ? ' on' : '') + '"><div class="qgcon-row">' +
+          '<button type="button" class="qgcon-b" role="radio" data-act="qgt" data-k="' + esc(k) + '" aria-checked="' + on + '">' + esc(T.t) + '</button>' +
+          '<button type="button" class="qgcon-i" data-act="qginfo" data-k="' + esc(k) + '" aria-expanded="' + open + '" aria-label="「' + esc(T.t) + '」包含的內容">i</button></div>' +
+          (open ? '<p class="qgcon-info"><b>包含：</b>' + T.c.map(esc).join("、") + '</p>' : '') + '</div>';
       }).join("") + '</div>' +
-      (g.sel.size ? '<button type="button" class="linkbtn" data-act="qgclear">' + ICON.x + '清除已揀概念</button>' : '') + '</section>' : '') +
+      (g.sel.size ? '<button type="button" class="linkbtn" data-act="qgclear">' + ICON.x + '取消已揀概念</button>' : '') + '</section>' : '') +
     '<section class="block" aria-labelledby="hNum"><div class="block-head"><h3 id="hNum">答案數量</h3></div>' +
       '<div class="nseg" role="group" aria-labelledby="hNum">' + [1,2,3,4,5].map(k => '<button type="button" data-act="qgn" data-n="' + k + '" aria-pressed="' + (g.n === k) + '">' + k + '</button>').join("") + '</div>' +
       '<p class="hint">要求學生答幾多個論點，每個 1 分，最多 5 分。</p></section>' +
@@ -1959,10 +2018,9 @@ async function purgeLocalTrip(tid){
 }
 function readQDraft(){
   const d = S.qdraft; if (!d) return;
-  const ti = $("#qTitle"); if (ti) d.title = ti.value;
   const de = $("#qDest"); if (de) d.dest = de.value;
   d.qs.forEach((q, i) => { const a = $("#qt" + i), b = $("#qp" + i), n = $("#qn" + i); if (a) q.text = a.value; if (b) q.pts = b.value; if (n) q.need = +n.value; });
-  const sh = $("#qShow"); if (sh) d.show = sh.checked;
+  const m = document.querySelector('input[name="qmode"]:checked'); if (m) d.mode = m.value;
 }
 const countPoints = txt => String(txt || "").split(/\n+/).map(l => l.trim()).filter(Boolean).length;
 
@@ -1995,7 +2053,7 @@ const A = {
     if (!/^[0-9A-Z][0-9A-Z\-]{0,5}$/.test(cls) || cls === TEACHER) return flashIn("請輸入正確的班別，例如 4A。");
     if (!(no >= 1 && no <= 99)) return flashIn("請輸入正確的學號，例如 01。");
     flashIn(""); setBusy("regBtn", true, "登記中……"); S.registering = true;
-    try { await startSession(await api("gRegister", {ticket: S.route.ticket, name, cls, no})); toast("登記成功，歡迎使用旅遊日誌"); }
+    try { await startSession(await api("gRegister", {ticket: S.route.ticket, name, cls, no})); toast("登記成功，歡迎使用我的旅遊手帳"); }
     catch (e) {
       if (isStudent()) return;
       if (e.code === "ticket") return go("login", {msg: e.message});
@@ -2232,11 +2290,11 @@ const A = {
   atrip(el){ go("atrip", {sid: el.dataset.sid, id: el.dataset.id, back: Object.assign({}, S.route)}); },
   aopenresp(el){ const b = Object.assign({}, S.route); delete b.fresh; go("aresp", {rid: el.dataset.id, back: b}); },
   openqset(el){ go("qset", {id: el.dataset.id, back: {name: "admin", tab: "qsets"}}); },
-  newqset(){ S.qdraft = {title: "", dest: "", qs: [{text: "", pts: "", need: 2}], show: true}; go("qedit", {back: {name: "admin", tab: "qsets"}}); },
+  newqset(){ S.qdraft = {dest: "", qs: [{text: "", pts: "", need: 2}], mode: "submit"}; go("qedit", {back: {name: "admin", tab: "qsets"}}); },
   editqset(el){
     const c = S.t["qs:" + el.dataset.id]; if (!c || !c.data) return;
     const q = c.data.qset;
-    S.qdraft = {id: q.id, title: q.title, dest: q.dest || "", show: !!q.showAnswer,
+    S.qdraft = {id: q.id, dest: q.dest || String(q.title || "").replace(/考察$/, ""), mode: ansMode(q),
       qs: q.questions.map(x => ({id: x.id, text: x.text, need: x.need >= 1 ? Math.min(x.need, x.points.length) : x.points.length, pts: x.points.map(p => p.text).join("\n")}))};
     go("qedit", {back: Object.assign({}, S.route)});
   },
@@ -2244,22 +2302,25 @@ const A = {
   /* 出題助手 */
   toqgen(el){
     readQDraft(); const d = S.qdraft, i = +el.dataset.i;
-    S.qg = Object.assign({dest: "", cat: 0, n: 2, sel: new Set(), open: new Set()}, S.qgKeep || {}, {target: i, cands: [], i: 0, order: null, pos: 0});
+    S.qg = Object.assign({dest: "", part: "", cat: 0, n: 2, sel: new Set()}, S.qgKeep || {}, {info: new Set(), target: i, cands: [], i: 0, order: null, pos: 0});
     if (d.dest) S.qg.dest = d.dest;
     if (i >= 0 && d.qs[i] && d.qs[i].need) S.qg.n = Math.min(5, d.qs[i].need);
     go("qgen", {back: Object.assign({}, S.route)});
   },
   qgreset(){ const g = S.qg; g.cands = []; g.i = 0; g.order = null; g.pos = 0; g.wrapped = false; S.flash = null; },
-  qgread(){ const g = S.qg, e = $("#gDest"); if (e && e.value.trim() !== g.dest) { g.dest = e.value.trim(); A.qgreset(); } },
-  qgcat(el){ A.qgread(); const g = S.qg, n = +el.dataset.n; if (g.cat !== n) { g.cat = n; g.sel = new Set(); g.open = new Set(); A.qgreset(); } refresh(); },
-  qgc(el){
-    A.qgread(); const g = S.qg, k = el.dataset.k, tp = k.split("|")[0];
-    if (g.sel.has(k)) g.sel.delete(k); else g.sel.add(k);
-    el.setAttribute("aria-pressed", g.sel.has(k));
-    const n = [...g.sel].filter(x => x.startsWith(tp + "|")).length, cnt = document.querySelector('[data-cnt="' + tp + '"]'); if (cnt) cnt.textContent = n ? "已揀 " + n : "";
-    const all = $("#qgCount"); if (all) all.textContent = g.sel.size ? "已揀 " + g.sel.size + " 個" : "不揀＝由系統揀";
-    if (g.cands.length) { A.qgreset(); refresh(); }
+  qgread(){
+    const g = S.qg, e = $("#gDest"), p = $("#gPart");
+    if (e && e.value.trim() !== g.dest) { g.dest = e.value.trim(); A.qgreset(); }
+    if (p && p.value.trim() !== (g.part || "")) { g.part = p.value.trim(); A.qgreset(); }
   },
+  qgcat(el){ A.qgread(); const g = S.qg, n = +el.dataset.n; if (g.cat !== n) { g.cat = n; g.sel = new Set(); g.info = new Set(); A.qgreset(); } refresh(); },
+  qgt(el){   // 只可揀一個概念（例如「承載力」）：揀另一個會換走，再按一次取消
+    A.qgread(); const g = S.qg, k = el.dataset.k;
+    g.sel = g.sel.has(k) ? new Set() : new Set([k]);
+    if (g.cands.length) A.qgreset();
+    refresh();
+  },
+  qginfo(el){ A.qgread(); const g = S.qg, k = el.dataset.k; if (g.info.has(k)) g.info.delete(k); else g.info.add(k); refresh(); },
   qgclear(){ A.qgread(); S.qg.sel = new Set(); A.qgreset(); refresh(); },
   qgn(el){ A.qgread(); const g = S.qg, n = +el.dataset.n; if (g.n !== n) { g.n = n; A.qgreset(); } refresh(); },
   qggo(){
@@ -2275,7 +2336,7 @@ const A = {
       else { g.n = want; A.qgreset(); }
     }
     if (!c) { S.flash = "這個課題暫時未有合適的題目，請改選其他概念或課題。"; return refresh(); }
-    g.cands.push(c); g.i = 0; S.qgKeep = {dest: g.dest, cat: g.cat, n: g.n, sel: new Set(g.sel), open: new Set(g.open)}; refresh();
+    g.cands.push(c); g.i = 0; S.qgKeep = {dest: g.dest, part: g.part, cat: g.cat, n: g.n, sel: new Set(g.sel)}; refresh();
   },
   qgmore(){
     A.qgread(); const g = S.qg;
@@ -2292,8 +2353,7 @@ const A = {
     if (at >= 0 && d.qs[at]) d.qs[at] = q;
     else { at = d.qs.findIndex(x => !String(x.text || "").trim() && !countPoints(x.pts)); if (at >= 0) d.qs[at] = q; else { d.qs.push(q); at = d.qs.length - 1; } }
     if (!String(d.dest || "").trim()) d.dest = g.dest;
-    if (!String(d.title || "").trim()) d.title = (g.dest + "考察").slice(0, 40);
-    S.qgKeep = {dest: g.dest, cat: g.cat, n: g.n, sel: new Set(g.sel), open: new Set(g.open)};
+    S.qgKeep = {dest: g.dest, part: g.part, cat: g.cat, n: g.n, sel: new Set(g.sel)};
     A.back(); toast("已加入第 " + (at + 1) + " 題，可再自行修改");
   },
   rmq(el){ readQDraft(); S.qdraft.qs.splice(+el.dataset.i, 1); refresh(); },
@@ -2301,7 +2361,7 @@ const A = {
     readQDraft(); const d = S.qdraft;
     const qs = d.qs.map(q => ({id: q.id, text: q.text.trim(), points: q.pts, need: q.need || countPoints(q.pts)})).filter(q => q.text || countPoints(q.points));
     const fail = msg => { S.flash = msg; refresh(); };
-    if (!d.title.trim()) return fail("請輸入考察主題。");
+    if (!String(d.dest || "").trim()) return fail("請輸入目的地。");
     if (!qs.length) return fail("請最少出一題。");
     const bad = qs.findIndex(q => !q.text || !countPoints(q.points));
     if (bad >= 0) return fail("第 " + (bad + 1) + " 題" + (qs[bad].text ? "未有參考答案（得分點）" : "未有題目") + "。");
@@ -2309,7 +2369,7 @@ const A = {
     if (few >= 0) return fail("第 " + (few + 1) + " 題要求答 " + qs[few].need + " 項，但只寫了 " + countPoints(qs[few].points) + " 個得分點。");
     setBusy("qBtn", true, "儲存中……");
     try {
-      const body = {title: d.title.trim(), dest: String(d.dest || "").trim(), showAnswer: !!d.show, questions: qs};
+      const dest = String(d.dest || "").trim().slice(0, 40), body = {title: dest, dest, ansMode: d.mode || "submit", showAnswer: (d.mode || "submit") === "submit", questions: qs};   // 題目組名稱＝目的地
       if (d.id) {
         const res = await api("tUpdateQset", Object.assign({id: d.id}, body));
         S.qdraft = null; S.t = {};
@@ -2320,6 +2380,18 @@ const A = {
         go("qset", {id: res.qset.id, fresh: true, back: {name: "admin", tab: "qsets"}}); toast("已產生題目編號 " + res.qset.code);
       }
     } catch (e) { setBusy("qBtn", false); fail(e.message); }
+  },
+  copyans(el){ const v = el.dataset.v; try { navigator.clipboard.writeText(v).then(() => toast("已複製答案編碼 " + v), () => toast("答案編碼：" + v)); } catch (e) { toast("答案編碼：" + v); } },
+  async ansunlock(){
+    const rid = S.route.rid, code = ($("#inAnsCode").value || "").normalize("NFKC").replace(/\s+/g, "");
+    if (!code) return flashIn("請輸入答案編碼。");
+    flashIn(""); setBusy("ansCodeBtn", true, "核對中……");
+    try {
+      const d = await api("unlockAnswers", {rid, code});
+      await put("responses", d.response);
+      S.responses = S.responses.map(x => x.id === rid ? d.response : x);
+      refresh(); toast("已顯示參考答案");
+    } catch (e) { setBusy("ansCodeBtn", false, "顯示答案"); flashIn(e.net ? "需要網絡才可以核對答案編碼。" : e.message); }
   },
   copycode(el){
     const v = el.dataset.v;
@@ -2415,10 +2487,9 @@ document.addEventListener("keydown", e => {
 });
 document.addEventListener("submit", e => {
   e.preventDefault(); const id = e.target.id;
-  if (id === "regForm") A.register(); else if (id === "classForm") A.saveclass(); else if (id === "lcForm") A.lclogin(); else if (id === "stuForm") A.savestu(); else if (id === "scoreForm") A.savescore();
+  if (id === "regForm") A.register(); else if (id === "classForm") A.saveclass(); else if (id === "lcForm") A.lclogin(); else if (id === "stuForm") A.savestu(); else if (id === "scoreForm") A.savescore(); else if (id === "ansCodeForm") A.ansunlock();
   else if (id === "tripForm") A.createTrip(); else if (id === "codeForm") A.loadcode(); else if (id === "qForm") A.saveqset();
 });
-document.addEventListener("toggle", e => { const t = e.target; if (S.qg && t.tagName === "DETAILS" && t.dataset.k) { if (t.open) S.qg.open.add(t.dataset.k); else S.qg.open.delete(t.dataset.k); } }, true);
 window.addEventListener("online", () => { if (isStudent()) syncNow(); });
 document.addEventListener("visibilitychange", () => {
   const vis = document.visibilityState === "visible";
