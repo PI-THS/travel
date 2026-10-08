@@ -745,17 +745,26 @@ async function drawJPEG(src, max, q){
   if (!blob) { freeCanvas(c); throw new Error("壓縮失敗（原圖 " + w0 + "×" + h0 + "）"); }
   return {blob, w, h, c};
 }
+const isHeic = f => /hei[cf]/i.test(f.type || "") || /\.hei[cf]$/i.test(f.name || "");
+const HEIC_MSG = "這張相片是 HEIC 格式，這部手機的瀏覽器讀取不到。請在相機設定關閉「高效率相片」（HEIF），之後拍攝的相片就可以使用；或者選擇其他相片。";
 async function makePhoto(file){
   const url = URL.createObjectURL(file);
-  let img = null, full = null, thumb = null;
+  let img = null, bmp = null, full = null, thumb = null;
   try {
-    img = await loadImg(url);
-    full = await drawJPEG(img, 1280, 0.8);
-    img.src = ""; img = null;                    // 手機原相可達數千萬像素，縮細之後即刻放手
+    try { img = await loadImg(url); }
+    catch (e) {
+      // 有啲相 <img> 讀唔到（例如部分 Android 手機嘅 HEIC 相），試多一個方法
+      try { if (window.createImageBitmap) bmp = await createImageBitmap(file, {imageOrientation: "from-image"}); } catch (e2) {}
+      if (!bmp) throw Object.assign(new Error((isHeic(file) ? "HEIC 相片" : "未能讀取圖片") + "（" + (file.type || "未知格式") + "）"), {heic: isHeic(file)});
+    }
+    full = await drawJPEG(img || bmp, 1280, 0.8);
+    if (img) { img.src = ""; img = null; }        // 手機原相可達數千萬像素，縮細之後即刻放手
+    if (bmp) { try { bmp.close(); } catch (e) {} bmp = null; }
     thumb = await drawJPEG(full.c, 480, 0.72);   // 縮圖由已縮細嘅相再縮，唔再用原相
     return {id: uid(), full: await asBuf(full.blob), thumb: await asBuf(thumb.blob), w: full.w, h: full.h, remote: false};
   } finally {
     if (img) img.src = "";
+    if (bmp) { try { bmp.close(); } catch (e) {} }
     freeCanvas(full && full.c); freeCanvas(thumb && thumb.c);
     URL.revokeObjectURL(url);
   }
@@ -784,6 +793,9 @@ const isTeacher = () => !!(S.session && S.session.role === "teacher");
 const LOGQ = [];
 const INAPP = /(FBAN|FBAV|Instagram|Line\/|MicroMessenger|WhatsApp|Snapchat|TikTok|musical_ly)/i.test(navigator.userAgent);
 const STANDALONE = (() => { try { return !!(navigator.standalone || matchMedia("(display-mode: standalone)").matches); } catch (e) { return false; } })();
+const IOS = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+const IOS_HOME = IOS && STANDALONE;   // iPhone「加入主畫面」嘅 app：入面用唔到 Google 登入
+const appURL = () => location.origin + location.pathname.replace(/index\.html$/, "");
 function logErr(kind, msg, persist = true){
   try {
     LOGQ.push({t: new Date().toISOString(), kind, msg: String(msg || "").slice(0, 300), route: S.route ? S.route.name : "", ua: navigator.userAgent.slice(0, 160), standalone: STANDALONE});
@@ -804,7 +816,7 @@ async function sendLogs(){
 function markAlive(fg){ if (idb) put("meta", {id: "alive", fg, route: S.route ? S.route.name : "", photos: S.draft ? S.draft.photos.length : 0, t: Date.now()}); }
 
 /* ── 返回鍵：Android 返回掣／iPhone 向右掃，會返上一頁，唔會成個 app 走咗 ── */
-const ROOTS = new Set(["boot", "setup", "login", "trips", "admin"]);
+const ROOTS = new Set(["boot", "setup", "login", "switch", "trips", "admin"]);
 let guard = false, dropPop = false, guardT = null;
 function wantGuard(){ return !!S.viewer || !!S.sheet || !ROOTS.has(S.route.name); }
 function guardSoon(){ clearTimeout(guardT); guardT = setTimeout(syncGuard, 0); }
@@ -855,6 +867,8 @@ function render(){
     case "login": html = vLogin(); break;
     case "register": html = vRegister(); break;
     case "editclass": html = vEditClass(); break;
+    case "switch": html = vSwitch(); break;
+    case "aeditstu": html = vAEditStu(r.sid); break;
     case "trips": html = vTrips(); break;
     case "newtrip": html = vNewTrip(); break;
     case "trip": html = vTrip(r.id); break;
@@ -1027,17 +1041,41 @@ function vSetup(){
 }
 function vLogin(){
   const r = S.route;
-  const warn = INAPP ? '<p class="flash">你正在其他 app 內置的瀏覽器開啟這個網頁，Google 登入未必可用，紀錄亦有機會遺失。請按右上角選單，改用 Safari 或 Chrome 開啟。</p>' : '';
+  const env = r.lc ? '' : IOS_HOME ? '<p class="flash">你正在使用「加入主畫面」的 app，iPhone 不容許在這裏用 Google 登入。請用 Safari 開啟 ' + esc(appURL()) + ' 登入；如果這個 app 內有未上載的紀錄，請按下面「用登入碼登入」。</p>'
+    : INAPP ? '<p class="flash">你正在其他 app（例如 WhatsApp、Instagram）內置的瀏覽器開啟這個網頁，Google 不容許在這裏登入。請按右上角選單，選擇用 Safari 或 Chrome 開啟；或者複製網址，貼到 Safari 或 Chrome。</p>' : '';
+  const copy = !r.lc && (IOS_HOME || INAPP) ? '<button type="button" class="btn btn-ghost sm" data-act="copyurl">' + ICON.copy + '複製網址</button>' : '';
+  const google = (GCID ? '<div id="gBtn" class="gbtn" aria-live="polite"><p class="loading">正在載入 Google 登入……</p></div>'
+      : '<p class="flash">未設定 Google 登入：請在 config.js 填上 GOOGLE_CLIENT_ID。</p>') +
+    '<p class="flash" data-flash role="alert" hidden></p>' +
+    '<div class="quick"><button type="button" class="linkbtn" data-act="tolc">用登入碼登入</button>' +
+    '<p class="fineprint">未能用 Google 登入？請用 Safari 或 Chrome 開啟本網址；或者在另一部已登入的手機按「帳戶」→「產生登入碼」，或請老師提供登入碼。</p></div>';
+  const lc = '<form id="lcForm" class="stack" novalidate>' +
+      '<div class="field"><label for="inLc">登入碼</label><input id="inLc" maxlength="7" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" placeholder="6 位數字"></div>' +
+      '<p class="hint">在另一部已登入的手機按「帳戶」→「產生登入碼」，或請老師在後台產生。登入碼 10 分鐘內有效，只可使用一次。</p>' +
+      '<p class="flash" data-flash role="alert" hidden></p>' +
+      '<button class="btn btn-primary btn-block" type="submit" id="lcBtn">登入</button>' +
+      '<div class="quick"><button type="button" class="linkbtn" data-act="tologin">改用 Google 帳戶登入</button></div></form>';
   return '<main class="login">' + brandHTML() + '<div class="panel stack">' +
       (r.msg ? '<p class="flash">' + esc(r.msg) + '</p>' : '') +
-      '<p class="label">登入</p>' +
-      '<p class="fineprint">請使用 Google 帳戶登入。學生第一次登入需要登記中文姓名、班別及學號；老師登入後直接進入後台。</p>' +
-      (GCID ? '<div id="gBtn" class="gbtn" aria-live="polite"><p class="loading">正在載入 Google 登入……</p></div>'
-            : '<p class="flash">未設定 Google 登入：請在 config.js 填上 GOOGLE_CLIENT_ID。</p>') +
-      '<p class="flash" data-flash role="alert" hidden></p>' +
+      '<p class="label">' + (r.lc ? '用登入碼登入' : '登入') + '</p>' +
+      (r.lc ? '' : '<p class="fineprint">請使用 Google 帳戶登入。學生第一次登入需要登記中文姓名、班別及學號；老師登入後直接進入後台。</p>') +
+      env + copy + (r.lc ? lc : google) +
     '</div>' +
     (S.volatile ? '<p class="flash">這個瀏覽器未能保存資料，未上載的紀錄在關閉頁面後會消失。請改用 Safari 或 Chrome 開啟。</p>' : '') +
-    warn + '</main>';
+    '</main>';
+}
+// 呢部手機有另一個帳戶未上載嘅紀錄：唔好靜靜雞刪走，先問清楚
+function vSwitch(){
+  const w = S.swap;
+  if (!w) return vLogin();
+  const o = w.owner, me = w.d.me, who = (o.name || "另一位同學") + (o.cls ? "（" + codeOf(o.cls, o.no) + "）" : "");
+  return '<main class="login">' + brandHTML() + '<div class="panel stack">' +
+    '<p class="label">這部手機有未上載的紀錄</p>' +
+    '<p class="fineprint">這部手機仍有 ' + w.n + ' 項屬於 ' + esc(who) + ' 的紀錄（例如相片）未上載。如果這是你的紀錄，請返回，用原本的帳戶登入，紀錄便會自動上載。</p>' +
+    '<button type="button" class="btn btn-primary btn-block" data-act="swback">返回登入畫面</button>' +
+    '<div class="danger-zone"><p class="hint">如果這些紀錄不屬於你，可以刪除它們，然後以 ' + esc(me.name) + '（' + esc(codeOf(me.cls, me.no)) + '）登入。刪除後不能復原。</p>' +
+      confirmBtn("swwipe", "刪除這些紀錄並登入", "再按一次確認刪除") + '</div>' +
+    '</div></main>';
 }
 // Google 登入掣：等 Google 個程式庫載入完先畫
 let gReady = false, gWait = null;
@@ -1260,17 +1298,40 @@ function vAdmin(){
 function vAStudent(sid){
   const c = need("stu:" + sid, "tStudent", {sid});
   if (!c.data) return bar("學生紀錄", {back:"back"}) + '<main class="view">' + stateHTML(c, "stu:" + sid) + '</main>';
-  const d = c.data, s = d.student, trips = sortTrips(d.trips), code = codeOf(s.cls, s.no);
+  const d = c.data, s = d.student, trips = sortTrips(d.trips), code = codeOf(s.cls, s.no), lc = S.t["lc:" + sid];
   const pwBox = !s.registered ? '<p class="hint">這位學生還未登記。學生第一次使用時，用 Google 帳戶登入，再輸入中文姓名及 ' + esc(code) + '。</p>'
     : '<div class="pwrow"><span class="label">Google 帳戶</span><span class="pwval">' + esc(s.email || "（未有紀錄）") + '</span></div>' +
-      (s.registeredAt ? '<p class="hint">登記時間：' + fmtStamp(s.registeredAt) + '</p>' : '');
+      (s.registeredAt ? '<p class="hint">登記時間：' + fmtStamp(s.registeredAt) + '</p>' : '') +
+      '<p class="hint">學生未能用 Google 登入時（例如 iPhone「加入主畫面」的 app），可以用登入碼登入。</p>' +
+      (lc && lc.until > Date.now() ? '<div class="bigcode"><p class="eyebrow">登入碼</p><p class="digits sm">' + esc(lc.code) + '</p><p class="hint">請學生在登入畫面按「用登入碼登入」輸入。10 分鐘內有效，只可使用一次。</p></div>'
+        : '<div class="btnrow"><button type="button" class="btn btn-ghost sm" data-act="tlc" data-sid="' + sid + '">產生登入碼</button></div>');
   return bar(s.name || code, {back:"back", plain:true}) + '<main class="view"><section class="adminhead"><p class="eyebrow">學生紀錄</p><h2 class="th-place plain">' + esc(s.name || "（未登記）") + '</h2>' +
     '<p class="th-sum">' + esc(code) + '　·　<b>' + trips.length + '</b> 次考察　<b>' + d.responses.filter(r => r.status === "submitted").length + '</b> 份已提交答案</p>' +
-    (s.lastLogin ? '<p class="hint">最近登入：' + fmtStamp(s.lastLogin) + '</p>' : '') + '</section>' +
+    (s.lastLogin ? '<p class="hint">最近登入：' + fmtStamp(s.lastLogin) + '</p>' : '') +
+    '<div class="btnrow"><button type="button" class="btn btn-ghost sm" data-act="aeditstu" data-sid="' + sid + '">修改姓名／班別／學號</button></div></section>' +
     '<section class="regbox" aria-label="登入資料">' + pwBox + '</section>' +
     '<section class="triplist" aria-label="考察列表">' + (trips.length ? trips.map(t => tripCard(t, "atrip", d.points, sid)).join("") : '<div class="empty"><p>這位學生還未有考察紀錄。</p></div>') + '</section>' +
-    (s.registered ? '<div class="danger-zone"><p class="hint">如果有人用錯了這個學號登記，可以清除登記（解除 Google 帳戶），讓真正的學生用自己的 Google 帳戶重新登記。考察紀錄會保留。</p>' +
-      confirmBtn("clearreg:" + sid, "清除登記", "再按一次確認清除登記") + '</div>' : '') + '</main>';
+    '<div class="danger-zone">' +
+      (s.registered ? '<p class="hint">如果有人用錯了這個學號登記，可以清除登記（解除 Google 帳戶），讓真正的學生用自己的 Google 帳戶重新登記。考察紀錄會保留。</p>' +
+        confirmBtn("clearreg:" + sid, "清除登記", "再按一次確認清除登記") : '') +
+      '<p class="hint">刪除帳戶會一併刪除這位學生的考察、紀錄點、答案及相片（相片會放入你 Google Drive 的垃圾桶，30 日內可以救回）。適用於測試帳戶或重複登記的帳戶。</p>' +
+      confirmBtn("delstu:" + sid, "刪除帳戶", "再按一次確認刪除帳戶及所有紀錄") + '</div></main>';
+}
+function vAEditStu(sid){
+  const c = need("stu:" + sid, "tStudent", {sid});
+  if (!c.data) return bar("修改學生資料", {back:"back"}) + '<main class="view">' + stateHTML(c, "stu:" + sid) + '</main>';
+  const s = c.data.student;
+  return bar("修改學生資料", {back:"back"}) +
+    '<main class="view"><form id="stuForm" class="stack" autocomplete="off" novalidate>' +
+      '<div class="field"><label for="eName">姓名</label><input id="eName" maxlength="20" value="' + esc(s.name) + '"></div>' +
+      '<div class="rowfields">' +
+        '<div class="field"><label for="eCls">班別</label><input id="eCls" maxlength="6" autocapitalize="characters" spellcheck="false" value="' + esc(s.cls) + '"></div>' +
+        '<div class="field"><label for="eNo">學號</label><input id="eNo" maxlength="2" inputmode="numeric" pattern="[0-9]*" value="' + esc(s.no ? pad(s.no) : "") + '"></div>' +
+      '</div>' +
+      '<p class="hint">儲存後，這位學生的考察紀錄、答案及 Sheet 內的姓名、班別學號會一併更新。</p>' +
+      '<p class="flash" data-flash role="alert" hidden></p>' +
+    '</form></main>' +
+    '<div class="dock"><button type="submit" form="stuForm" class="btn btn-primary" id="stuBtn">儲存</button></div>';
 }
 function vATrip(sid, id){
   const c = need("stu:" + sid, "tStudent", {sid});
@@ -1351,14 +1412,16 @@ function renderSheet(){
       '<div class="pk-list" id="pkList"></div></div>';
     renderPkList(); updatePkCount();
   } else if (S.sheet === "account" && S.session) {
-    const s = S.session, n = S.sync.pending;
+    const s = S.session, n = S.sync.pending, mc = S.myCode && S.myCode.until > Date.now() ? S.myCode : null;
     root.innerHTML = '<div class="scrim" data-act="closesheet"></div>' +
       '<div class="sheet" role="dialog" aria-modal="true" aria-labelledby="acTitle">' +
       '<div class="sheet-head"><h3 id="acTitle">帳戶</h3><button type="button" class="iconbtn" data-act="closesheet" aria-label="關閉">' + ICON.x + '</button></div>' +
       '<div class="sheet-body"><dl class="acct"><dt>姓名</dt><dd>' + esc(s.name) + '</dd><dt>班別學號</dt><dd>' + esc(codeOf(s.cls, s.no)) + '</dd>' + (s.email ? '<dt>GOOGLE</dt><dd>' + esc(s.email) + '</dd>' : '') + '</dl>' +
         '<p class="syncline" role="status">' + esc(syncText()) + '</p>' +
         '<div class="btnrow"><button type="button" class="btn btn-ghost sm" data-act="syncnow"' + (S.sync.busy ? ' disabled' : '') + '>' + ICON.refresh + '立即同步</button>' +
-        '<button type="button" class="btn btn-ghost sm" data-act="toeditclass">更改班別學號</button></div>' +
+        '<button type="button" class="btn btn-ghost sm" data-act="toeditclass">更改班別學號</button>' +
+        '<button type="button" class="btn btn-ghost sm" data-act="mycode">產生登入碼</button></div>' +
+        (mc ? '<div class="bigcode"><p class="eyebrow">登入碼</p><p class="digits sm">' + esc(mc.code) + '</p><p class="hint">10 分鐘內有效，只可使用一次。在「加入主畫面」的 app 或另一部手機的登入畫面，按「用登入碼登入」輸入。</p></div>' : '') +
         confirmBtn("logout", "登出", n ? "尚有 " + n + " 項未上載，登出會遺失。再按一次確認登出" : "再按一次確認登出") +
         '<p class="fineprint">登出後，這部手機上的紀錄會被清除；再次登入即可從雲端取回已上載的紀錄。</p>' +
       '</div></div>';
@@ -1542,12 +1605,16 @@ async function wipeLocal(){
   S.trips = []; S.points = []; S.responses = []; S.draft = null;
   Object.assign(S.sync, {pending: 0, error: null, note: null, offline: false, last: 0, lastPull: 0, pulled: false});
 }
-async function startSession(d){
+async function startSession(d, force){
   const me = d.me;
-  resetPhotoCache();
+  resetPhotoCache(); S.myCode = null;
   if (me.role === "student") {
     const owner = await getOne("meta", "owner");
-    if (owner && owner.sid !== me.sid) await wipeLocal();
+    if (owner && owner.sid !== me.sid) {
+      const n = (await getAll("outbox")).length;
+      if (n && !force) { S.swap = {d, owner, n}; return go("switch"); }   // 有其他帳戶未上載嘅紀錄：先問，唔好即刻刪
+      await wipeLocal();
+    }
     await put("meta", {id: "owner", sid: me.sid, name: me.name, cls: me.cls, no: me.no});
     try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {}); } catch (e) {}   // 請瀏覽器唔好自動清走未上載嘅紀錄
   }
@@ -1567,7 +1634,7 @@ async function authLost(why){
   logErr("auth", "伺服器表示登入已失效（" + (why || "") + "）");   // 重新登入後會送去「錯誤紀錄」工作表，方便查原因
   S.session = null; S.t = {}; resetPhotoCache(); await dropSession(s.token); S.sheet = null; renderSheet(); document.documentElement.classList.remove("locked");
   const n = teacher ? 0 : (await getAll("outbox")).length;
-  go("login", {msg: "登入已失效，請重新登入。" + (n ? "這部手機仍有 " + n + " 項屬於" + name + "（" + codeOf(s.cls, s.no) + "）的紀錄未上載，請用 Google 帳戶登入並登記同一個班別學號，紀錄便會自動上載。" : "")});
+  go("login", {msg: "登入已失效，請重新登入。" + (n ? "這部手機仍有 " + n + " 項屬於" + name + "（" + codeOf(s.cls, s.no) + "）的紀錄未上載，請用同一個帳戶登入（Google 或登入碼），紀錄便會自動上載。" : "")});
 }
 
 /* ── 動作 ── */
@@ -1592,11 +1659,30 @@ const countPoints = txt => String(txt || "").split(/\n+/).map(l => l.trim()).fil
 const A = {
   /* 帳戶 */
   tologin(){ go("login"); },
+  tolc(){ go("login", {lc: true}); },
+  async lclogin(){
+    const code = ($("#inLc").value || "").normalize("NFKC").replace(/\D/g, "");
+    if (code.length !== 6) return flashIn("請輸入 6 位數字的登入碼。");
+    flashIn(""); setBusy("lcBtn", true, "登入中……");
+    try { await startSession(await api("codeLogin", {code})); }
+    catch (e) { setBusy("lcBtn", false, "登入"); flashIn(e.net ? "未能連接伺服器，請檢查網絡後再試。" : e.message); }
+  },
+  copyurl(){
+    const u = appURL();
+    try { navigator.clipboard.writeText(u).then(() => toast("已複製網址，請貼到 Safari 或 Chrome"), () => toast(u)); } catch (e) { toast(u); }
+  },
+  async mycode(el){
+    if (el) el.disabled = true;
+    try { const d = await api("myLoginCode"); S.myCode = {code: d.code, until: Date.now() + d.expiresIn * 1000}; }
+    catch (e) { toast(e.net ? "需要網絡才可以產生登入碼。" : e.message); }
+    renderSheet();
+  },
+  swback(){ S.swap = null; go("login"); },
   async register(){
     if (S.registering || isStudent()) return;   // 連按兩次或者已經登入：唔好再送出
     const name = $("#rName").value.normalize("NFKC").replace(/\s+/g, ""), cls = $("#rCls").value.normalize("NFKC").replace(/\s+/g, "").toUpperCase(), no = parseInt($("#rNo").value.normalize("NFKC"), 10);
     if (!/^[㐀-䶿一-鿿豈-﫿]{2,8}$/.test(name)) return flashIn("請輸入中文姓名（2 至 8 個中文字）。");
-    if (!/^[0-9A-Z\-]{1,6}$/.test(cls) || cls === TEACHER) return flashIn("請輸入正確的班別，例如 4A。");
+    if (!/^[0-9A-Z][0-9A-Z\-]{0,5}$/.test(cls) || cls === TEACHER) return flashIn("請輸入正確的班別，例如 4A。");
     if (!(no >= 1 && no <= 99)) return flashIn("請輸入正確的學號，例如 01。");
     flashIn(""); setBusy("regBtn", true, "登記中……"); S.registering = true;
     try { await startSession(await api("gRegister", {ticket: S.route.ticket, name, cls, no})); toast("登記成功，歡迎使用旅遊日誌"); }
@@ -1609,7 +1695,7 @@ const A = {
   toeditclass(){ const back = Object.assign({}, S.route); A.closesheet(); go("editclass", {back}); },
   async saveclass(){
     const cls = $("#cCls").value.normalize("NFKC").replace(/\s+/g, "").toUpperCase(), no = parseInt($("#cNo").value.normalize("NFKC"), 10);
-    if (!/^[0-9A-Z\-]{1,6}$/.test(cls) || cls === TEACHER) return flashIn("請輸入正確的班別，例如 5A。");
+    if (!/^[0-9A-Z][0-9A-Z\-]{0,5}$/.test(cls) || cls === TEACHER) return flashIn("請輸入正確的班別，例如 5A。");
     if (!(no >= 1 && no <= 99)) return flashIn("請輸入正確的學號，例如 01。");
     if (cls === S.session.cls && no === S.session.no) return A.back();
     flashIn(""); setBusy("classBtn", true, "儲存中……");
@@ -1653,7 +1739,7 @@ const A = {
       if (old) await dropPhoto(old);
       if (S.route.name === "trip") refresh();
       toast("已更新封面");
-    } catch (e) { logErr("photo", "封面：" + (e && e.message) + "｜" + (f.type || "") + " " + Math.round((f.size || 0) / 1024) + "KB"); toast("未能讀取這張圖片，請再選擇一次。"); }
+    } catch (e) { logErr("photo", "封面：" + (e && e.message) + "｜" + (f.type || "") + " " + Math.round((f.size || 0) / 1024) + "KB"); toast(e && e.heic ? "這張相片是 HEIC 格式，未能讀取。請在相機設定關閉「高效率相片」，或選擇其他相片。" : "未能讀取這張圖片，請再選擇一次。"); }
   },
   opencode(){ S.codeOpen = true; S.flash = null; refresh(); const i = $("#inCode"); if (i) i.focus(); },
   async loadcode(){
@@ -1702,7 +1788,7 @@ const A = {
         if (S.draft !== d) { await dropPhoto(ph.id); continue; }   // 已經離開編輯畫面
         d.photos.push(ph.id); d._added.push(ph.id); saveDraftSoon(0);
       } catch (e) {
-        S.flash = "未能讀取其中一張相片，請再選擇一次。";
+        S.flash = e && e.heic ? HEIC_MSG : "未能讀取其中一張相片，請再選擇一次。";
         logErr("photo", (e && e.message) + "｜" + (f.type || "") + " " + Math.round((f.size || 0) / 1024) + "KB");
       } finally { d._busy = Math.max(0, (d._busy || 0) - 1); }
       if (S.draft === d && S.route.name === "point") refresh();
@@ -1788,6 +1874,22 @@ const A = {
   /* 老師 */
   trefresh(){ S.t = {}; refresh(); },
   tretry(el){ delete S.t[el.dataset.key]; refresh(); },
+  async tlc(el){
+    const sid = el.dataset.sid; el.disabled = true;
+    try { const d = await api("tLoginCode", {sid}); S.t["lc:" + sid] = {code: d.code, until: Date.now() + d.expiresIn * 1000}; refresh(); }
+    catch (e) { el.disabled = false; toast(e.message); }
+  },
+  aeditstu(el){ go("aeditstu", {sid: el.dataset.sid, back: Object.assign({}, S.route)}); },
+  async savestu(){
+    const sid = S.route.sid, name = $("#eName").value.normalize("NFKC").trim().replace(/\s+/g, " ");
+    const cls = $("#eCls").value.normalize("NFKC").replace(/\s+/g, "").toUpperCase(), no = parseInt($("#eNo").value.normalize("NFKC"), 10);
+    if (!name) return flashIn("請輸入姓名。");
+    if (!/^[0-9A-Z][0-9A-Z\-]{0,5}$/.test(cls) || cls === TEACHER) return flashIn("請輸入正確的班別，例如 4A。");
+    if (!(no >= 1 && no <= 99)) return flashIn("請輸入正確的學號，例如 01。");
+    flashIn(""); setBusy("stuBtn", true, "儲存中……");
+    try { await api("tUpdateStudent", {sid, name, cls, no}); S.t = {}; A.back(); toast("已更新學生資料"); }
+    catch (e) { setBusy("stuBtn", false, "儲存"); flashIn(e.message); }
+  },
   admintab(el){ go("admin", {tab: el.dataset.tab}); },
   openstudent(el){ go("astudent", {sid: el.dataset.sid, back: {name: "admin", tab: "students"}}); },
   atrip(el){ go("atrip", {sid: el.dataset.sid, id: el.dataset.id, back: Object.assign({}, S.route)}); },
@@ -1858,6 +1960,12 @@ const A = {
     } else if (kind === "delqs") {
       try { await api("tDeleteQset", {id}); S.t = {}; go("admin", {tab: "qsets"}); toast("已刪除題目"); }
       catch (e) { toast(e.message); refresh(); }
+    } else if (kind === "swwipe") {
+      const w = S.swap; S.swap = null;
+      if (w) { try { await startSession(w.d, true); toast("已刪除舊紀錄並登入"); } catch (e) { go("login", {msg: e.message}); } }
+    } else if (kind === "delstu") {
+      try { await api("tDeleteStudent", {sid: id}); S.t = {}; go("admin", {tab: "students"}); toast("已刪除帳戶"); }
+      catch (e) { toast(e.message); refresh(); }
     } else if (kind === "clearreg") {
       try {
         await api("tClearReg", {sid: id});
@@ -1899,7 +2007,7 @@ document.addEventListener("keydown", e => {
 });
 document.addEventListener("submit", e => {
   e.preventDefault(); const id = e.target.id;
-  if (id === "regForm") A.register(); else if (id === "classForm") A.saveclass();
+  if (id === "regForm") A.register(); else if (id === "classForm") A.saveclass(); else if (id === "lcForm") A.lclogin(); else if (id === "stuForm") A.savestu();
   else if (id === "tripForm") A.createTrip(); else if (id === "codeForm") A.loadcode(); else if (id === "qForm") A.saveqset();
 });
 window.addEventListener("online", () => { if (isStudent()) syncNow(); });
