@@ -1350,7 +1350,7 @@ const PDF_STY = {
 };
 const NOSTART = /^[，。、；：！？）」』》〉,.;:!?)\]％%]$/;   // 唔可以放喺行頭嘅標點
 async function renderPDF(blocks, footer){
-  const pages = [], W = PDF_W * PDF_SC, Hh = PDF_H * PDF_SC;
+  const pages = [], W = Math.round(PDF_W * PDF_SC), Hh = Math.round(PDF_H * PDF_SC);   // PDF 規定影像闊高要係整數，同 canvas 一致
   let c = null, g = null, y = 0, pageNo = 0;
   const font = st => (st.b ? "700 " : "400 ") + (st.size * PDF_SC) + "px " + PDF_FONT;
   const newPage = async () => {
