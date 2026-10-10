@@ -137,7 +137,7 @@ input::placeholder,textarea::placeholder{color:var(--ink-3)}
 .cover-login .gbtn .loading{margin:0;font-size:.78rem}
 .cover-login .linkbtn{min-height:1.9rem;padding:.1rem;font-size:.8rem;color:#5B3A24;text-decoration-color:#C9A659}
 .cl-row{display:flex;gap:.35rem;width:100%}
-#inLc{flex:1;min-width:0;min-height:2.5rem;padding:.3rem .45rem;border:1.5px solid #5B3A24;border-radius:.4rem;background:rgba(255,255,255,.92);font:500 1rem var(--f-mono);text-align:center}
+#inLc{flex:1;min-width:0;min-height:2.5rem;padding:.3rem .45rem;border:2px solid #C9A21E;border-radius:.4rem;background:#FBE07A;color:#111;font:600 1rem var(--f-mono);text-align:center}   /* 登入碼＝黃色方格 */
 .cl-row .btn{flex:none;min-height:2.5rem;padding:0 .7rem}
 .cover-alert{position:absolute;top:1.5%;left:4%;right:4%;z-index:2;display:flex;flex-direction:column;align-items:center;gap:.4rem}
 .cover-alert .flash{width:100%;background:rgba(255,250,244,.97);box-shadow:var(--shadow)}
@@ -517,23 +517,22 @@ fieldset.qedit legend{float:left;width:100%;padding:0;font:700 1.1rem var(--f-ha
 
 .toast{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + .8rem);transform:translateX(-50%);z-index:60;max-width:calc(100% - 2rem);padding:.6rem 1rem;border-radius:.35rem;background:var(--navy);color:var(--on-navy);font:500 .9rem var(--f-ui);box-shadow:0 4px 14px rgba(0,0,0,.2);text-align:center}
 .loading{margin:0;padding:2rem 0;color:var(--ink-2);font:400 1.05rem var(--f-hand)}
-/* ── 編碼顏色：每種編碼一種顏色，輸入格同老師顯示嘅編碼一致 ── 班級＝綠、考察點／題目＝藍、答案＝紅、登入碼＝啡黃、老師邀請碼＝紫 */
-.kc-cls{--kc:var(--green)} .kc-site{--kc:var(--b4)} .kc-ans{--kc:var(--stamp)} .kc-login{--kc:var(--ochre)} .kc-inv{--kc:var(--b2)}
-.codebox.kc,.scoreedit.kc{border-left:5px solid var(--kc)}
-.field.kc{padding:.55rem .7rem .4rem;border-left:5px solid var(--kc);border-radius:.2rem;background:var(--sheet)}
-.kc label{color:var(--kc);font-weight:700}
-.kc label::before{content:"";display:inline-block;width:.62em;height:.62em;margin-right:.4em;border-radius:50%;background:var(--kc);vertical-align:.05em}
-.kc input:not([type=file]):not([type=checkbox]):not([type=radio]){border-bottom:2px solid var(--kc)}
-.kc input:not([type=file]):not([type=checkbox]):not([type=radio]):focus{border-bottom-color:var(--kc);box-shadow:inset 0 -2px 0 var(--kc)}
-.kc .btn-primary{background:var(--kc);color:var(--paper);box-shadow:0 3px 0 color-mix(in srgb,var(--kc) 60%,#000)}
-.btn.btn-ghost.kc{border-color:var(--kc);color:var(--kc)}
-.linkbtn.kc{color:var(--kc);text-decoration-color:var(--kc)}
-.linkbtn.kc svg{color:var(--kc)}
-.bigcode.kc{border-top:6px solid var(--kc)}
-.bigcode.kc .eyebrow{padding:.15rem .7rem;border-radius:999px;background:var(--kc);color:var(--paper)}
-.cl-row.kc input:not([type=file]):not([type=checkbox]):not([type=radio]){border-bottom:2px solid var(--kc)}
-.kc-legend{display:flex;flex-wrap:wrap;gap:.3rem .8rem;margin:0;font:500 .74rem var(--f-ui);color:var(--ink-2)}
-.kc-legend span::before{content:"";display:inline-block;width:.62em;height:.62em;margin-right:.3em;border-radius:50%;background:var(--kc);vertical-align:.05em}
+/* ── 編碼顏色：每種編碼一種顏色，成個輸入方格填色、黑色字；老師顯示嘅編碼用同一顏色 ──
+   考察點／題目＝淺藍、班級＝淺綠、答案＝紅、登入碼＝黃、老師邀請碼＝灰 */
+.kc-site{--kf:#BFDDF7;--kb:#4F8FCB} .kc-cls{--kf:#C6EBCB;--kb:#4FA864} .kc-ans{--kf:#F4A9A0;--kb:#C9483B} .kc-login{--kf:#FBE07A;--kb:#C9A21E} .kc-inv{--kf:#D6D6D6;--kb:#8C8C8C}
+.kc input:not([type=file]):not([type=checkbox]):not([type=radio]){min-height:3.1rem;padding:.45rem .85rem;border:2px solid var(--kb);border-radius:.5rem;background:var(--kf);color:#111;font:600 1.2rem var(--f-mono);letter-spacing:.18em;caret-color:#111}
+.kc input:not([type=file]):not([type=checkbox]):not([type=radio])::placeholder{color:#3d3d3d;opacity:.75;letter-spacing:.04em;font:500 .95rem var(--f-ui)}
+.kc input:not([type=file]):not([type=checkbox]):not([type=radio]):focus{border-color:#111;box-shadow:0 0 0 3px var(--kf)}
+.kc label{display:inline-flex;align-items:center;gap:.4rem;color:var(--ink);font-weight:700}
+.kc label::before,.kc-legend span::before{content:"";flex:none;width:.95em;height:.95em;border:1.5px solid var(--kb);border-radius:.2rem;background:var(--kf)}
+.btn.btn-ghost.kc,.btn.kc-fill{background:var(--kf);border:2px solid var(--kb);color:#111}
+.btn.btn-ghost.kc svg{color:#111}
+.linkbtn.kc{color:var(--ink);text-decoration-color:var(--kb);text-decoration-thickness:3px}
+.bigcode.kc .eyebrow{padding:.15rem .7rem;border-radius:999px;background:var(--kf);color:#111}
+.bigcode.kc .digits{padding:.35rem .5rem .35rem .78rem;border:2px solid var(--kb);border-radius:.6rem;background:var(--kf);color:#111}
+.cl-row.kc input:not([type=file]):not([type=checkbox]):not([type=radio]){min-height:2.5rem;padding:.3rem .6rem;font-size:1rem}
+.kc-legend{display:flex;flex-wrap:wrap;gap:.35rem .9rem;margin:0;font:500 .76rem var(--f-ui);color:var(--ink-2)}
+.kc-legend span{display:inline-flex;align-items:center;gap:.3rem}
 /* ── 完成及下載考察課業 ── */
 .donebox{display:flex;flex-direction:column;gap:.55rem;padding:1rem;border:2px solid var(--green);border-radius:.5rem;background:var(--sheet);box-shadow:var(--shadow)}
 .done-stamp{align-self:flex-start;margin:0;padding:.1rem .8rem;border:2.5px solid var(--green);border-radius:.3rem;color:var(--green);font:700 1.25rem var(--f-hand);letter-spacing:.3em;transform:rotate(-3deg)}
@@ -1711,8 +1710,8 @@ function homeCodesHTML(){
       (f === "class" ? '' : '<button type="button" class="linkbtn kc kc-cls" data-act="homeform" data-f="class">' + ICON.plus + '加入班級</button>') + '</div>' +
     (cs.length ? '<div class="chips">' + cs.map(c => '<span class="clschip">' + esc(c.name) + (c.teacher ? '<small>' + esc(c.teacher) + '</small>' : '') + '</span>').join("") + '</div>'
       : f === "class" ? '' : '<p class="hint">還未加入班級。請按「加入班級」，輸入老師提供的 6 位數字班級編碼。</p>') +
-    (f === "class" ? form("joinForm", "班級編碼", "加入", "老師新增班級後會提供班級編碼（綠色），例如 S4THS 班的編碼。", "kc-cls") : '') +
-    (f === "site" ? form("siteForm", "考察點編碼", "開始考察", "老師開設考察點後會提供考察點編碼（藍色）。輸入後會自動建立這次考察，並顯示老師要求的紀錄點數目及考察題目。", "kc-site")
+    (f === "class" ? form("joinForm", "班級編碼", "加入", "老師新增班級後會提供班級編碼（淺綠色方格），例如 S4THS 班的編碼。", "kc-cls") : '') +
+    (f === "site" ? form("siteForm", "考察點編碼", "開始考察", "老師開設考察點後會提供考察點編碼（淺藍色方格）。輸入後會自動建立這次考察，並顯示老師要求的紀錄點數目及考察題目。", "kc-site")
       : '<button type="button" class="btn btn-ghost btn-block kc kc-site" data-act="homeform" data-f="site">' + ICON.book + '輸入考察點編碼</button>') +
     '<p class="kc-legend" aria-label="編碼顏色"><span class="kc-cls">班級編碼</span><span class="kc-site">考察點編碼</span><span class="kc-ans">答案編碼</span><span class="kc-login">登入碼</span></p>' +
     '</section>';
@@ -1896,7 +1895,7 @@ function vAdmin(){
 function siteRow(q, back){
   return '<button type="button" class="qsrow" data-act="openqset" data-id="' + q.id + '"' + (back ? ' data-back="' + esc(back) + '"' : '') + '><span class="qs-code">' + esc(q.code) + '</span>' +
     '<span class="qs-title">' + esc(q.title) + '</span>' +
-    '<span class="qs-sub">' + (q.className ? esc(q.className) + ' · ' : '') + (q.nPts ? '紀錄點 ' + q.nPts + ' 個 · ' : '') + q.questions + ' 題 · ' + q.submitted + ' 份已提交' + (q.drafts ? ' · ' + q.drafts + ' 份作答中' : '') + (q.avg !== null && q.avg !== undefined ? ' · 平均 ' + q.avg + ' 分' : '') + '</span></button>';
+    '<span class="qs-sub">' + (q.date ? esc(q.date.replace(/-/g, ".")) + ' · ' : '') + (q.className ? esc(q.className) + ' · ' : '') + (q.nPts ? '紀錄點 ' + q.nPts + ' 個 · ' : '') + q.questions + ' 題 · ' + q.submitted + ' 份已提交' + (q.drafts ? ' · ' + q.drafts + ' 份作答中' : '') + (q.avg !== null && q.avg !== undefined ? ' · 平均 ' + q.avg + ' 分' : '') + '</span></button>';
 }
 // 班級頁：班級編碼、考察點、學生課業、下載班級成績表
 function vAClass(id){
@@ -2014,7 +2013,7 @@ function vQset(id){
       '<p class="hint">' + (S.route.fresh ? "已產生考察點編碼，請告訴學生。" : "") + '學生在「我的考察」按「輸入考察點編碼」，輸入後即可取得紀錄點要求及考察題目。</p>' +
       '<button type="button" class="btn btn-ghost sm" data-act="copycode" data-v="' + esc(q.code) + '" data-what="考察點編碼">' + ICON.copy + '複製編碼</button></div>' +
     '<section class="qhead"><h2 class="th-place">' + esc(q.title) + '</h2>' +
-      '<p class="th-sum">對象：' + (cname ? esc(cname) : "不限班級") + '　·　紀錄點：' + (nPts ? nPts + ' 個（' + nPts + ' 分）' : '不設要求') + '</p>' +
+      '<p class="th-sum">考察日期：' + (q.date ? fmtDate(q.date) : "未設定") + '</p><p class="th-sum">對象：' + (cname ? esc(cname) : "不限班級") + '　·　紀錄點：' + (nPts ? nPts + ' 個（' + nPts + ' 分）' : '不設要求') + '</p>' +
       '<p class="th-sum">' + (q.dest && q.dest !== q.title ? esc(q.dest) + '　·　' : '') + q.questions.length + ' 題　共 ' + total + ' 分　·　' + {none: "學生提交後只看到得分", submit: "學生提交後可看到參考答案", code: "用答案編碼開放答案"}[ansMode(q)] + '</p>' +
       '<div class="btnrow"><button type="button" class="btn btn-ghost sm" data-act="editqset" data-id="' + id + '">修改考察點</button></div></section>' +
     (ansMode(q) === "code" && q.ansCode ? '<div class="bigcode kc kc-ans"><p class="eyebrow">答案編碼</p><p class="digits sm">' + esc(q.ansCode) + '</p>' +
@@ -2040,6 +2039,7 @@ function vQEdit(){
   const ptsOpt = k => '<option value="' + k + '"' + (k === (d.nPts || 0) ? ' selected' : '') + '>' + (k ? k + ' 個（' + k + ' 分）' : '不設要求') + '</option>';
   return bar(d.id ? "修改考察點" : "新增考察點", {back:"back"}) + '<main class="view"><form id="qForm" class="stack" autocomplete="off" novalidate>' +
     '<div class="field"><label for="qDest">考察點（目的地）</label><input id="qDest" maxlength="40" placeholder="例如：大館" value="' + esc(d.dest || "") + '"><p class="hint">學生輸入考察點編碼後，會以這個名稱建立考察紀錄。</p></div>' +
+    '<div class="field"><label for="qDate">考察日期</label><input id="qDate" type="date" value="' + esc(d.date || todayStr()) + '"><p class="hint">預設為今日。學生輸入考察點編碼後，考察紀錄及下載的 PDF 會用這個日期。</p></div>' +
     '<div class="field"><label for="qCls">對象班級</label><select id="qCls"><option value="">不限班級</option>' +
       classes.map(k => '<option value="' + esc(k.id) + '"' + (k.id === d.classId ? ' selected' : '') + '>' + esc(k.name) + '（' + esc(k.code) + '）</option>').join("") +
       (d.classId && !classes.some(k => k.id === d.classId) ? '<option value="' + esc(d.classId) + '" selected>' + (ov.data ? '（已刪除班級）' : '載入中……') + '</option>' : '') + '</select>' +
@@ -2482,7 +2482,7 @@ async function purgeLocalTrip(tid){
 function readQDraft(){
   const d = S.qdraft; if (!d) return;
   const de = $("#qDest"); if (de) d.dest = de.value;
-  const qc = $("#qCls"), qp = $("#qPts"); if (qc) d.classId = qc.value; if (qp) d.nPts = +qp.value || 0;
+  const qc = $("#qCls"), qp = $("#qPts"), qd = $("#qDate"); if (qc) d.classId = qc.value; if (qp) d.nPts = +qp.value || 0; if (qd) d.date = qd.value || todayStr();
   d.qs.forEach((q, i) => { const a = $("#qt" + i), b = $("#qp" + i), n = $("#qn" + i); if (a) q.text = a.value; if (b) q.pts = b.value; if (n) q.need = +n.value; });
   const m = document.querySelector('input[name="qmode"]:checked'); if (m) d.mode = m.value;
 }
@@ -2822,13 +2822,13 @@ const A = {
   newqset(el){
     const ov = S.t.overview && S.t.overview.data, cls = (el && el.dataset.cls) || (ov && ov.classes && ov.classes.length === 1 ? ov.classes[0].id : "");
     const back = el && el.dataset.cls ? {name: "aclass", id: el.dataset.cls} : {name: "admin", tab: "qsets"};
-    S.qdraft = {dest: "", qs: [{text: "", pts: "", need: 2}], mode: "submit", classId: cls, nPts: 3, back};
+    S.qdraft = {dest: "", qs: [{text: "", pts: "", need: 2}], mode: "submit", classId: cls, nPts: 3, date: todayStr(), back};
     go("qedit", {back});
   },
   editqset(el){
     const c = S.t["qs:" + el.dataset.id]; if (!c || !c.data) return;
     const q = c.data.qset;
-    S.qdraft = {id: q.id, dest: q.dest || String(q.title || "").replace(/考察$/, ""), mode: ansMode(q), classId: q.classId || "", nPts: q.nPts || 0, back: S.route.back,
+    S.qdraft = {id: q.id, dest: q.dest || String(q.title || "").replace(/考察$/, ""), mode: ansMode(q), classId: q.classId || "", nPts: q.nPts || 0, date: q.date || "", back: S.route.back,
       qs: q.questions.map(x => ({id: x.id, text: x.text, need: x.need >= 1 ? Math.min(x.need, x.points.length) : x.points.length, pts: x.points.map(p => p.text).join("\n")}))};
     go("qedit", {back: Object.assign({}, S.route)});
   },
@@ -2945,7 +2945,7 @@ const A = {
     if (few >= 0) return fail("第 " + (few + 1) + " 題要求答 " + qs[few].need + " 項，但只寫了 " + countPoints(qs[few].points) + " 個得分點。");
     setBusy("qBtn", true, "儲存中……");
     try {
-      const dest = String(d.dest || "").trim().slice(0, 40), body = {title: dest, dest, ansMode: d.mode || "submit", showAnswer: (d.mode || "submit") === "submit", questions: qs, classId: d.classId || "", nPts: d.nPts || 0};   // 考察點名稱＝目的地
+      const dest = String(d.dest || "").trim().slice(0, 40), body = {title: dest, dest, ansMode: d.mode || "submit", showAnswer: (d.mode || "submit") === "submit", questions: qs, classId: d.classId || "", nPts: d.nPts || 0, date: d.date || todayStr()};   // 考察點名稱＝目的地
       const back = d.back || {name: "admin", tab: "qsets"};
       if (d.id) {
         const res = await api("tUpdateQset", Object.assign({id: d.id}, body));
